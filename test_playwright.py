@@ -1,6 +1,6 @@
 from playwright.sync_api import sync_playwright
 import pandas as pd
-imoprt os
+import os
 
 def main():
     # playwright test
