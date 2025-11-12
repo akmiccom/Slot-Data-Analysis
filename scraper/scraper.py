@@ -1,23 +1,13 @@
-# from playwright.sync_api import sync_playwright
-# from playwright.sync_api import Page, sync_playwright, TimeoutError as PWTimeout
 import pandas as pd
 from urllib.parse import quote, urljoin
 import os
-import datetime as dt
 import time
 import os
 import yaml
-from dataclasses import dataclass
 
 import config
 from logger_setup import setup_logger
-from utils import _norm_text
-# from scraping_hall_page import extract_date_url
-# from scraping_date_page import extract_model_url
-# from scraping_model_page import extract_model_data
 from scraping_result_data import extract_result_data
-
-# from df_clean import df_data_clean
 
 # =========================
 # 設定・ロガー
