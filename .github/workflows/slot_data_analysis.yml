@@ -35,7 +35,8 @@ jobs:
           playwright install-deps
 
       - name: Run Playwright script
-        run: python scraper/scraping_hall_page.py
+        # run: python scraper/scraping_hall_page.py
+        run: python scraper/scraping_date_page.py
 
       - name: Save scraped results
         uses: actions/upload-artifact@v4

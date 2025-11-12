@@ -36,7 +36,7 @@ def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
 
     # スクリーンショット
     page.screenshot(
-        path=config.IMG_DIR / f"{hall}_screenshot.jpg", type="jpeg", quality=50
+        path=config.IMG_DIR / f"{hall}_screenshot_hall.jpg", type="jpeg", quality=50
     )
 
     # 日付リンク
@@ -91,4 +91,4 @@ if __name__ == "__main__":
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         hall_url = urljoin(config.MAIN_URL, quote(hall))
-        date_urls = extract_date_url(hall_url, page, period=5)
+        date_urls = extract_date_url(hall_url, page, period=3)
