@@ -75,7 +75,7 @@ def scraper_all_hall(test_mode=False) -> pd.DataFrame:
 
 if __name__ == "__main__":
 
-    df = scraper_all_hall(test_mode=True)
+    df = scraper_all_hall(test_mode=False)
     # df = df_data_clean(df)
 
     # conn = sqlite3.connect(config.DB_PATH)
