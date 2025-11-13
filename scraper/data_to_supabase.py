@@ -4,24 +4,13 @@ from supabase import create_client, Client
 
 from config import config
 from utils.logger_setup import setup_logger
-
+from utils.utils import get_supabase_client
 
 # =========================
 # 設定・ロガー
 # =========================
 filename, ext = os.path.splitext(os.path.basename(__file__))
 logger = setup_logger(filename, log_file=config.LOG_PATH)
-
-
-def get_supabase_client() -> Client:
-    """supabese のクライアントを取得"""
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-    if not url or not key:
-        raise RuntimeError(
-            "SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY が設定されていません。"
-        )
-    return create_client(url, key)
 
 
 def add_model(df: pd.DataFrame, supabase: Client) -> None:
