@@ -6,3 +6,4 @@ pyyaml
 supabase
 colorlog
 types-PyYAML
+streamlit
