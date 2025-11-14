@@ -7,8 +7,8 @@ today = datetime.date.today()
 n_d_ago = today - datetime.timedelta(days=N_PAST_DAYS)
 yesterday = today - datetime.timedelta(days=1)
 
-
-st.set_page_config(page_title="スロットデータ分析", layout="wide")
+title = "スロットデータ分析"
+st.set_page_config(page_title=title, layout="wide")
 
 st.header("TOP PAGE に乗せるもの")
 st.subheader("グラフなどでホール分析のダッシュボードを作成")

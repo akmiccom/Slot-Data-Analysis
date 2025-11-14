@@ -1,5 +1,6 @@
 import os
-from typing import Optional
+from datetime import date
+from typing import Optional, Union, Any
 import pandas as pd
 from supabase import create_client, Client
 
@@ -17,12 +18,12 @@ def get_supabase_client() -> Client:
 # --------------------------------------------------
 # 内部共通関数：ページングして全部取ってくる
 # --------------------------------------------------
-def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, any]]:
+def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, Any]]:
     """
     Supabase の 1000件制限を回避するための共通関数。
     渡された query に対して range() でページングしながら全件取得する。
     """
-    all_rows: list[dict[str, any]] = []
+    all_rows: list[dict[str, Any]] = []
     page = 0
 
     while True:
@@ -86,8 +87,8 @@ def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, any]]:
 # --------------------------------------------------
 def fetch(
     view: str,
-    start: str,
-    end: str,
+    start: Union[str, date],
+    end: Union[str, date],
     hall: Optional[str] = None,
     model: Optional[str] = None,
 ) -> pd.DataFrame:
@@ -97,7 +98,8 @@ def fetch(
     内部でページングして 1000件制限を回避する。
     """
     supabase = get_supabase_client()
-    query = supabase.table(view).select("*").gte("date", start).lte("date", end)
+    query = supabase.table(view).select(
+        "*").gte("date", start).lte("date", end)
     if hall is not None:
         query = query.eq("hall", hall)
     if model is not None:
@@ -134,7 +136,8 @@ def fetch_latest(
     supabase = get_supabase_client()
 
     # まず最新日だけを1行取得
-    query = supabase.table(view).select("date").order("date", desc=True).limit(1)
+    query = supabase.table(view).select(
+        "date").order("date", desc=True).limit(1)
 
     if hall is not None:
         query = query.eq("hall", hall)
