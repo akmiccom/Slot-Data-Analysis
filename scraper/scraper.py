@@ -77,14 +77,3 @@ if __name__ == "__main__":
     data_to_supabase.add_model(df, supabase)
     data_to_supabase.add_prefecture_and_hall(df, supabase)
     data_to_supabase.add_data_result(df, supabase)
-    
-    # conn = sqlite3.connect(config.DB_PATH)
-    # # cursor = conn.cursor()
-
-    # # df_to_db.add_model(df, conn, cursor)
-    # # df_to_db.add_prefecture_and_hall(df, conn, cursor)
-    # # df_to_db.add_data_result(conn, cursor, df)
-
-    # # conn.commit()
-    # # conn.close()
-

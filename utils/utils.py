@@ -1,7 +1,6 @@
 import os
 import re
 import unicodedata
-from supabase import create_client, Client
 
 # =========================
 # ユーティリティ
@@ -31,13 +30,3 @@ def extract_model_name(text: str) -> str:
 
     return name
 
-
-def get_supabase_client() -> Client:
-    """supabese のクライアントを取得"""
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-    if not url or not key:
-        raise RuntimeError(
-            "SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY が設定されていません。"
-        )
-    return create_client(url, key)

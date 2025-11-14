@@ -3,8 +3,8 @@ import pandas as pd
 
 import datetime
 import time
-from utils.utils_for_streamlit import auto_height
-from scraper.data_from_supabase import fetch
+from utils_for_streamlit import auto_height
+from data_from_supabase import fetch
 
 # --- page_config ---
 st.set_page_config(page_title="データベース", page_icon="", layout="wide")
