@@ -6,7 +6,7 @@ from colorlog import ColoredFormatter
 from config.config import LOG_PATH
 
 
-def setup_logger(name="scraper", log_file=None, level=logging.DEBUG):
+def setup_logger(name="scraper", log_file=None, level=logging.INFO):
     """logのコンソール及び、ファイル出力"""
 
     formatter = ColoredFormatter(

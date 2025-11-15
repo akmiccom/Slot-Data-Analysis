@@ -3,8 +3,10 @@ from datetime import date
 from typing import Optional, Union, Any
 import pandas as pd
 from supabase import create_client, Client
+import streamlit as st
 
 
+@st.cache_resource
 def get_supabase_client() -> Client:
     """supabese のクライアントを取得"""
     url = os.environ.get("SUPABASE_URL")
@@ -85,6 +87,7 @@ def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, Any]]:
 # --------------------------------------------------
 # ① 期間指定＆hall/model でフィルタ（既存 fetch の改良版）
 # --------------------------------------------------
+@st.cache_data
 def fetch(
     view: str,
     start: Union[str, date],
@@ -113,6 +116,7 @@ def fetch(
 # --------------------------------------------------
 # ② 1日分だけ取得するヘルパー
 # --------------------------------------------------
+@st.cache_data
 def fetch_one_day(
     view: str, target_date: str, hall: Optional[str] = None, model: Optional[str] = None
 ) -> pd.DataFrame:
@@ -126,6 +130,7 @@ def fetch_one_day(
 # --------------------------------------------------
 # ③ 最新日（最大 date）のデータを取得するヘルパー
 # --------------------------------------------------
+@st.cache_data
 def fetch_latest(
     view: str, hall: Optional[str] = None, model: Optional[str] = None
 ) -> pd.DataFrame:
@@ -159,6 +164,7 @@ def fetch_latest(
 # --------------------------------------------------
 # ④ マスタ系：halls / models（& おまけで prefectures）
 # --------------------------------------------------
+@st.cache_data
 def fetch_halls() -> pd.DataFrame:
     """
     halls テーブルの全件を取得（必要ならページング対応も可能）。
@@ -168,7 +174,7 @@ def fetch_halls() -> pd.DataFrame:
     rows = _fetch_all_rows(query)
     return pd.DataFrame(rows)
 
-
+@st.cache_data
 def fetch_models() -> pd.DataFrame:
     """
     models テーブルの全件を取得。
@@ -178,7 +184,7 @@ def fetch_models() -> pd.DataFrame:
     rows = _fetch_all_rows(query)
     return pd.DataFrame(rows)
 
-
+@st.cache_data
 def fetch_prefectures() -> pd.DataFrame:
     """
     prefectures テーブルの全件を取得（おまけ）。
@@ -192,6 +198,7 @@ def fetch_prefectures() -> pd.DataFrame:
 # --------------------------------------------------
 # ⑤ 汎用版：任意の条件 dict を渡せる fetch_paginated
 # --------------------------------------------------
+@st.cache_data
 def fetch_paginated(
     view: str,
     eq_filters: Optional[dict[str, any]] = None,
