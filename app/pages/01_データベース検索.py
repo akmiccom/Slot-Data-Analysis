@@ -58,7 +58,8 @@ ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
 with col1:
     # --- hall ---
-    halls = fetch_halls()["name"].tolist()
+    halls_df = fetch_halls()
+    halls = halls_df["name"].tolist()
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
     df = fetch("result_joined", ss.start_date, ss.end_date, hall=hall, model=None)
     df_hall = df[(df["hall"] == hall)]
