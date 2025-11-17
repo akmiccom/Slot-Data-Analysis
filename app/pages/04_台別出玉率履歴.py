@@ -9,12 +9,7 @@ from utils_for_streamlit import style_val
 from utils_for_streamlit import make_style_val
 
 
-def validate_dates():
-    if ss.end_date < ss.start_date:
-        ss.start_date = ss.end_date
-
-
-PAST_N_DAYS = 30
+PAST_N_DAYS = 7
 
 # --- page_config ---
 st.set_page_config(page_title="台番号別の出玉率・回転数履歴", layout="wide")
@@ -39,27 +34,31 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
+
+def validate_dates():
+    if ss.end_date < ss.start_date:
+        ss.start_date = ss.end_date
+
+
 col1, col2 = st.columns(2)
 with col1:
     st.date_input(
         "検索開始日",
         key="start_date",
-        value=ss["start_date"],
         max_value=yesterday,
         on_change=validate_dates,
     )
+    time.sleep(0.1)
 with col2:
     st.date_input(
         "検索終了日",
         key="end_date",
-        value=ss["end_date"],
-        # min_value=ss["start_date"],
         max_value=yesterday,
         on_change=validate_dates,
     )
+    time.sleep(0.1)
 
 ALL = "すべて表示"
-# df_fetch = fetch(HALLS, ss.start_date, ss.end_date, model_pattern="ジャグラー")
 df_fetch = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
 
 col1, col2, col3 = st.columns(3)
@@ -84,7 +83,7 @@ df = df_filtered
 # groupby 用のカラムを追加
 df["BB_rate"] = (df["game"] / df["bb"]).round(1)
 df["RB_rate"] = (df["game"] / df["rb"]).round(1)
-df["Total_rate"] = (df["game"] / (df["bb"]+ df["rb"])).round(1)
+df["Total_rate"] = (df["game"] / (df["bb"] + df["rb"])).round(1)
 df["date"] = pd.to_datetime(df["date"])
 df["day"] = df["date"].dt.day
 df["weekday_num"] = df["date"].dt.weekday
@@ -135,8 +134,6 @@ st.text("RB_rate")
 st.dataframe(rb_rate)
 st.text("Total_rate")
 st.dataframe(total_rate)
-
-
 
 
 # # --- Display ---
@@ -194,9 +191,7 @@ df_day_last = pd.concat([pt, medal_rate, rb_rate, total_rate], axis=1)
 # df_day_last
 sort_vals = ["game", "medal", "medal_rate", "rb_rate", "total_rate"]
 interleaved_cols = [
-    (i, j)
-    for j in df_day_last.columns.get_level_values(1).unique()
-    for i in sort_vals
+    (i, j) for j in df_day_last.columns.get_level_values(1).unique() for i in sort_vals
 ]
 # interleaved_cols
 df_day_last = df_day_last[interleaved_cols]

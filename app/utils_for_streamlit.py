@@ -1,3 +1,5 @@
+import streamlit as st
+
 # --- 表示 ---
 def auto_height(df):
     rows = len(df)
@@ -60,3 +62,9 @@ WEEKDAY_MAP = {
     5: "土",
     6: "日",
 }
+
+
+def validate_dates():
+    ss = st.session_state
+    if ss.end_date < ss.start_date:
+        ss.start_date = ss.end_date
