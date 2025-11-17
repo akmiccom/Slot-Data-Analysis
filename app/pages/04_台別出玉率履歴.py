@@ -64,10 +64,10 @@ ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
 # --- 1) ホール選択 ---
 with col1:
-    # halls = sorted(df_fetch["hall"].unique().tolist()) + [ALL]
-    halls = fetch_halls()["name"].tolist()
+    # halls = fetch_halls()["name"].tolist()
+    df_fetch = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
+    halls = sorted(df_fetch["hall"].unique().tolist()) + [ALL]
     hall = st.selectbox("ホールを選択", halls)
-    df_fetch = fetch("result_joined", ss.start_date, ss.end_date, hall=hall, model=None)
     df_hall = df_fetch if hall == ALL else df_fetch[df_fetch["hall"] == hall]
 # --- 2) モデル選択（ホールに従属）---
 with col2:

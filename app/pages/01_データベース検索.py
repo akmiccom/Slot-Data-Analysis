@@ -16,7 +16,7 @@ page_title = "データベース検索"
 st.set_page_config(page_title=page_title, page_icon="", layout="wide")
 
 # --- Title etc. ---
-st.page_link("Slot_Data_Analysis.py", label="🏠 トップページへ戻る")
+st.page_link("スロットデータ分析.py", label="🏠 トップページへ戻る")
 st.header(page_title)
 st.markdown("フィルター設定で、ホール・機種・台番・期間で絞り込みが可能です。")
 
@@ -58,10 +58,11 @@ ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
 with col1:
     # --- hall ---
-    halls_df = fetch_halls()
-    halls = halls_df["name"].tolist()
+    # halls_df = fetch_halls()
+    # halls = halls_df["name"].tolist()
+    df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
+    halls = df.hall.unique().tolist()
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
-    df = fetch("result_joined", ss.start_date, ss.end_date, hall=hall, model=None)
     df_hall = df[(df["hall"] == hall)]
     time.sleep(0.1)
 with col2:
@@ -132,32 +133,4 @@ start_date, end_date = st.slider(
 )
 st.write(f"📅 検索期間: {start_date} ～ {end_date}")
 
-
-st.markdown(
-    """
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'});"
-            style="
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 9999;
-                background-color: #eee;
-                padding: 10px 15px;
-                border-radius: 8px;
-                border: 1px solid #ccc;
-                cursor: pointer;">
-        ⬆️ ページの先頭へ
-    </button>
-    """,
-    unsafe_allow_html=True,
-)
-
-st.markdown(
-    """
-    <a href="#page_top" style="text-decoration:none; font-size:16px;">
-        ⬆️ ページの頭へ戻る
-    </a>
-    """,
-    unsafe_allow_html=True
-)
 
