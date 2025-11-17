@@ -141,6 +141,9 @@ ss = st.session_state
 ss.setdefault("start_date", start_date)
 ss.setdefault("end_date", end_date)
 
+# st.text(start_date)
+# st.text(end_date)
+
 col1, col2, col3 = st.columns(3)
 with col1:
     st.date_input(
