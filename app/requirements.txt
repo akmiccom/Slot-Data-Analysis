@@ -5,4 +5,4 @@ supabase
 python-dotenv
 numpy
 plotly
-yaml
+pyyaml
