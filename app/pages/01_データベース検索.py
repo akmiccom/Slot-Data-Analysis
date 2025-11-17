@@ -16,7 +16,7 @@ page_title = "データベース検索"
 st.set_page_config(page_title=page_title, page_icon="", layout="wide")
 
 # --- Title etc. ---
-st.page_link("スロットデータ分析.py", label="🏠 トップページへ戻る")
+st.page_link("Slot_Data_Analysis.py", label="🏠 トップページへ戻る")
 st.header(page_title)
 st.markdown("フィルター設定で、ホール・機種・台番・期間で絞り込みが可能です。")
 
