@@ -14,6 +14,7 @@ st.title(title)
 st.header("TOP PAGE に乗せるもの", divider="rainbow")
 st.markdown(
     f"""
+    - ホール一覧
     - グラフなどでホール分析の月別ダッシュボードを作成
     - 機種別出玉推移
     """
