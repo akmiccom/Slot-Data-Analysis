@@ -1,10 +1,13 @@
+import streamlit as st
+
 # --- 表示 ---
 def auto_height(df):
     rows = len(df)
-    row_height = 30  # 1行あたりの高さ（目安）
+    row_height = 34  # 1行あたりの高さ（目安）
     base_height = 100  # ヘッダ・余白ぶん
-    max_height = 800  # 上限（スクロール防止）
+    max_height = 1000  # 上限（スクロール防止）
     height = min(base_height + rows * row_height, max_height)
+    height = base_height + rows * row_height
     return height
 
 
@@ -60,3 +63,9 @@ WEEKDAY_MAP = {
     5: "土",
     6: "日",
 }
+
+
+def validate_dates():
+    ss = st.session_state
+    if ss.end_date < ss.start_date:
+        ss.start_date = ss.end_date
