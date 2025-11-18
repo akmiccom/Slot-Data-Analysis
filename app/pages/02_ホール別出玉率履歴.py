@@ -3,25 +3,21 @@ import pandas as pd
 import datetime
 import time
 from data_from_supabase import fetch
-from utils_for_streamlit import HALLS, WEEKDAY_MAP
-from utils_for_streamlit import auto_height
-from utils_for_streamlit import style_val
-from utils_for_streamlit import make_style_val
+from utils import HALLS, WEEKDAY_MAP
+from utils import auto_height
+from utils import style_val
+from utils import make_style_val
+from utils import validate_dates
 
 
-def validate_dates():
-    if ss.end_date < ss.start_date:
-        ss.start_date = ss.end_date
-
-
-PAST_N_DAYS = 10
+PAST_N_DAYS = 7
 
 # --- page_config ---
 st.set_page_config(page_title="ホール別の出玉率・回転数履歴", layout="wide")
 
 # --- Title etc. ---
 st.title("ホール別の出玉率・回転数履歴")
-st.header("ホール別出玉率履歴", divider="rainbow")
+st.subheader("ホール別出玉率履歴", divider="rainbow")
 st.markdown(
     f"""
     ホール別の**出玉率履歴データ**を表示します。機能は順次追加する予定です。
@@ -42,23 +38,13 @@ ss.setdefault("end_date", yesterday)
 col1, col2, col3 = st.columns(3)
 with col1:
     st.date_input(
-        "検索開始日",
-        key="start_date",
-        value=ss["start_date"],
-        max_value=yesterday,
-        on_change=validate_dates,
+        "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
 with col2:
     st.date_input(
-        "検索終了日",
-        key="end_date",
-        value=ss["end_date"],
-        # min_value=ss["start_date"],
-        max_value=yesterday,
-        on_change=validate_dates,
+        "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
 with col3:
-    # df = fetch(HALLS, ss.start_date, ss.end_date, model_pattern="ジャグラー")
     df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
     halls = ["すべてのホール"] + df["hall"].unique().tolist()
     hall = st.selectbox("ホールを選択", halls)
@@ -75,25 +61,24 @@ df["day_last"] = df["day"].astype(str).str[-1]
 df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
 
 
-    
+ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
 with col1:
-    day_last_list = ["すべての日"] + sorted(df["day_last"].unique().tolist())
+    day_last_list = [ALL] + sorted(df["day_last"].unique().tolist())
     day_last = st.selectbox("末尾日を選択", day_last_list)
-    if day_last != "すべての日":
+    if day_last != ALL:
         df = df[df["day_last"] == day_last]
 with col2:
-    day_list = ["すべての日"] + sorted(df["day"].unique().tolist())
+    day_list = [ALL] + sorted(df["day"].unique().tolist())
     day = st.selectbox("毎月〇〇日を選択", day_list)
-    if day != "すべての日":
+    if day != ALL:
         df = df[df["day"] == day]
 with col3:
-    weekday_list = ["すべての曜日", "土", "日", "月", "火", "水", "木", "金"]
+    weekday_list = [ALL, "土", "日", "月", "火", "水", "木", "金"]
     weekday = st.selectbox("曜日を選択", weekday_list)
-    if weekday != "すべての曜日":
+    if weekday != ALL:
         df = df[df["weekday"] == weekday]
     
-
 
 # --- pivot_table ---
 games = df.pivot_table(
@@ -132,7 +117,7 @@ st.dataframe(df_styled, height=height)
 
 
 # --- Display ---
-st.header("ホール別平均回転数履歴", divider="rainbow")
+st.subheader("ホール別平均回転数履歴", divider="rainbow")
 
 threshold_value = 5000
 style_func = make_style_val(threshold_value)

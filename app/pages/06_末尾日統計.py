@@ -1,10 +1,13 @@
 import streamlit as st
 import pandas as pd
-from datetime import date, timedelta
+import datetime
 from dateutil.relativedelta import relativedelta
-from utils_for_streamlit import HALLS, WEEKDAY_MAP
 from data_from_supabase import fetch
+from utils import HALLS, WEEKDAY_MAP
+from utils import validate_dates
 
+
+PAST_N_DAYS = 30
 
 def pre_process_first(df, is_win=1.03):
     """データに必要な列を追加する"""
@@ -93,20 +96,14 @@ st.markdown(
 )
 
 
-# --- 日付処理 ---
-def validate_dates():
-    if ss.end_date < ss.start_date:
-        ss.start_date = ss.end_date
-
-
 def begin_of_month_to_end_of_month(months=1, days=1):
     """期間を開始日を指定月数の1日から、n月前の月末からm日まで"""
-    year, month = date.today().year, date.today().month
-    this_month_first = date(year, month, 1)
-    end_date = this_month_first - timedelta(days=days)
+    year, month = datetime.date.today().year, datetime.date.today().month
+    this_month_first = datetime.date(year, month, 1)
+    # end_date = this_month_first - datetime.timedelta(days=days)
     start_date = this_month_first - relativedelta(months=months)
 
-    return start_date, end_date
+    return start_date
 
 
 # --- 表示処理 ---
@@ -125,9 +122,9 @@ def adjust_height(df, hall, day):
 
 # 最新の設置状態を取得してインデックスを取得
 def make_df_latest(past_n_days=3):
-    today = date.today()
-    n_d_ago = today - timedelta(days=past_n_days)
-    yesterday = today - timedelta(days=1)
+    today = datetime.date.today()
+    n_d_ago = today - datetime.timedelta(days=past_n_days)
+    yesterday = today - datetime.timedelta(days=1)
     # df_latest = fetch(HALLS, n_d_ago, yesterday, model_pattern="ジャグラー")
     df_latest = fetch("result_joined", n_d_ago, yesterday, hall=None, model=None)
     df_latest = df_latest.set_index(["hall", "model", "unit_no"])
@@ -135,32 +132,25 @@ def make_df_latest(past_n_days=3):
 
 df_latest = make_df_latest()
 
-# 日付カラム
-start_date, end_date = begin_of_month_to_end_of_month(months=1, days=1)
+# --- 日付処理 ---
+today = datetime.date.today()
+n_d_ago = today - datetime.timedelta(days=PAST_N_DAYS)
+yesterday = today - datetime.timedelta(days=1)
+start_date = begin_of_month_to_end_of_month(months=1, days=1)
+
 ss = st.session_state
 ss.setdefault("start_date", start_date)
-ss.setdefault("end_date", end_date)
+ss.setdefault("end_date", yesterday)
 
-# st.text(start_date)
-# st.text(end_date)
 
 col1, col2, col3 = st.columns(3)
 with col1:
     st.date_input(
-        "検索開始日",
-        key="start_date",
-        value=ss["start_date"],
-        max_value=end_date,
-        on_change=validate_dates,
+        "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
 with col2:
     st.date_input(
-        "検索終了日",
-        key="end_date",
-        value=ss["end_date"],
-        # min_value=ss["start_date"],
-        max_value=end_date,
-        on_change=validate_dates,
+        "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
 
 
@@ -179,7 +169,7 @@ df_groupe = pre_process_groupe(df, group_targets)
 
 # --- 選択用リスト作成 ---
 day_list = df_groupe["day_last"].unique().tolist()
-display_day = date.today().day + 1
+display_day = datetime.date.today().day + 1
 days = day_list[display_day:] + day_list[:display_day]
 if len(days) > 6:
     days.insert(6, "ALL")
