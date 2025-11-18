@@ -25,9 +25,9 @@ st.markdown(
     """
 )
 
+# --- UI ---
 help_text = f"過去{PAST_N_DAYS}日間のデータを表示しています。"
 st.subheader("フィルター設定", divider="rainbow", help=help_text)
-
 
 # --- 日付処理 ---
 today = datetime.date.today()
@@ -38,7 +38,11 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
-col1, col2 = st.columns(2)
+# --- 初期読み込み ---
+df = fetch("result_joined", n_d_ago, today)
+
+# -- フィルター設定 ---
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.date_input(
         "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
@@ -47,26 +51,16 @@ with col2:
     st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-
-
-# --- リスト&フィルター ---
 ALL = "すべて表示"
-col1, col2, col3 = st.columns(3)
-# --- hall ---
-with col1:
-    # halls_df = fetch_halls()
-    # halls = halls_df["name"].tolist()
-    df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
-    halls = sorted(df.hall.unique().tolist())
+with col3:
+    halls = sorted(df.hall.unique().tolist()) + [ALL]
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
     df_hall = df[(df["hall"] == hall)]
-# --- model ---
-with col2:
+with col4:
     models = df_hall["model"].value_counts().index.tolist()
     model = st.selectbox("機種を選択", models, help="台数の多い順に表示")
     df_model = df_hall[(df_hall["model"] == model)]
-# --- unit_no ---
-with col3:
+with col5:
     units = sorted(df_model["unit_no"].unique().tolist())
     if len(units) > 5:
         units.insert(5, ALL)
@@ -76,11 +70,7 @@ with col3:
     df_unit = df_model
     if unit != ALL:
         df_unit = df_model[df_model["unit_no"] == unit]
-        df_unit = df_unit.drop_duplicates()
-    
-st.text(ss.start_date)
-st.text(ss.end_date)
-st.text(df_unit.date.unique())
+    df_unit = df_unit.drop_duplicates()
 
 # --- Display ---
 st.subheader("検索結果", divider="rainbow", help=help_text)
@@ -94,11 +84,7 @@ st.markdown(
 show_cols = ["model", "date", "unit_no", "game", "medal", "bb", "rb"]
 show_df = df_unit[show_cols]
 
-if len(show_df) > 10:
-    height = min(100 + len(show_df) * 30, 800)
-else:
-    height = "auto"
-st.dataframe(show_df, height=height, width="stretch", hide_index=True)
+st.dataframe(show_df, height="auto", width="stretch", hide_index=True)
 if show_df.shape[0]:
     st.text(f"{show_df.shape[0]} 件のデータが存在します。")
 else:
@@ -111,21 +97,9 @@ st.markdown(
         <a href="/"
            target="_self"
            style="font-size: 16px; text-decoration: none;">
-            🏠 トップへ戻る
+            🏠 HOME
         </a>
     </div>
     """,
     unsafe_allow_html=True,
 )
-
-## Samples
-
-display_date = today - datetime.timedelta(days=PAST_N_DAYS)
-start_date, end_date = st.slider(
-    "検索期間",
-    min_value=display_date,
-    max_value=today,
-    value=(n_d_ago, today),
-    format="YYYY-MM-DD",
-)
-st.write(f"📅 検索期間: {start_date} ～ {end_date}")
