@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import yaml
-from utils_for_streamlit import WEEKDAY_MAP
+from utils import WEEKDAY_MAP
 from data_from_supabase import fetch
 
 def build_mapping(key, default):

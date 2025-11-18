@@ -1,13 +1,12 @@
-import os
+# import os
 import streamlit as st
-import pandas as pd
-
+# import pandas as pd
 import datetime
 import time
-from utils_for_streamlit import validate_dates
-from data_from_supabase import fetch, fetch_halls
+from utils import validate_dates
+from data_from_supabase import fetch
 
-PAST_N_DAYS = 8
+PAST_N_DAYS = 7
 
 st.markdown('<a id="page_top"></a>', unsafe_allow_html=True)
 
@@ -16,11 +15,16 @@ page_title = "データベース検索"
 st.set_page_config(page_title=page_title, page_icon="", layout="wide")
 
 # --- Title etc. ---
-st.page_link("Slot_Data_Analysis.py", label="🏠 トップページへ戻る")
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
 st.header(page_title)
-st.markdown("フィルター設定で、ホール・機種・台番・期間で絞り込みが可能です。")
+st.markdown(
+    """
+    - ホール・機種・台番・期間で絞り込みが可能です。
+    - ホールごとに台数が多い機種を優先的に表示します。
+    - 台番号で「すべて表示」し、日付を一日に絞るとその日のデータを一覧で確認できます。
+    """
+)
 
-# st.divider()
 help_text = f"過去{PAST_N_DAYS}日間のデータを表示しています。"
 st.subheader("フィルター設定", divider="rainbow", help=help_text)
 
@@ -34,45 +38,35 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
-
 col1, col2 = st.columns(2)
 with col1:
     st.date_input(
-        "検索開始日",
-        key="start_date",
-        max_value=yesterday,
-        on_change=validate_dates,
+        "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
-    time.sleep(0.1)
 with col2:
     st.date_input(
-        "検索終了日",
-        key="end_date",
-        max_value=yesterday,
-        on_change=validate_dates,
+        "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-    time.sleep(0.1)
+
 
 # --- リスト&フィルター ---
 ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
+# --- hall ---
 with col1:
-    # --- hall ---
     # halls_df = fetch_halls()
     # halls = halls_df["name"].tolist()
     df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
-    halls = df.hall.unique().tolist()
+    halls = sorted(df.hall.unique().tolist())
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
     df_hall = df[(df["hall"] == hall)]
-    time.sleep(0.1)
+# --- model ---
 with col2:
-    # --- model ---
     models = df_hall["model"].value_counts().index.tolist()
     model = st.selectbox("機種を選択", models, help="台数の多い順に表示")
     df_model = df_hall[(df_hall["model"] == model)]
-    time.sleep(0.1)
+# --- unit_no ---
 with col3:
-    # --- unit_no ---
     units = sorted(df_model["unit_no"].unique().tolist())
     if len(units) > 5:
         units.insert(5, ALL)
@@ -82,11 +76,14 @@ with col3:
     df_unit = df_model
     if unit != ALL:
         df_unit = df_model[df_model["unit_no"] == unit]
-    time.sleep(0.1)
+        df_unit = df_unit.drop_duplicates()
+    
+st.text(ss.start_date)
+st.text(ss.end_date)
+st.text(df_unit.date.unique())
 
 # --- Display ---
-st.divider()
-# st.subheader("データベース", divider="rainbow", help=help_text)
+st.subheader("検索結果", divider="rainbow", help=help_text)
 st.markdown(
     f"""
     - 📅 検索期間: {ss.start_date} ～ {ss.end_date}
@@ -132,5 +129,3 @@ start_date, end_date = st.slider(
     format="YYYY-MM-DD",
 )
 st.write(f"📅 検索期間: {start_date} ～ {end_date}")
-
-

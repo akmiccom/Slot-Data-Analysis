@@ -6,13 +6,13 @@ import os
 import yaml
 from data_from_supabase import fetch, fetch_halls
 from preprocess import df_preprocess, build_mapping, cal_grape_rate
-from utils_for_streamlit import WEEKDAY_MAP
-from utils_for_streamlit import validate_dates
-from utils_for_streamlit import auto_height
-from utils_for_streamlit import style_val
+from utils import WEEKDAY_MAP
+from utils import validate_dates
+from utils import auto_height
+from utils import style_val
 
 
-PAST_N_DAYS = 8
+PAST_N_DAYS = 7
 
 # --- page_config ---
 page_title = "台番号別の出玉率・回転数履歴"
