@@ -8,7 +8,6 @@ from utils import validate_dates
 from preprocess import df_preprocess
 
 
-
 PAST_N_DAYS = 30
 
 
@@ -85,14 +84,16 @@ def pre_process_groupe(df, group_targets):
     return df_day_last
 
 
-def begin_of_month_to_end_of_month(months=1, days=1):
+def begin_of_month_to_end_of_month(months=3, past_n_days=5):
     """期間を開始日を指定月数の1日から、n月前の月末からm日まで"""
-    year, month = datetime.date.today().year, datetime.date.today().month
+    today = datetime.date.today()
+    year, month = today.year, today.month
+    yesterday = today - datetime.timedelta(days=1)
+    n_d_ago = today - datetime.timedelta(days=past_n_days)
     this_month_first = datetime.date(year, month, 1)
-    # end_date = this_month_first - datetime.timedelta(days=days)
-    start_date = this_month_first - relativedelta(months=months)
+    n_m_ago_first = this_month_first - relativedelta(months=months)
 
-    return start_date
+    return n_m_ago_first, n_d_ago, yesterday, today
 
 
 # --- 表示処理 ---
@@ -116,6 +117,7 @@ def get_latest_df(past_n_days=3):
     yesterday = today - datetime.timedelta(days=1)
     df_latest = fetch("result_joined", n_d_ago, yesterday, hall=None, model=None)
     halls = sorted(df_latest["hall"].unique().tolist())
+    # models = sorted(df_latest["model"].unique().tolist())
     df_latest = df_latest.set_index(["hall", "model", "unit_no"])
     return df_latest, halls
 
@@ -125,8 +127,9 @@ title = "末尾日統計"
 st.set_page_config(page_title=title, layout="wide")
 
 # --- Title etc. ---
-st.header(title)
-st.subheader("以下の条件でデータを表示", divider="rainbow")
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
+st.subheader(title, divider="rainbow")
+# st.subheader("以下の条件でデータを表示", divider="rainbow")
 st.markdown(
     """
     - 回転数 5,000G以上
@@ -137,18 +140,16 @@ st.markdown(
 )
 
 # --- 日付処理 ---
-today = datetime.date.today()
-n_d_ago = today - datetime.timedelta(days=PAST_N_DAYS)
-yesterday = today - datetime.timedelta(days=1)
-start_date = begin_of_month_to_end_of_month(months=1, days=1)
+n_m_ago_first, n_d_ago, yesterday, today = begin_of_month_to_end_of_month(
+    months=3, past_n_days=5
+)
 
 ss = st.session_state
-ss.setdefault("start_date", start_date)
+ss.setdefault("start_date", n_m_ago_first)
 ss.setdefault("end_date", yesterday)
 
 # --- 最新設置状態取得 ---
-df_latest, halls = get_latest_df()
-df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
+
 
 # -- フィルター設定 ---
 st.subheader("フィルター設定", divider="rainbow")
@@ -163,24 +164,32 @@ with col2:
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
 with col3:
+    df_latest, halls = get_latest_df(past_n_days=3)
     if len(halls) > 5:
         halls.insert(5, ALL)
     hall = st.selectbox("ホールを選択", halls)
-    df = df.set_index(["hall", "model", "unit_no"])
-    safe_index = df.index.intersection(df_latest.index)
-    df = df.loc[safe_index].reset_index()
-    df_hall = pre_process_first(df, is_win=1.03)
-    df_hall = df_hall if hall == ALL else df_hall[df_hall["hall"] == hall]
+    if hall == ALL:
+        df_hall = fetch("result_joined", ss.start_date, ss.end_date)
+    else:
+        df_hall = fetch("result_joined", ss.start_date, ss.end_date, hall=hall)
 with col4:
-    models = [ALL] + sorted(df_hall["model"].unique().tolist())
+    models = df_hall["model"].value_counts().index.tolist()
+    if len(models) > 5:
+        models.insert(5, ALL)
     model = st.selectbox("モデルを選択", models)
     df_model = df_hall if model == ALL else df_hall[df_hall["model"] == model]
+        
+    df_model = df_model.set_index(["hall", "model", "unit_no"])
+    safe_index = df_model.index.intersection(df_latest.index)
+    df_model = df_model.loc[safe_index].reset_index()
+    df_model = pre_process_first(df_model, is_win=1.03)
 with col5:
     day_last_list = sorted(df_model["day_last"].unique().tolist())
     day_last = st.selectbox("末尾日を選択", day_last_list)
     df_day_last = df_model[df_model["day_last"] == day_last]
 
-win_rate = st.slider("勝率を選択", 0.0, 1.0, 0.50)
+
+win_rate = st.slider("勝率を選択", 0.0, 1.0, 0.51)
 
 group_targets = ["hall", "model", "unit_no", "day_last"]
 df_groupe = pre_process_groupe(df_day_last, group_targets)
@@ -237,14 +246,12 @@ else:
     models = df_groupe["model"].unique().tolist()
     units = df_groupe["unit_no"].unique().tolist()
     unit = st.selectbox(f"{len(units)} 件の中から台番号を選択", units)
-
-    # st.dataframe(df_groupe)
-
-    hall_df = df[(df["hall"] == hall) & (df["day_last"] == day_last)]
-    model_df = hall_df[hall_df["model"].isin(models)]
-    unit_df = model_df[model_df["unit_no"] == unit]
-
-    show_df = unit_df
+    
+    df_detail_hall = df_model[(df_model["hall"] == hall) & (df_model["day_last"] == day_last)]
+    df_detail_model = df_detail_hall[df_detail_hall["model"].isin(models)]
+    df_unit = df_detail_model[df_detail_model["unit_no"] == unit]
+    show_df = df_unit
+    
     show_cols = [
         "hall",
         "model",
@@ -264,3 +271,17 @@ else:
         # "day_last",
     ]
     st.dataframe(show_df[show_cols], height="auto", hide_index=True, width="stretch")
+
+# トップに戻るリンク
+st.markdown(
+    """
+    <div style="text-align: right;">
+        <a href="/"
+           target="_self"
+           style="font-size: 16px; text-decoration: none;">
+            🏠 HOME
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

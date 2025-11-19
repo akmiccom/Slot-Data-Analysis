@@ -19,7 +19,7 @@ page_title = "台番号別の出玉率・回転数履歴"
 st.set_page_config(page_title=page_title, layout="wide")
 
 # --- Title etc. ---
-st.page_link("Slot_Data_Analysis.py", label="🏠 トップページへ戻る")
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
 help_text = f"過去{PAST_N_DAYS}日間のデータを表示しています。"
 st.header(page_title, divider="rainbow", help=help_text)
 st.markdown(
@@ -175,3 +175,17 @@ mean_row = df_history.mean(numeric_only=True).round(1)
 mean_row.name = "mean"
 df_history = pd.concat([pd.DataFrame([mean_row]), df_history])
 st.dataframe(df_history, width="stretch", height=auto_height((df_history)))
+
+# トップに戻るリンク
+st.markdown(
+    """
+    <div style="text-align: right;">
+        <a href="/"
+           target="_self"
+           style="font-size: 16px; text-decoration: none;">
+            🏠 HOME
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)

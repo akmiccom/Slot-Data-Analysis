@@ -101,8 +101,12 @@ def fetch(
     内部でページングして 1000件制限を回避する。
     """
     supabase = get_supabase_client()
-    query = supabase.table(view).select(
-        "*").gte("date", start).lte("date", end)
+    query = (
+        supabase.table(view)
+        .select("date,hall,model,unit_no,game,medal,bb,rb")
+        .gte("date", start)
+        .lte("date", end)
+    )
     if hall is not None:
         query = query.eq("hall", hall)
     if model is not None:
@@ -141,8 +145,7 @@ def fetch_latest(
     supabase = get_supabase_client()
 
     # まず最新日だけを1行取得
-    query = supabase.table(view).select(
-        "date").order("date", desc=True).limit(1)
+    query = supabase.table(view).select("date").order("date", desc=True).limit(1)
 
     if hall is not None:
         query = query.eq("hall", hall)
@@ -174,6 +177,7 @@ def fetch_halls() -> pd.DataFrame:
     rows = _fetch_all_rows(query)
     return pd.DataFrame(rows)
 
+
 @st.cache_data
 def fetch_models() -> pd.DataFrame:
     """
@@ -183,6 +187,7 @@ def fetch_models() -> pd.DataFrame:
     query = supabase.table("models").select("*").order("name")
     rows = _fetch_all_rows(query)
     return pd.DataFrame(rows)
+
 
 @st.cache_data
 def fetch_prefectures() -> pd.DataFrame:
