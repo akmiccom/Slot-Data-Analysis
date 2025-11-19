@@ -10,7 +10,7 @@ from utils import make_style_val
 from utils import validate_dates
 
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 # --- page_config ---
 st.set_page_config(page_title="モデル別の出玉率・回転数履歴", layout="wide")
@@ -25,6 +25,8 @@ st.markdown(
     """
 )
 
+# --- UI ---
+st.subheader("フィルター設定", divider="rainbow")
 
 # --- 日付処理 ---
 today = datetime.date.today()
@@ -35,6 +37,16 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
+# --- 初期読み込み ---
+df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
+df["date"] = pd.to_datetime(df["date"])
+df["day"] = df["date"].dt.day
+df["weekday_num"] = df["date"].dt.weekday
+df["weekday"] = df["weekday_num"].map(WEEKDAY_MAP)
+df["day_last"] = df["day"].astype(str).str[-1]
+df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
+
+# -- フィルター設定 ---
 col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.date_input(
@@ -44,51 +56,45 @@ with col2:
     st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-    df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
+ALL = "すべて表示"
 with col3:
-    halls = sorted(df["hall"].unique().tolist()) + ["すべてのホール"]
+    halls = sorted(df.hall.unique().tolist())
+    if len(halls) > 5:
+        halls.insert(5, ALL)
+    else:
+        halls.append(ALL)
     hall = st.selectbox("ホールを選択", halls)
+    df_hall = df if hall == ALL else df[df["hall"] == hall]
 with col4:
-    models =  ["すべてのモデル"] + sorted(df["model"].unique().tolist())
+    models =  [ALL] + sorted(df["model"].unique().tolist())
     model = st.selectbox("モデルを選択", models)
-
-if hall != "すべてのホール" and model == "すべてのモデル":
-    df = df[(df["hall"] == hall)]
-elif hall == "すべてのホール" and model != "すべてのモデル":
-    df = df[(df["model"] == model)]
-
-
-# preprocess
-df["date"] = pd.to_datetime(df["date"])
-df["day"] = df["date"].dt.day
-df["weekday_num"] = df["date"].dt.weekday
-df["weekday"] = df["weekday_num"].map(WEEKDAY_MAP)
-df["day_last"] = df["day"].astype(str).str[-1]
-df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
-
-
+    df_model = df_hall
+    if model != ALL:
+        df_model = df_hall[df_hall["model"] == model]
     
 col1, col2, col3 = st.columns(3)
 with col1:
     day_last_list = ["すべての日"] + sorted(df["day_last"].unique().tolist())
     day_last = st.selectbox("末尾日を選択", day_last_list)
+    df_day_last = df_model
     if day_last != "すべての日":
-        df = df[df["day_last"] == day_last]
+        df_day_last = df_model[df_model["day_last"] == day_last]
 with col2:
     day_list = ["すべての日"] + sorted(df["day"].unique().tolist())
     day = st.selectbox("毎月〇〇日を選択", day_list)
+    df_day = df_day_last
     if day != "すべての日":
-        df = df[df["day"] == day]
+        df_day = df_day_last[df_day_last["day"] == day]
 with col3:
     weekday_list = ["すべての曜日", "土", "日", "月", "火", "水", "木", "金"]
     weekday = st.selectbox("曜日を選択", weekday_list)
+    df_weekday = df_day
     if weekday != "すべての曜日":
-        df = df[df["weekday"] == weekday]
+        df_weekday = df_day[df_day["weekday"] == weekday]
     
 
-
 # --- pivot_table ---
-games = df.pivot_table(
+games = df_weekday.pivot_table(
     index=["hall", "model"],
     columns="date",
     values="game",
@@ -96,7 +102,7 @@ games = df.pivot_table(
     margins=True,
     margins_name="SubTotal",
 )
-medals = df.pivot_table(
+medals = df_weekday.pivot_table(
     index=["hall", "model"],
     columns="date",
     values="medal",
@@ -125,7 +131,7 @@ st.dataframe(df_styled, height=height)
 
 
 # --- Display ---
-st.header("モデル別平均回転数履歴", divider="rainbow")
+st.subheader("モデル別平均回転数履歴", divider="rainbow")
 st.text(f"平均回転数 : {game_mean:.01f}")
 threshold_value = game_mean * 1.3
 style_func = make_style_val(threshold_value)

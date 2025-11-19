@@ -10,14 +10,13 @@ from utils import make_style_val
 from utils import validate_dates
 
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 # --- page_config ---
 st.set_page_config(page_title="ホール別の出玉率・回転数履歴", layout="wide")
 
 # --- Title etc. ---
 st.title("ホール別の出玉率・回転数履歴")
-st.subheader("ホール別出玉率履歴", divider="rainbow")
 st.markdown(
     f"""
     ホール別の**出玉率履歴データ**を表示します。機能は順次追加する予定です。
@@ -25,6 +24,8 @@ st.markdown(
     """
 )
 
+# --- UI ---
+st.subheader("フィルター設定", divider="rainbow")
 
 # --- 日付処理 ---
 today = datetime.date.today()
@@ -35,6 +36,16 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
+# --- 初期読み込み ---
+df = fetch("result_joined", n_d_ago, today)
+df["date"] = pd.to_datetime(df["date"])
+df["day"] = df["date"].dt.day
+df["weekday_num"] = df["date"].dt.weekday
+df["weekday"] = df["weekday_num"].map(WEEKDAY_MAP)
+df["day_last"] = df["day"].astype(str).str[-1]
+df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
+
+# -- フィルター設定 ---
 col1, col2, col3 = st.columns(3)
 with col1:
     st.date_input(
@@ -44,24 +55,17 @@ with col2:
     st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-with col3:
-    df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
-    halls = ["すべてのホール"] + df["hall"].unique().tolist()
-    hall = st.selectbox("ホールを選択", halls)
-
-if hall != "すべてのホール":
-    df = df[df["hall"] == hall]
-    
-    
-df["date"] = pd.to_datetime(df["date"])
-df["day"] = df["date"].dt.day
-df["weekday_num"] = df["date"].dt.weekday
-df["weekday"] = df["weekday_num"].map(WEEKDAY_MAP)
-df["day_last"] = df["day"].astype(str).str[-1]
-df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
-
-
 ALL = "すべて表示"
+with col3:
+    halls = sorted(df.hall.unique().tolist())
+    if len(halls) > 5:
+        halls.insert(5, ALL)
+    else:
+        halls.append(ALL)
+    hall = st.selectbox("ホールを選択", halls)
+    if hall != ALL:
+        df = df[df["hall"] == hall]
+
 col1, col2, col3 = st.columns(3)
 with col1:
     day_last_list = [ALL] + sorted(df["day_last"].unique().tolist())
@@ -98,36 +102,28 @@ medals = df.pivot_table(
     margins_name="SubTotal",
 )
 rate = (games * 3 + medals) / (games * 3)
-sorted_games = games.iloc[:, ::-1]
+sorted_game = games.iloc[:, ::-1]
 sorted_rate = rate.iloc[:, ::-1]
 
 
 # --- Display ---
+st.subheader("ホール別出玉率履歴", divider="rainbow")
 threshold_value = 1.02
 style_func = make_style_val(threshold_value)
 num_cols = sorted_rate.select_dtypes(include="number").columns
 df_styled = sorted_rate.style.map(style_func, subset=num_cols).format(
     {col: "{:.3f}" for col in num_cols}
 )
-if len(sorted_rate) > 10:
-    height = min(100 + len(sorted_rate) * 30, 800)
-else:
-    height = "auto"
-st.dataframe(df_styled, height=height)
+st.dataframe(df_styled, height=auto_height(sorted_rate))
 
 
 # --- Display ---
-st.subheader("ホール別平均回転数履歴", divider="rainbow")
+st.subheader("ホール別回転数履歴", divider="rainbow")
 
 threshold_value = 5000
 style_func = make_style_val(threshold_value)
-num_cols = sorted_games.select_dtypes(include="number").columns
-df_styled = sorted_games.style.map(style_func, subset=num_cols).format(
+num_cols = sorted_game.select_dtypes(include="number").columns
+df_styled = sorted_game.style.map(style_func, subset=num_cols).format(
     {col: "{:.1f}" for col in num_cols}
 )
-
-if len(sorted_games) > 10:
-    height = min(100 + len(sorted_games) * 30, 800)
-else:
-    height = "auto"
-st.dataframe(df_styled, height=height)
+st.dataframe(df_styled, height=auto_height(sorted_game))

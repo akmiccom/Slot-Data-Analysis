@@ -12,7 +12,7 @@ from utils import auto_height
 from utils import style_val
 
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 # --- page_config ---
 page_title = "台番号別の出玉率・回転数履歴"
@@ -39,39 +39,31 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
+# --- 初期読み込み ---
+df = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
 
-col1, col2 = st.columns(2)
+# -- フィルター設定 ---
+col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.date_input(
-        "検索開始日",
-        key="start_date",
-        max_value=yesterday,
-        on_change=validate_dates,
+        "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
-    time.sleep(0.1)
 with col2:
     st.date_input(
-        "検索終了日",
-        key="end_date",
-        max_value=yesterday,
-        on_change=validate_dates,
+        "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-    time.sleep(0.1)
-
-# df_fetch = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
-
 ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
-# --- 1) ホール選択 ---
 with col1:
-    # halls = fetch_halls()["name"].tolist()
-    df_fetch = fetch("result_joined", ss.start_date, ss.end_date, hall=None, model=None)
-    halls = sorted(df_fetch["hall"].unique().tolist()) + [ALL]
+    halls = sorted(df.hall.unique().tolist())
+    if len(halls) > 5:
+        halls.insert(5, ALL)
+    else:
+        halls.append(ALL)
     hall = st.selectbox("ホールを選択", halls)
-    df_hall = df_fetch if hall == ALL else df_fetch[df_fetch["hall"] == hall]
+    df_hall = df if hall == ALL else df[df["hall"] == hall]
 # --- 2) モデル選択（ホールに従属）---
 with col2:
-    # models = sorted(df_hall["model"].dropna().unique().tolist()) + [ALL]
     models = df_hall["model"].value_counts().index.tolist()
     model = st.selectbox("モデルを選択", models)
     df_model = [ALL] + df_hall if model == ALL else df_hall[df_hall["model"] == model]
@@ -81,9 +73,8 @@ with col3:
     unit = st.selectbox("台番号を選択", units)
     df_unit = df_model if unit == ALL else df_model[df_model["unit_no"] == unit]
 
-df_filtered = df_unit
-
 # --- 前処理関数 ---
+df_filtered = df_unit
 df = df_preprocess(df_filtered)
 
 # -– フィルタリング（日付・末尾日・毎月〇〇日・曜日）---
