@@ -83,6 +83,7 @@ st.subheader("Streamlit Widgets Sample", divider="rainbow")
 tab1, tab2, tab3 = st.tabs(["概要", "詳細", "その他"])
 with tab1:
     st.markdown("ここには概要を表示します。")
+    st.dataframe(fetch_halls())
 with tab2:
     st.markdown("ここには詳細を表示します。")
 with tab3:
