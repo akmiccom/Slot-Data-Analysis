@@ -16,6 +16,7 @@ PAST_N_DAYS = 5
 st.set_page_config(page_title="ホール別の出玉率・回転数履歴", layout="wide")
 
 # --- Title etc. ---
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
 st.title("ホール別の出玉率・回転数履歴")
 st.markdown(
     f"""
@@ -127,3 +128,17 @@ df_styled = sorted_game.style.map(style_func, subset=num_cols).format(
     {col: "{:.1f}" for col in num_cols}
 )
 st.dataframe(df_styled, height=auto_height(sorted_game))
+
+# トップに戻るリンク
+st.markdown(
+    """
+    <div style="text-align: right;">
+        <a href="/"
+           target="_self"
+           style="font-size: 16px; text-decoration: none;">
+            🏠 HOME
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
