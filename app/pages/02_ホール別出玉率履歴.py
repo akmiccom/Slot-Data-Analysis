@@ -10,7 +10,7 @@ from utils import make_style_val
 from utils import validate_dates
 
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 # --- page_config ---
 st.set_page_config(page_title="ホール別の出玉率・回転数履歴", layout="wide")

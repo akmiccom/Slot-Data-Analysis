@@ -36,17 +36,6 @@ st.page_link("pages/03_機種別出玉率履歴.py", label="機種別の分析",
 st.page_link("pages/04_台別出玉率履歴.py", label="台番号別の分析", icon="📈")
 st.page_link("pages/06_末尾日統計.py", label="末尾日別の分析", icon="📈")
 
-
-st.subheader("Streamlit Widgets Sample", divider="gray")
-tab1, tab2, tab3 = st.tabs(["概要", "詳細", "その他"])
-with tab1:
-    st.markdown("ここには概要を表示します。")
-with tab2:
-    st.markdown("ここには詳細を表示します。")
-with tab3:
-    st.markdown("ここにはその他を表示します。")
-
-
 # --- UI ---
 st.subheader("データ検索", divider="rainbow")
 
@@ -87,5 +76,15 @@ with col5:
     df_unit = df_model[df_model["unit_no"] == unit]
 
 # --- Display ---
-st.write(f"{len(df_unit)} 件の結果")
-st.dataframe(df_unit.head(500), height="auto")
+st.write(f"{len(df_unit)} 件の結果を表示しています。 (最大表示数50件)")
+st.dataframe(df_unit.head(50), height="auto")
+
+# --- Sample ---
+st.subheader("Streamlit Widgets Sample", divider="gray")
+tab1, tab2, tab3 = st.tabs(["概要", "詳細", "その他"])
+with tab1:
+    st.markdown("ここには概要を表示します。")
+with tab2:
+    st.markdown("ここには詳細を表示します。")
+with tab3:
+    st.markdown("ここにはその他を表示します。")

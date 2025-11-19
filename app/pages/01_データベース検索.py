@@ -6,7 +6,7 @@ import time
 from utils import validate_dates
 from data_from_supabase import fetch
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 st.markdown('<a id="page_top"></a>', unsafe_allow_html=True)
 
@@ -21,7 +21,7 @@ st.markdown(
     """
     - ホール・機種・台番・期間で絞り込みが可能です。
     - ホールごとに台数が多い機種を優先的に表示します。
-    - 台番号で「すべて表示」し、日付を一日に絞るとその日のデータを一覧で確認できます。
+    - 台番号で「すべて表示」して、日付を一日に絞るとその日のデータを一覧で確認できます。
     """
 )
 

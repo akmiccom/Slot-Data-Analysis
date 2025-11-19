@@ -10,7 +10,7 @@ from utils import make_style_val
 from utils import validate_dates
 
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 # --- page_config ---
 st.set_page_config(page_title="モデル別の出玉率・回転数履歴", layout="wide")
@@ -131,7 +131,7 @@ st.dataframe(df_styled, height=height)
 
 
 # --- Display ---
-st.header("モデル別平均回転数履歴", divider="rainbow")
+st.subheader("モデル別平均回転数履歴", divider="rainbow")
 st.text(f"平均回転数 : {game_mean:.01f}")
 threshold_value = game_mean * 1.3
 style_func = make_style_val(threshold_value)

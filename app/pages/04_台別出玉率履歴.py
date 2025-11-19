@@ -12,7 +12,7 @@ from utils import auto_height
 from utils import style_val
 
 
-PAST_N_DAYS = 7
+PAST_N_DAYS = 5
 
 # --- page_config ---
 page_title = "台番号別の出玉率・回転数履歴"
