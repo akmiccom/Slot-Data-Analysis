@@ -33,3 +33,5 @@ if hasattr(res, "error"):
 
 df = pd.DataFrame(res.data)
 st.write("df.columns:", df.columns.tolist())
+
+st.dataframe(df.head())
