@@ -1,6 +1,7 @@
+import pandas as pd
 import datetime
 import streamlit as st
-from data_from_supabase import fetch, fetch_halls
+from data_from_supabase import fetch, fetch_halls, fetch_models, fetch_latest
 from utils import validate_dates
 
 title = "データ分析"
@@ -79,12 +80,36 @@ st.markdown(
 # st.dataframe(df_unit.head(50), height="auto")
 
 # --- Sample ---
-st.subheader("Streamlit Widgets Sample", divider="rainbow")
-tab1, tab2, tab3 = st.tabs(["概要", "詳細", "その他"])
+st.subheader("最新のホール・モデルの状況", divider="rainbow")
+df_latest = fetch_latest("result_joined", hall=None, model=None)
+tab1, tab2, tab3 = st.tabs(["ホール別台数", "モデル別台数", "その他"])
 with tab1:
-    st.markdown("ここには概要を表示します。")
-    st.dataframe(fetch_halls())
+    grouped = df_latest.groupby("hall")
+    unit_count = grouped["unit_no"].count().sort_values(ascending=False)
+    unit_count = pd.DataFrame(unit_count).rename(
+        columns={"unit_no": "ホール別ジャグラーの台数"}
+    )
+    halls = unit_count.index.tolist()
+    st.dataframe(unit_count, height="auto", width="content")
 with tab2:
-    st.markdown("ここには詳細を表示します。")
+    models = fetch_models()
+    grouped = df_latest.groupby("model")
+    unit_count = grouped["unit_no"].count().sort_values(ascending=False)
+    unit_count = pd.DataFrame(unit_count).rename(columns={"unit_no": "機種別の台数"})
+    st.dataframe(unit_count, height="auto", width="content")
 with tab3:
-    st.markdown("ここにはその他を表示します。")
+    ALL = "すべて表示"
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if len(halls) > 5:
+            halls.insert(5, ALL)
+        hall = st.selectbox("ホール選択", halls)
+        df_hall = df_latest if hall == ALL else df_latest[df_latest["hall"] == hall]
+    with col2:
+        models = df_hall["model"].value_counts().index.tolist()
+        model = st.selectbox("モデル選択", models)
+        df_model = df_hall if model == ALL else df_hall[df_hall["model"] == model]
+    with col3:
+        "a"
+
+    st.dataframe(df_hall)
