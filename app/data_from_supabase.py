@@ -43,47 +43,6 @@ def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, Any]]:
 
     return all_rows
 
-
-# def fetch(view: str, start: str, end: str, hall: str = None, model: str = None):
-#     """
-#     Supabase からデータをページングしてすべて取得する。
-#     hall, model を指定しない場合はすべてを呼び出し
-#     API の 1000 件制限を回避。
-#     """
-#     supabase = get_supabase_client()
-
-#     page_size = 1000
-#     page = 0
-#     all_rows = []
-
-#     while True:
-#         # ベースクエリ
-#         query = supabase.table(view).select("*").gte("date", start).lte("date", end)
-
-#         if hall is not None:
-#             query = query.eq("hall", hall)
-
-#         if model is not None:
-#             query = query.eq("model", model)
-
-#         # ページング
-#         start_i = page * page_size
-#         end_i = start_i + page_size - 1
-#         query = query.range(start_i, end_i)
-
-#         res = query.execute()
-#         rows = res.data
-#         if not rows:  # データが0件になったら終了
-#             break
-
-#         all_rows.extend(rows)
-#         page += 1
-
-#     df = pd.DataFrame(all_rows)
-
-#     return df
-
-
 # --------------------------------------------------
 # ① 期間指定＆hall/model でフィルタ（既存 fetch の改良版）
 # --------------------------------------------------
@@ -94,6 +53,7 @@ def fetch(
     end: Union[str, date],
     hall: Optional[str] = None,
     model: Optional[str] = None,
+    day_last: Optional[int] = None,
 ) -> pd.DataFrame:
     """
     Supabase から date 範囲でデータ取得。
@@ -101,16 +61,13 @@ def fetch(
     内部でページングして 1000件制限を回避する。
     """
     supabase = get_supabase_client()
-    query = (
-        supabase.table(view)
-        .select("date,hall,model,unit_no,game,medal,bb,rb")
-        .gte("date", start)
-        .lte("date", end)
-    )
+    query = supabase.table(view).select("*").gte("date", start).lte("date", end)
     if hall is not None:
         query = query.eq("hall", hall)
     if model is not None:
         query = query.eq("model", model)
+    if day_last is not None:
+        query = query.eq("day_last", day_last)
     rows = _fetch_all_rows(query)
     df = pd.DataFrame(rows)
 
