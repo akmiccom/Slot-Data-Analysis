@@ -54,7 +54,7 @@ def fetch(
     end: Union[str, date],
     hall: Optional[str] = None,
     model: Optional[str] = None,
-    day_last: Optional[int] = None,
+    # day_last: Optional[int] = None,
 ) -> pd.DataFrame:
     """
     Supabase から date 範囲でデータ取得。
@@ -72,8 +72,8 @@ def fetch(
         query = query.eq("hall", hall)
     if model is not None:
         query = query.eq("model", model)
-    if day_last is not None:
-        query = query.eq("day_last", day_last)
+    # if day_last is not None:
+    #     query = query.eq("day_last", day_last)
     rows = _fetch_all_rows(query)
     df = pd.DataFrame(rows)
 
