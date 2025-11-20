@@ -43,6 +43,7 @@ def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, Any]]:
 
     return all_rows
 
+
 # --------------------------------------------------
 # ① 期間指定＆hall/model でフィルタ（既存 fetch の改良版）
 # --------------------------------------------------
@@ -61,7 +62,12 @@ def fetch(
     内部でページングして 1000件制限を回避する。
     """
     supabase = get_supabase_client()
-    query = supabase.table(view).select("*").gte("date", start).lte("date", end)
+    query = (
+        supabase.table(view)
+        .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
+        .gte("date", start)
+        .lte("date", end)
+    )
     if hall is not None:
         query = query.eq("hall", hall)
     if model is not None:
@@ -207,21 +213,22 @@ def fetch_paginated(
 if __name__ == "__main__":
 
     view = "result_joined"
-    start = "2025-11-10"
-    end = "2025-11-15"
+    start = "2025-11-01"
+    end = "2025-11-30"
     hall = "楽園ハッピーロード大山"
     model = "マイジャグラーV"
+    day_last = 3
 
-    df = fetch(view, start, end, hall=None, model=None)
+    df = fetch(view, start, end, hall=hall, model=model, day_last=day_last)
     # res = query.execute()
     # df = pd.DataFrame(res.data)
 
     print(df.hall.unique())
     print(df.model.unique())
     print(df.date.unique())
-    print(df.shape[0])
+    print(df)
     # print(df.tail())
 
-    df_one_day = fetch_one_day(view, "2025-11-13", hall=None, model=None)
-    print(df_one_day.date.unique())
-    print(df_one_day.shape[0])
+    # df_one_day = fetch_one_day(view, "2025-11-13", hall=None, model=None)
+    # print(df_one_day.date.unique())
+    # print(df_one_day.shape[0])

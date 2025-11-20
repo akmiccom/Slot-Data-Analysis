@@ -86,6 +86,19 @@ def pre_process_groupe(df, group_targets):
     df_group = df_group.reset_index()
     return df_group
 
+supabase = get_supabase_client()
+query = (
+    supabase.table("result_joined")
+    .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
+)
+res = query.execute()
+st.write("res.data (first 5):", res.data[:5])
+# エラー情報があれば
+if hasattr(res, "error"):
+    st.write("res.error:", res.error)
+
+df = pd.DataFrame(res.data)
+st.write("df.columns:", df.columns.tolist())
 
 starttime = time.time()
 
