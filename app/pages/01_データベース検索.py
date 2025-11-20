@@ -40,6 +40,7 @@ ss.setdefault("end_date", yesterday)
 
 # --- 初期読み込み ---
 df = fetch("result_joined", n_d_ago, today)
+st.text(df.columns)
 
 # -- フィルター設定 ---
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -53,7 +54,7 @@ with col2:
     )
 ALL = "すべて表示"
 with col3:
-    halls = sorted(df.hall.unique().tolist()) + [ALL]
+    halls = sorted(df["hall"].unique().tolist()) + [ALL]
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
     df_hall = df[(df["hall"] == hall)]
 with col4:
