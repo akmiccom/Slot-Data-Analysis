@@ -53,7 +53,7 @@ with col2:
     )
 ALL = "すべて表示"
 with col3:
-    halls = sorted(df.hall.unique().tolist()) + [ALL]
+    halls = sorted(df["hall"].unique().tolist()) + [ALL]
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
     df_hall = df[(df["hall"] == hall)]
 with col4:

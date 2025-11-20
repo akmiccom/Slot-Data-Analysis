@@ -39,6 +39,7 @@ ss.setdefault("end_date", yesterday)
 
 # --- 初期読み込み ---
 df = fetch("result_joined", n_d_ago, today)
+st.text(df.columns)
 df["date"] = pd.to_datetime(df["date"])
 df["day"] = df["date"].dt.day
 df["weekday_num"] = df["date"].dt.weekday

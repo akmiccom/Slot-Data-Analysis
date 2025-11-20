@@ -55,7 +55,7 @@ with col2:
 ALL = "すべて表示"
 col1, col2, col3 = st.columns(3)
 with col1:
-    halls = sorted(df.hall.unique().tolist())
+    halls = sorted(df["hall"].unique().tolist())
     if len(halls) > 5:
         halls.insert(5, ALL)
     else:
