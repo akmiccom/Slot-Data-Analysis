@@ -98,7 +98,7 @@ if hasattr(res, "error"):
     st.write("res.error:", res.error)
 
 df = pd.DataFrame(res.data)
-# st.write("df.columns:", df.columns.tolist())
+st.write("df.columns:", df.columns.tolist())
 
 starttime = time.time()
 
