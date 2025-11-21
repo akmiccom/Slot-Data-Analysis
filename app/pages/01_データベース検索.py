@@ -53,10 +53,11 @@ with col2:
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
 with col3:
-    # halls = sorted(df["hall"].unique().tolist())
-    df_unique, df_final, halls = get_latest_data("result_joined", start, end)
+    df = fetch("result_joined", start, end)
+    halls = sorted(df["hall"].unique().tolist())
+    # df_unique, df_final, halls = get_latest_data("result_joined", start, end)
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
-    df_hall = df_final[(df_final["hall"] == hall)]
+    df_hall = df[(df["hall"] == hall)]
     df_hall = df_hall.drop_duplicates()
 with col4:
     models = df_hall["model"].value_counts().index.tolist()
