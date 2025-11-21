@@ -18,7 +18,7 @@ st.set_page_config(page_title="ホール別の出玉率・回転数履歴", layo
 
 # --- Title etc. ---
 st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
-st.title("ホール別の出玉率・回転数履歴")
+st.subtitle("ホール別の出玉率・回転数履歴")
 st.markdown(
     f"""
     ホール別の**出玉率履歴データ**を表示します。機能は順次追加する予定です。

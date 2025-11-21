@@ -9,16 +9,6 @@ title = "データ分析"
 st.set_page_config(page_title=title, layout="wide",
                    initial_sidebar_state="collapsed")
 
-st.markdown(
-    """
-    ## スマホ画面に合わせた設定
-    - header : 7文字/行
-    - subheader : 8文字/行
-    - 箇条書き : 16文字/行
-    - 文章 : 20文字/行
-    """
-)
-
 # st.subheader(title)
 st.divider()
 
@@ -70,3 +60,13 @@ with tab3:
         df_model = df_hall if model == ALL else df_hall[df_hall["model"] == model]
 
     st.dataframe(df_model)
+
+st.markdown(
+    """
+    ## スマホ画面に合わせた設定
+    - header : 7文字/行
+    - subheader : 8文字/行
+    - 箇条書き : 16文字/行
+    - 文章 : 20文字/行
+    """
+)

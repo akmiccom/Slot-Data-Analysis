@@ -17,8 +17,7 @@ st.set_page_config(page_title="モデル別の出玉率・回転数履歴", layo
 
 # --- Title etc. ---
 st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
-st.title("モデル別の出玉率・回転数履歴")
-st.header("モデル別出玉率履歴", divider="rainbow")
+st.subheader("モデル別出玉率履歴", divider="rainbow")
 st.markdown(
     f"""
     モデル別の**出玉率履歴データ**を表示します。機能は順次追加する予定です。
@@ -132,7 +131,7 @@ st.dataframe(df_styled, height=height)
 
 
 # --- Display ---
-st.subheader("モデル別平均回転数履歴", divider="rainbow")
+st.subheader("モデル別回転数履歴", divider="rainbow")
 st.text(f"平均回転数 : {game_mean:.01f}")
 threshold_value = game_mean * 1.3
 style_func = make_style_val(threshold_value)

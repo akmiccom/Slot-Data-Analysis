@@ -21,7 +21,7 @@ st.set_page_config(page_title=page_title, layout="wide")
 # --- Title etc. ---
 st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
 help_text = f"過去{PAST_N_DAYS}日間のデータを表示しています。"
-st.header(page_title, divider="rainbow", help=help_text)
+st.subheader(page_title, divider="rainbow", help=help_text)
 st.markdown(
     f"""
     台番号別の**出玉率履歴データ**を表示します。
