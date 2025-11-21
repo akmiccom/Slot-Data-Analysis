@@ -6,7 +6,8 @@ from utils import validate_dates
 
 
 title = "データ分析"
-st.set_page_config(page_title=title, layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title=title, layout="wide",
+                   initial_sidebar_state="collapsed")
 
 st.markdown(
     """
@@ -37,49 +38,6 @@ st.markdown(
     """
 )
 
-# # --- UI ---
-# st.subheader("データ検索", divider="rainbow")
-
-# # --- 日付設定 ---
-# N_PAST_DAYS = 5
-# today = datetime.date.today()
-# yesterday = today - datetime.timedelta(days=1)
-# n_d_ago = today - datetime.timedelta(days=N_PAST_DAYS)
-
-# ss = st.session_state
-# ss.setdefault("start_date", n_d_ago)
-# ss.setdefault("end_date", yesterday)
-
-# # --- 初期読み込み ---
-# df = fetch("result_joined", n_d_ago, today, hall=None, model=None)
-
-# # -- フィルター設定 ---
-# col1, col2, col3, col4, col5 = st.columns(5)
-# with col1:
-#     st.date_input(
-#         "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
-#     )
-# with col2:
-#     st.date_input(
-#         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
-#     )
-# with col3:
-#     halls = sorted(df.hall.unique().tolist())
-#     hall = st.selectbox("ホール", halls)
-#     df_hall = fetch("result_joined", ss.start_date, ss.end_date, hall)
-# with col4:
-#     models = df_hall["model"].value_counts().index.tolist()
-#     model = st.selectbox("モデル", models)
-#     df_model = fetch("result_joined", ss.start_date, ss.end_date, hall, model)
-# with col5:
-#     units = sorted(df_model.unit_no.unique().tolist())
-#     unit = st.selectbox("台番号", units)
-#     df_unit = df_model[df_model["unit_no"] == unit]
-
-# # --- Display ---
-# st.write(f"{len(df_unit)} 件の結果を表示しています。 (最大表示数50件)")
-# st.dataframe(df_unit.head(50), height="auto")
-
 # --- Sample ---
 st.subheader("最新のホール・モデルの状況", divider="rainbow")
 df_latest = fetch_latest("result_joined", hall=None, model=None)
@@ -100,7 +58,7 @@ with tab2:
     st.dataframe(unit_count, height="auto", width="content")
 with tab3:
     ALL = "すべて表示"
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     with col1:
         if len(halls) > 5:
             halls.insert(5, ALL)
@@ -110,7 +68,5 @@ with tab3:
         models = df_hall["model"].value_counts().index.tolist()
         model = st.selectbox("モデル選択", models)
         df_model = df_hall if model == ALL else df_hall[df_hall["model"] == model]
-    with col3:
-        "a"
 
-    st.dataframe(df_hall)
+    st.dataframe(df_model)

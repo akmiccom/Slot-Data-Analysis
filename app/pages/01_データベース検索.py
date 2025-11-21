@@ -4,7 +4,7 @@ import streamlit as st
 import datetime
 import time
 from utils import validate_dates
-from data_from_supabase import fetch
+from data_from_supabase import fetch, get_latest_data
 
 
 PAST_N_DAYS = 5
@@ -40,33 +40,31 @@ ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
 # --- 初期読み込み ---
-df = fetch("result_joined", n_d_ago, today)
 
 # -- フィルター設定 ---
+ALL = "すべて表示"
 col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
-    st.date_input(
+    start = st.date_input(
         "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
 with col2:
-    st.date_input(
+    end = st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-ALL = "すべて表示"
 with col3:
-    halls = sorted(df["hall"].unique().tolist()) + [ALL]
+    # halls = sorted(df["hall"].unique().tolist())
+    df_unique, df_final, halls = get_latest_data("result_joined", start, end)
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
-    df_hall = df[(df["hall"] == hall)]
+    df_hall = df_final[(df_final["hall"] == hall)]
+    df_hall = df_hall.drop_duplicates()
 with col4:
     models = df_hall["model"].value_counts().index.tolist()
     model = st.selectbox("機種を選択", models, help="台数の多い順に表示")
     df_model = df_hall[(df_hall["model"] == model)]
+    df_model = df_model.drop_duplicates()
 with col5:
-    units = sorted(df_model["unit_no"].unique().tolist())
-    if len(units) > 5:
-        units.insert(5, ALL)
-    else:
-        units.append(ALL)
+    units = sorted(df_model["unit_no"].unique().tolist()) + [ALL]
     unit = st.selectbox("台番号を選択", units, help="すべて表示も可能")
     df_unit = df_model
     if unit != ALL:

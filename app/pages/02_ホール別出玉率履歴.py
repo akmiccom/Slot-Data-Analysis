@@ -2,7 +2,8 @@ import streamlit as st
 import pandas as pd
 import datetime
 import time
-from data_from_supabase import fetch
+from data_from_supabase import fetch, get_latest_data
+from preprocess import df_preprocess
 from utils import HALLS, WEEKDAY_MAP
 from utils import auto_height
 from utils import style_val
@@ -10,7 +11,7 @@ from utils import make_style_val
 from utils import validate_dates
 
 
-PAST_N_DAYS = 5
+PAST_N_DAYS = 10
 
 # --- page_config ---
 st.set_page_config(page_title="ホール別の出玉率・回転数履歴", layout="wide")
@@ -38,38 +39,42 @@ ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
 # --- 初期読み込み ---
-df = fetch("result_joined", n_d_ago, today)
-df["date"] = pd.to_datetime(df["date"])
-df["day"] = df["date"].dt.day
-df["weekday_num"] = df["date"].dt.weekday
-df["weekday"] = df["weekday_num"].map(WEEKDAY_MAP)
-df["day_last"] = df["day"].astype(str).str[-1]
-df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
 
 # -- フィルター設定 ---
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.date_input(
+    start = st.date_input(
         "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
 with col2:
-    st.date_input(
+    end = st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
+    df_unique, df_final, halls = get_latest_data("result_joined", start, end)
+    df_final = df_preprocess(df_final)
+    # df = fetch("result_joined", n_d_ago, today)
+    # df_final["date"] = pd.to_datetime(df_final["date"])
+    # df_final["day"] = df_final["date"].dt.day
+    # df_final["weekday_num"] = df_final["date"].dt.weekday
+    # df_final["weekday"] = df_final["weekday_num"].map(WEEKDAY_MAP)
+    # df_final["day_last"] = df_final["day"].astype(str).str[-1]
+    # df_final["date"] = pd.to_datetime(df_final["date"]).dt.strftime("%m-%d %a")
 ALL = "すべて表示"
 with col3:
-    halls = sorted(df.hall.unique().tolist())
+    halls = sorted(df_final["hall"].unique().tolist())
     if len(halls) > 5:
         halls.insert(5, ALL)
     else:
         halls.append(ALL)
     hall = st.selectbox("ホールを選択", halls)
     if hall != ALL:
-        df = df[df["hall"] == hall]
+        df = df_final[df_final["hall"] == hall]
+    else:
+        df = df_final
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    day_last_list = [ALL] + sorted(df["day_last"].unique().tolist())
+    day_last_list = sorted(df["day_last"].unique().tolist()) + [ALL]
     day_last = st.selectbox("末尾日を選択", day_last_list)
     if day_last != ALL:
         df = df[df["day_last"] == day_last]
@@ -83,7 +88,6 @@ with col3:
     weekday = st.selectbox("曜日を選択", weekday_list)
     if weekday != ALL:
         df = df[df["weekday"] == weekday]
-    
 
 # --- pivot_table ---
 games = df.pivot_table(
