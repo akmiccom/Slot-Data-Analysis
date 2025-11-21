@@ -35,16 +35,12 @@ today = datetime.date.today()
 n_d_ago = today - datetime.timedelta(days=PAST_N_DAYS)
 yesterday = today - datetime.timedelta(days=1)
 
-st.text(n_d_ago)
-st.text(yesterday)
-
 ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
 # --- 初期読み込み ---
 df = fetch("result_joined", n_d_ago, today)
-st.text(df.columns)
 
 # -- フィルター設定 ---
 col1, col2, col3, col4, col5 = st.columns(5)
