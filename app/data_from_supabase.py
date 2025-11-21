@@ -85,13 +85,17 @@ def fetch(
 # --------------------------------------------------
 @st.cache_data
 def fetch_one_day(
-    view: str, target_date: str, hall: Optional[str] = None, model: Optional[str] = None
+    view: str,
+    target_date: str,
+    hall: Optional[str] = None,
+    model: Optional[str] = None,
+    day_last: Optional[int] = None,
 ) -> pd.DataFrame:
     """
     指定した1日分（target_date）のデータを取得する。
     内部的には fetch() を start=end にして呼び出すだけ。
     """
-    return fetch(view=view, start=target_date, end=target_date, hall=hall, model=model)
+    return fetch(view=view, start=target_date, end=target_date, hall=hall, model=model, day_last=day_last)
 
 
 # --------------------------------------------------
@@ -108,7 +112,8 @@ def fetch_latest(
     supabase = get_supabase_client()
 
     # まず最新日だけを1行取得
-    query = supabase.table(view).select("date").order("date", desc=True).limit(1)
+    query = supabase.table(view).select(
+        "date").order("date", desc=True).limit(1)
 
     if hall is not None:
         query = query.eq("hall", hall)
