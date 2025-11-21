@@ -6,6 +6,7 @@ import time
 from utils import validate_dates
 from data_from_supabase import fetch
 
+
 PAST_N_DAYS = 5
 
 st.markdown('<a id="page_top"></a>', unsafe_allow_html=True)

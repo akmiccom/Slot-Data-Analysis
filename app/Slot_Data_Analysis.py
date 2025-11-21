@@ -4,6 +4,7 @@ import streamlit as st
 from data_from_supabase import fetch, fetch_halls, fetch_models, fetch_latest
 from utils import validate_dates
 
+
 title = "データ分析"
 st.set_page_config(page_title=title, layout="wide", initial_sidebar_state="collapsed")
 
