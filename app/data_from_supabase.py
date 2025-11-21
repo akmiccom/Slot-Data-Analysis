@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional, Union, Any
 import pandas as pd
 from supabase import create_client, Client
@@ -141,7 +141,7 @@ def fetch_halls() -> pd.DataFrame:
     halls テーブルの全件を取得（必要ならページング対応も可能）。
     """
     supabase = get_supabase_client()
-    query = supabase.table("halls").select("*").order("name")
+    query = supabase.table("halls").select("hall_id,name").order("name")
     rows = _fetch_all_rows(query)
     return pd.DataFrame(rows)
 
@@ -213,6 +213,53 @@ def fetch_paginated(
     rows = _fetch_all_rows(query)
 
     return pd.DataFrame(rows)
+
+
+@st.cache_data
+def get_latest_data(
+    view: str,
+    start: Union[str, date],
+    end: Union[str, date],
+) -> pd.DataFrame:
+
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    n_d_ago = yesterday - timedelta(days=3)
+
+    supabase = get_supabase_client()
+    query = (
+        supabase.table("result_joined")
+        .select("hall,model,unit_no")
+        .gte("date", n_d_ago)
+        .lte("date", yesterday)
+    )
+    rows = _fetch_all_rows(query)
+    df_latest = pd.DataFrame(rows)
+    df_unique = (
+        df_latest[["hall", "model", "unit_no"]]
+        .drop_duplicates()
+        .sort_values(["hall", "model", "unit_no"])
+    )
+    # st.dataframe(df_unique, width="stretch", height=100, hide_index=True)
+    # st.text(len(df_unique))
+
+    halls = df_unique["hall"].unique().tolist()
+    models = df_unique["model"].unique().tolist()
+    units = df_unique["unit_no"].unique().tolist()
+
+    query = (
+        supabase.table("result_joined")
+        .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
+        .gte("date", start)
+        .lte("date", end)
+        .in_("hall", halls)
+        .in_("model", models)
+        .in_("unit_no", units)
+    )
+    rows = _fetch_all_rows(query)
+    df_final = pd.DataFrame(rows).sort_values(["hall", "model", "unit_no"])
+
+    return df_unique, df_final, halls
 
 
 if __name__ == "__main__":
