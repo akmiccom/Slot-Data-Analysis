@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from data_from_supabase import get_supabase_client
+from data_from_supabase import fetch
 
 
 title = "fetch_test"
@@ -22,3 +23,13 @@ if hasattr(res, "error"):
 df = pd.DataFrame(res.data)
 # st.write("df.columns:", df.columns.tolist())
 st.dataframe(df, width="stretch", hide_index=True)
+
+st.subheader("func fetch")
+view = "result_joined"
+start = "2025-11-01"
+end = "2025-11-30"
+hall = "マルハン池袋店"
+model = "マイジャグラーV"
+day_last = 3
+df_fetch = fetch(view, start, end, hall, model, day_last)
+st.dataframe(df_fetch, width="stretch", hide_index=True)
