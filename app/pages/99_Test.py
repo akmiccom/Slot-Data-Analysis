@@ -164,9 +164,9 @@ group_targets = ["hall", "model", "unit_no", "day_last"]
 df_groupe = pre_process_groupe(df_pre, group_targets)
 df_groupe_pre = df_groupe[
     (df_groupe["game_m"] >= 3000)
-    & (df_groupe["medal_m"] >= 500)
-    & (df_groupe["count"] >= 3)
-    & (df_groupe["win_rate"] >= win_rate)
+    # & (df_groupe["medal_m"] >= 500)
+    # & (df_groupe["count"] >= 3)
+    # & (df_groupe["win_rate"] >= win_rate)
 ]
 # df_groupe = df_groupe[df_groupe["win_rate"] >= win_rate]
 df_groupe_sort = df_groupe_pre.sort_values("rb_rate")

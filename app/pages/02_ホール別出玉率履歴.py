@@ -39,6 +39,14 @@ ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
 # --- 初期読み込み ---
+df = fetch("result_joined", n_d_ago, today)
+st.text(df.columns)
+df["date"] = pd.to_datetime(df["date"])
+df["day"] = df["date"].dt.day
+df["weekday_num"] = df["date"].dt.weekday
+df["weekday"] = df["weekday_num"].map(WEEKDAY_MAP)
+df["day_last"] = df["day"].astype(str).str[-1]
+df["date"] = pd.to_datetime(df["date"]).dt.strftime("%m-%d %a")
 
 # -- フィルター設定 ---
 col1, col2, col3 = st.columns(3)
