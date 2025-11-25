@@ -1,5 +1,5 @@
 import os
-from datetime import date
+from datetime import date, timedelta
 from typing import Optional, Union, Any
 import pandas as pd
 from supabase import create_client, Client
@@ -43,6 +43,7 @@ def _fetch_all_rows(query, page_size: int = 1000) -> list[dict[str, Any]]:
 
     return all_rows
 
+
 # --------------------------------------------------
 # ① 期間指定＆hall/model でフィルタ（既存 fetch の改良版）
 # --------------------------------------------------
@@ -61,7 +62,12 @@ def fetch(
     内部でページングして 1000件制限を回避する。
     """
     supabase = get_supabase_client()
-    query = supabase.table(view).select("*").gte("date", start).lte("date", end)
+    query = (
+        supabase.table(view)
+        .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
+        .gte("date", start)
+        .lte("date", end)
+    )
     if hall is not None:
         query = query.eq("hall", hall)
     if model is not None:
@@ -79,13 +85,17 @@ def fetch(
 # --------------------------------------------------
 @st.cache_data
 def fetch_one_day(
-    view: str, target_date: str, hall: Optional[str] = None, model: Optional[str] = None
+    view: str,
+    target_date: str,
+    hall: Optional[str] = None,
+    model: Optional[str] = None,
+    day_last: Optional[int] = None,
 ) -> pd.DataFrame:
     """
     指定した1日分（target_date）のデータを取得する。
     内部的には fetch() を start=end にして呼び出すだけ。
     """
-    return fetch(view=view, start=target_date, end=target_date, hall=hall, model=model)
+    return fetch(view=view, start=target_date, end=target_date, hall=hall, model=model, day_last=day_last)
 
 
 # --------------------------------------------------
@@ -102,7 +112,8 @@ def fetch_latest(
     supabase = get_supabase_client()
 
     # まず最新日だけを1行取得
-    query = supabase.table(view).select("date").order("date", desc=True).limit(1)
+    query = supabase.table(view).select(
+        "date").order("date", desc=True).limit(1)
 
     if hall is not None:
         query = query.eq("hall", hall)
@@ -130,7 +141,7 @@ def fetch_halls() -> pd.DataFrame:
     halls テーブルの全件を取得（必要ならページング対応も可能）。
     """
     supabase = get_supabase_client()
-    query = supabase.table("halls").select("*").order("name")
+    query = supabase.table("halls").select("hall_id,name").order("name")
     rows = _fetch_all_rows(query)
     return pd.DataFrame(rows)
 
@@ -204,24 +215,72 @@ def fetch_paginated(
     return pd.DataFrame(rows)
 
 
+@st.cache_data
+def get_latest_data(
+    view: str,
+    start: Union[str, date],
+    end: Union[str, date],
+) -> pd.DataFrame:
+
+    today = date.today()
+    yesterday = today - timedelta(days=1)
+    n_d_ago = yesterday - timedelta(days=3)
+
+    supabase = get_supabase_client()
+    query = (
+        supabase.table("result_joined")
+        .select("hall,model,unit_no")
+        .gte("date", n_d_ago)
+        .lte("date", yesterday)
+    )
+    rows = _fetch_all_rows(query)
+    df_latest = pd.DataFrame(rows)
+    df_unique = (
+        df_latest[["hall", "model", "unit_no"]]
+        .drop_duplicates()
+        .sort_values(["hall", "model", "unit_no"])
+    )
+    # st.dataframe(df_unique, width="stretch", height=100, hide_index=True)
+    # st.text(len(df_unique))
+
+    halls = df_unique["hall"].unique().tolist()
+    models = df_unique["model"].unique().tolist()
+    units = df_unique["unit_no"].unique().tolist()
+
+    query = (
+        supabase.table("result_joined")
+        .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
+        .gte("date", start)
+        .lte("date", end)
+        .in_("hall", halls)
+        .in_("model", models)
+        .in_("unit_no", units)
+    )
+    rows = _fetch_all_rows(query)
+    df_final = pd.DataFrame(rows).sort_values(["hall", "model", "unit_no"])
+
+    return df_unique, df_final, halls
+
+
 if __name__ == "__main__":
 
     view = "result_joined"
-    start = "2025-11-10"
-    end = "2025-11-15"
+    start = "2025-11-01"
+    end = "2025-11-30"
     hall = "楽園ハッピーロード大山"
     model = "マイジャグラーV"
+    day_last = 3
 
-    df = fetch(view, start, end, hall=None, model=None)
+    df = fetch(view, start, end, hall=hall, model=model, day_last=day_last)
     # res = query.execute()
     # df = pd.DataFrame(res.data)
 
     print(df.hall.unique())
     print(df.model.unique())
     print(df.date.unique())
-    print(df.shape[0])
+    print(df)
     # print(df.tail())
 
-    df_one_day = fetch_one_day(view, "2025-11-13", hall=None, model=None)
-    print(df_one_day.date.unique())
-    print(df_one_day.shape[0])
+    # df_one_day = fetch_one_day(view, "2025-11-13", hall=None, model=None)
+    # print(df_one_day.date.unique())
+    # print(df_one_day.shape[0])

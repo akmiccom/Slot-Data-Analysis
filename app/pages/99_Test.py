@@ -86,7 +86,6 @@ def pre_process_groupe(df, group_targets):
     df_group = df_group.reset_index()
     return df_group
 
-
 starttime = time.time()
 
 VIEW = "result_joined"
@@ -131,7 +130,7 @@ with col3:
     df = df.loc[safe_index].reset_index()
 with col4:
     halls = sorted(df["hall"].unique().tolist()) + [ALL]
-    halls = sorted(fetch_halls()["name"].tolist()) + [ALL]
+    # halls = sorted(fetch_halls()["name"].tolist()) + [ALL]
     hall = st.selectbox("hall", halls)
     df_hall = df if hall == ALL else df[df["hall"] == hall]
 with col5:
