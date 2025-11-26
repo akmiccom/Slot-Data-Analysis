@@ -105,45 +105,45 @@ halls:
     days_ago: 1
     period: 2
 
-  # - name: "レイト平塚"
+  - name: "レイトスロットステージ土浦"
+    prefecture: "茨城県"
+    slug: "麗都スロットステージ土浦"
+    spreadsheet_id: "1WO9qw9rBBUwJlmWe-b71sMMIh3ZlfUJJDSdh-hOhunQ"
+    days_ago: 1
+    period: 2
+
+  - name: "レイトつくば"
+    prefecture: "茨城県"
+    slug: "麗都つくば"
+    spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
+    days_ago: 1
+    period: 2
+
+  - name: "マルハンつくば店"
+    prefecture: "茨城県"
+    slug: "マルハンつくば店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ビックマーチつくば本店"
+    prefecture: "茨城県"
+    slug: "ビックマーチつくば本店"
+    spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
+    days_ago: 1
+    period: 2
+
+  - name: "パールショップともえ川越店"
+    prefecture: "埼玉県"
+    slug: "パールショップともえ川越店"
+    spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
+    days_ago: 1
+    period: 2
+
+  # - name: "レイト平塚" # 取得エラーが出る
   #   prefecture: "茨城県"
   #   slug: "麗都平塚"
   #   spreadsheet_id: "1WlvgMk-u_tUWizQVOYDQVg7bECyVzLm0-wlJDgJteAw"
-  #   days_ago: 1
-  #   period: 2
-
-  # - name: "レイトスロットステージ土浦"
-  #   prefecture: "茨城県"
-  #   slug: "麗都スロットステージ土浦"
-  #   spreadsheet_id: "1WO9qw9rBBUwJlmWe-b71sMMIh3ZlfUJJDSdh-hOhunQ"
-  #   days_ago: 1
-  #   period: 2
-
-  # - name: "レイトつくば"
-  #   prefecture: "茨城県"
-  #   slug: "麗都つくば"
-  #   spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
-  #   days_ago: 1
-  #   period: 2
-
-  # - name: "マルハンつくば店"
-  #   prefecture: "茨城県"
-  #   slug: "マルハンつくば店"
-  #   spreadsheet_id: ""
-  #   days_ago: 1
-  #   period: 2
-
-  # - name: "ビックマーチつくば本店"
-  #   prefecture: "茨城県"
-  #   slug: "ビックマーチつくば本店"
-  #   spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
-  #   days_ago: 1
-  #   period: 2
-
-  # - name: "パールショップともえ川越店"
-  #   prefecture: "埼玉県"
-  #   slug: "パールショップともえ川越店"
-  #   spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
   #   days_ago: 1
   #   period: 2
 
