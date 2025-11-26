@@ -1,15 +1,13 @@
 name: keep_streamlit_awake
 
 on:
-  schedule:
-    - cron: "*/15 * * * *"  # 15分ごと
+  # schedule:
+  #   - cron: "*/15 * * * *"  # 15分ごと
   workflow_dispatch:
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Keep Streamlit awake develop
-        run: curl -s https://dev-slot-data-analysis.streamlit.app > /dev/null
-      # - name: Keep Streamlit awake main
-      #   run: curl -s https://slot-data-analysis.streamlit.app > /dev/null
+      - name: Keep Streamlit awake main
+        run: curl -s https://slot-data-analysis.streamlit.app > /dev/null
