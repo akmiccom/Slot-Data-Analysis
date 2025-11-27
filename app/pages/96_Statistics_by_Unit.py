@@ -1,8 +1,10 @@
 from datetime import date
 import pandas as pd
 import streamlit as st
+import altair as alt
 
 from data_from_supabase import get_supabase_client, _fetch_all_rows
+from utils import calc_grape_rate, predict_setting, continuous_setting
 from utils import auto_height
 
 
@@ -24,6 +26,9 @@ column_config = {
     "win_rate": st.column_config.NumberColumn(width=50),
     "avg_madal": st.column_config.NumberColumn(width=50),
     "avg_game": st.column_config.NumberColumn(width=50),
+    "grape_rate": st.column_config.NumberColumn(width=50),
+    "weight_setting": st.column_config.NumberColumn(width=50),
+    "pred_setting": st.column_config.NumberColumn(width=50),
     "bb": st.column_config.NumberColumn(width=30),
     "rb": st.column_config.NumberColumn(width=30),
 }
@@ -103,10 +108,29 @@ with col7:
     df = df[df["rb_rate"] <= 322]
 
 with col8:
-    halls = [ALL] + df["hall"].value_counts().index.tolist()
+    halls = df["hall"].value_counts().index.tolist() + [ALL]
     hall = st.selectbox("hall", halls)
     if hall not in (None, ALL):
         df = df[df["hall"] == hall]
+
+df = df.rename(
+    columns={"sum_game": "game", "sum_medal": "medal", "sum_bb": "bb", "sum_rb": "rb"}
+)
+df = calc_grape_rate(df)
+# df["grape_rate"] = df["grape_rate"].astype(float).round(2)
+df["grape_rate"] = pd.to_numeric(df["grape_rate"], errors="coerce").round(2)
+df["weight_setting"] = df.apply(
+    lambda r: continuous_setting(
+        r["game"], r["rb"], r["bb"], r["grape_rate"], r["model"]
+    ),
+    axis=1,
+).round(1)
+df["pred_setting"] = df.apply(
+    lambda row: predict_setting(
+        row["game"], row["rb"], row["bb"], row["grape_rate"], row["model"]
+    )[0],
+    axis=1,
+)
 
 # --- display ---
 st.subheader("検索結果", divider="rainbow")
@@ -124,14 +148,18 @@ show_cols = [
     "hall",
     "model",
     "unit_no",
-    "rb_rate",
     "medal_rate",
     "win_rate",
-    "avg_medal",
-    "avg_game",
+    "pred_setting",
+    "weight_setting",
+    # "rb_rate",
+    # "avg_medal",
+    # "avg_game",
+    "grape_rate",
 ]
 if day_last == ALL:
     show_cols.insert(0, "day_last")
+# df_show = df_show
 df_show = df_show[show_cols]
 
 if len(df_show):
@@ -149,7 +177,24 @@ else:
         f"末尾「 **{day_last}** 」の日の「 **{hall}** 」ついて、該当するデータは存在しません。"
     )
 
+
 # --- display detail ---
+@st.cache_data
+def fetch_detail(hall, unit_no, day_last_list):
+    query = (
+        supabase.table("latest_units_results")
+        .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
+        .in_("day_last", day_last_list)
+        .eq("hall", hall)
+        .eq("unit_no", unit_no)
+        .gte("date", "2025-08-01")
+        .lte("date", "2025-11-25")
+    )
+    rows = _fetch_all_rows(query)
+    df_detail = pd.DataFrame(rows)
+    return df_detail
+
+
 if day_last == ALL or hall == ALL:
     st.markdown(
         f"""
@@ -160,51 +205,87 @@ if day_last == ALL or hall == ALL:
 elif len(df):
     st.subheader("履歴データ", divider="rainbow")
     units = df_show["unit_no"].tolist()
-    unit_no = st.selectbox(f"{len(units)} 件の中から台番号を選択", units)
-
-    prev_on = st.toggle("前日のデータを表示する", value=False)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        unit_no = st.selectbox(f"{len(units)} 件の中から台番号を選択", units)
+    with col2:
+        prev_on = st.toggle("前日のデータを表示する", value=False)
     day_last_list = [day_last]
     if prev_on:
         prev = (day_last - 1) % 10
         day_last_list = [day_last, prev]
 
-    query = (
-        supabase.table("latest_units_results")
-        .select("date,hall,model,unit_no,game,bb,rb,medal,day_last")
-        # .eq("day_last", day_last)
-        # .eq("day_last", day_last-1)
-        .in_("day_last", day_last_list)
-        .eq("hall", hall)
-        .eq("unit_no", unit_no)
-        .gte("date", "2025-08-01")
-        .lte("date", "2025-11-25")
-    )
-    rows = _fetch_all_rows(query)
-    df_detail = pd.DataFrame(rows)
+    df_detail = fetch_detail(hall, unit_no, day_last_list)
 
     if prev_on:
         st.markdown(f"前日と合わせて **{len(df_detail)}** 件を表示しています。")
     else:
         st.markdown(f"**{len(df_detail)}** 件を表示しています。")
 
+    # --- preprocess ---
+    df_detail["bb_rate"] = (df_detail["game"] / df_detail["bb"]).round(0)
     df_detail["rb_rate"] = (df_detail["game"] / df_detail["rb"]).round(0)
+    df_detail = calc_grape_rate(df_detail)
+    # df_detail["grape_rate"] = df_detail["grape_rate"].astype(float).round(2)
+    df["grape_rate"] = pd.to_numeric(df["grape_rate"], errors="coerce").round(2)
+    df_detail["weight_setting"] = df_detail.apply(
+        lambda r: continuous_setting(
+            r["game"], r["rb"], r["bb"], r["grape_rate"], r["model"]
+        ),
+        axis=1,
+    ).round(2)
+    df_detail["pred_setting"] = df_detail.apply(
+        lambda row: predict_setting(
+            row["game"], row["rb"], row["bb"], row["grape_rate"], row["model"]
+        )[0],
+        axis=1,
+    )
+
     df_detail = df_detail.sort_values("date", ascending=False)
+    df_detail = df_detail.drop(columns="day_last")
 
     detail_show_cols = [
         "date",
         "hall",
         "model",
         "unit_no",
-        "rb_rate",
+        "pred_setting",
+        "weight_setting",
         "game",
         "medal",
         "bb",
         "rb",
+        "bb_rate",
+        "rb_rate",
+        "grape_rate",
     ]
     df_show = df_detail[detail_show_cols]
+    # df_show = df_detail
     st.dataframe(
         df_show,
         height=auto_height(df_show),
         hide_index=True,
         column_config=column_config,
     )
+
+    # --- graph ---
+    # df_show["date"] = pd.to_datetime(df_show["date"])
+    # chart = (
+    #     alt.Chart(df_show)
+    #     .mark_line(point=True)  # 点 + ライン
+    #     .encode(
+    #         x="date:T",  # 横軸：日付
+    #         y="weight_setting:Q",  # 縦軸：数値
+    #         tooltip=["date", "weight_setting"],
+    #     )
+    #     .properties(width="container", height=350)
+    # )
+    # st.altair_chart(chart, use_container_width=True)
+
+    # st.markdown(
+    #     """
+    #     ##### weight_setting, pred_setting の違い
+    #     - 設定の"高さ指標"、集計なら → weight_setting を見る
+    #     - 設定を当てる（1つ選ぶ）なら pred_setting（整数）を見る
+    #     """
+    # )
