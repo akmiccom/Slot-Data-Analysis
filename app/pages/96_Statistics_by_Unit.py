@@ -244,48 +244,53 @@ elif len(df):
     df_detail = df_detail.sort_values("date", ascending=False)
     df_detail = df_detail.drop(columns="day_last")
 
-    detail_show_cols = [
-        "date",
-        "hall",
-        "model",
-        "unit_no",
-        "pred_setting",
-        "weight_setting",
-        "game",
-        "medal",
-        "bb",
-        "rb",
-        "bb_rate",
-        "rb_rate",
-        "grape_rate",
-    ]
-    df_show = df_detail[detail_show_cols]
-    # df_show = df_detail
-    st.dataframe(
-        df_show,
-        height=auto_height(df_show),
-        hide_index=True,
-        column_config=column_config,
-    )
+    # --- display ----
+    tab1, tab2 = st.tabs(["graph", "dataframe"])
+    # --- dataframe ---
+    with tab2:
+        detail_show_cols = [
+            "date",
+            "hall",
+            "model",
+            "unit_no",
+            "pred_setting",
+            "weight_setting",
+            "game",
+            "medal",
+            "bb",
+            "rb",
+            "bb_rate",
+            "rb_rate",
+            "grape_rate",
+        ]
+        df_show = df_detail[detail_show_cols]
+        # df_show = df_detail
+        st.dataframe(
+            df_show,
+            height=auto_height(df_show),
+            hide_index=True,
+            column_config=column_config,
+        )
+        
+    with tab1:
+        # --- graph ---
+        df_show["date"] = pd.to_datetime(df_show["date"])
+        chart = (
+            alt.Chart(df_show)
+            .mark_line(point=True)  # 点 + ライン
+            .encode(
+                x="date:T",  # 横軸：日付
+                y="weight_setting:Q",  # 縦軸：数値
+                tooltip=["date", "weight_setting"],
+            )
+            .properties(width="container", height=350)
+        )
+        st.altair_chart(chart, use_container_width=True)
 
-    # --- graph ---
-    # df_show["date"] = pd.to_datetime(df_show["date"])
-    # chart = (
-    #     alt.Chart(df_show)
-    #     .mark_line(point=True)  # 点 + ライン
-    #     .encode(
-    #         x="date:T",  # 横軸：日付
-    #         y="weight_setting:Q",  # 縦軸：数値
-    #         tooltip=["date", "weight_setting"],
-    #     )
-    #     .properties(width="container", height=350)
-    # )
-    # st.altair_chart(chart, use_container_width=True)
-
-    # st.markdown(
-    #     """
-    #     ##### weight_setting, pred_setting の違い
-    #     - 設定の"高さ指標"、集計なら → weight_setting を見る
-    #     - 設定を当てる（1つ選ぶ）なら pred_setting（整数）を見る
-    #     """
-    # )
+        st.markdown(
+            """
+            ##### weight_setting, pred_setting の違い
+            - 設定の"高さ指標"、集計なら → weight_setting を見る
+            - 設定を当てる（1つ選ぶ）なら pred_setting（整数）を見る
+            """
+        )
