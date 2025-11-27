@@ -83,7 +83,7 @@ def calc_grape_rate(df, cherry=True):
     計算に必要なデータをjsonから取得し
     データにマージしてブドウ確率を計算する
     """
-    json_path = r"data/json/jagglar_rate.json"
+    # json_path = r"config/jagglar_rate.json"
     with open(json_path, "r", encoding="utf-8") as f:
         model_data = json.load(f)
     constants = {k: m.get("grape_constants") for k, m in model_data.items()}
@@ -134,7 +134,6 @@ def softmax(logL_dict):
 #     """
 
 #     # 各機種別 × 設定別の RB確率を float に変換
-#     json_path = r"data/json/jagglar_rate.json"
 #     with open(json_path, "r", encoding="utf-8") as f:
 #         model_data = json.load(f)
 #     # with open("data/json/jagglar_rate.json", encoding="utf-8") as f:
@@ -214,6 +213,7 @@ from math import log, factorial
 import pandas as pd
 import numpy as np
 
+json_path = r"config/jagglar_rate.json"
 
 def predict_setting(game, rb, bb, grape_rate, model):
     """
@@ -231,7 +231,6 @@ def predict_setting(game, rb, bb, grape_rate, model):
     # -----------------------------
     # 1) JSON から機種・設定別の確率テーブルを作成
     # -----------------------------
-    json_path = r"data/json/jagglar_rate.json"
     with open(json_path, "r", encoding="utf-8") as f:
         model_data = json.load(f)
 
