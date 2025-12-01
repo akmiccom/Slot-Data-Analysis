@@ -89,7 +89,7 @@ git branch -D branch-name             # ローカル強制削除
 git push origin --delete branch-name  # リモート削除
 ```
 
-4. 変更の確認・コミット・プッシュ
+1. 変更の確認・コミット・プッシュ
 
 ```bash
 git status                      # 状態確認
@@ -102,13 +102,14 @@ git push                        # リモートにプッシュ
 git push -u origin branch-name  # 初めてリモートにプッシュ
 ```
 
-5. pull と fetch（リモート更新取得）
+1. pull と fetch（リモート更新取得）
 ```bash
 git pull
 git fetch
+git fetch --prune # リモートで消されたブランチを削除
 ```
 
-6. マージと rebase
+1. マージと rebase
 ```bash
 # ブランチをマージ（一般的)
 git checkout develop
@@ -118,20 +119,20 @@ git checkout feature/new-feature
 git rebase develop
 ```
 
-7. 直前のコミット修正・取り消し
+1. 直前のコミット修正・取り消し
 ```bash
 git commit --amend       # 直前のコミットメッセージ修正
 git reset --soft HEAD~1  # 直前のコミットを取り消してステージに戻す
 git reset --hard HEAD~1  # コミット＆変更ごと消す（危険）
 ```
 
-8. リモート設定
+1. リモート設定
 ```bash
 git remote -v # リモート一覧
 git remote add origin https://github.com/user/repo.git # origin を追加
 ```
 
-9. その他便利コマンド
+1. その他便利コマンド
 ■ ログ確認（きれい）
 ```bash
 git log --oneline --graph --decorate --all # ログ確認（きれい）
@@ -139,7 +140,7 @@ git reset HEAD file.py   # ステージング取り消し：
 git checkout -- file.py  # 作業内容を完全に捨てる：
 ```
 
-10. 実務フローのまとめ（黄金パターン）
+1.  実務フローのまとめ（黄金パターン）
 ■ ログ確認（きれい）
 ```bash
 # 1. main から新ブランチ作成
@@ -156,4 +157,3 @@ git push -u origin feature/add-x
 # 4. レビュー後 develop にマージ
 # 5. ステージング確認 → main にマージ
 ```
-
