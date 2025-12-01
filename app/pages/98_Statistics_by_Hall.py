@@ -10,6 +10,8 @@ supabase = get_supabase_client()
 page_title = "Statistics_by_Hall"
 st.set_page_config(page_title=page_title, page_icon="", layout="wide")
 
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
+
 st.subheader("Medal Rate by Hall")
 # query = supabase.table("medal_rate_by_hall").select("*")
 # rows = _fetch_all_rows(query)

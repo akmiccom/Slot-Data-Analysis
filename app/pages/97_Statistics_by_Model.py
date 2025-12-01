@@ -14,7 +14,7 @@ supabase = get_supabase_client()
 
 page_title = "Statistics_by_Model"
 st.set_page_config(page_title=page_title, page_icon="", layout="wide")
-
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
 st.subheader("Medal Rate by Model")
 
 
@@ -64,7 +64,7 @@ avg_game = df.pivot_table(
 )
 
 value_list = [3000, 4000, 5000, 6000]
-threshold_value = st.pills("出玉率を選択", value_list, default=value_list[1])
+threshold_value = st.pills("回転数を選択", value_list, default=value_list[1])
 style_func = make_style_val(threshold_value)
 num_cols = avg_game.select_dtypes(include="number").columns
 df_styled = avg_game.style.map(style_func, subset=num_cols).format(

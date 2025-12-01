@@ -53,6 +53,7 @@ with col2:
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
 with col3:
+    df = fetch("latest_units_results", start, end)
     halls = sorted(df["hall"].unique().tolist()) + [ALL]
     hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
     df_hall = df[(df["hall"] == hall)]

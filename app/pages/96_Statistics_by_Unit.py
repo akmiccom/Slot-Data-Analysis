@@ -37,7 +37,8 @@ column_config = {
 # --- title ---
 page_title = "台番号別の統計データ"
 st.set_page_config(page_title=page_title, page_icon="", layout="wide")
-st.header(page_title, divider="rainbow")
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
+st.subheader(page_title, divider="rainbow")
 st.markdown(
     """
     ページの使い方説明
