@@ -348,6 +348,10 @@ def predict_setting(game, rb, bb, grape_rate, model):
         return None, {}
 
     best_setting = max(results, key=results.get)
+    if game <= 3000:
+        best_setting = None
+        results = None
+    
     return best_setting, results
 
 
@@ -362,8 +366,8 @@ def continuous_setting(game, rb, bb, grape_rate, model):
     best_setting, logL = predict_setting(game, rb, bb, grape_rate, model)
 
     # 結果なし → 重み 0 など好きなルールに
-    if not logL:
-        return 0.0
+    if not logL or game <= 3000:
+        return None
 
     settings = np.array(list(logL.keys()), dtype=float)
     logLs = np.array(list(logL.values()), dtype=float)
@@ -374,8 +378,9 @@ def continuous_setting(game, rb, bb, grape_rate, model):
     w = w / w.sum()
 
     weight_setting = float((settings * w).sum())
+    # if game <= 3000:
+    #     weight_setting = None
     return weight_setting
-
 
 
 if __name__ == "__main__":
