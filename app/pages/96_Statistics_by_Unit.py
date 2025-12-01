@@ -8,8 +8,8 @@ from utils import calc_grape_rate, predict_setting, continuous_setting
 from utils import auto_height
 
 
-def rotate_list_by_tomorrow(lst):
-    tomorrow_day = date.today().day + 1  # 翌日の「日」
+def rotate_list_by_today(lst):
+    tomorrow_day = date.today().day  # 翌日の「日」
     start = tomorrow_day % len(lst)
     return lst[start:] + lst[:start]
 
@@ -50,8 +50,10 @@ supabase = get_supabase_client()
 
 
 @st.cache_data
-def fetch(day_last, hall=None, model=None):
+def fetch(day_last, pref=None, hall=None, model=None):
     query = supabase.table("medal_rate_by_unit_no").select("*")
+    if pref not in (None, ALL):
+        query = query.eq("prefecture", pref)
     if hall not in (None, ALL):
         query = query.eq("hall", hall)
     if model not in (None, ALL):
@@ -66,30 +68,38 @@ def fetch(day_last, hall=None, model=None):
 # --- selecter ---
 st.subheader("フィルター", divider="rainbow")
 ALL = "すべて"
-col1, col2, col3, col4, col5 = st.columns(5)
+count = st.sidebar.slider("count", 1, 10, 5, 1)
+weight_setting = st.sidebar.slider("weight_setting", 1, 6, 4, 1)
+win_rate = st.sidebar.slider("win_rate", 0.0, 1.0, 0.51, 0.1)
+# col1, col2, col3, col4, col5 = st.columns(5)
 col6, col7, col8 = st.columns(3)
-with col1:
-    count = st.slider("count", 3, 10, 6, 1)
-with col2:
-    medal_rate = st.slider("medal_rate", 100, 106, 103, 1)
-with col3:
-    win_rate = st.slider("win_rate", 0.0, 1.0, 0.51, 0.1)
-with col4:
-    avg_game = st.slider(
-        "avg_game", min_value=1000, max_value=5000, value=3000, step=1000
-    )
-with col5:
-    avg_medal = st.slider("avg_medal", 0, 1000, 500, 100)
+# with col1:
+# count = st.slider("count", 1, 10, 5, 1)
+# with col2:
+# weight_setting = st.slider("weight_setting", 1, 6, 4, 1)
+#     medal_rate = st.slider("medal_rate", 100, 106, 103, 1)
+# with col3:
+# win_rate = st.slider("win_rate", 0.0, 1.0, 0.51, 0.1)
+# with col4:
+#     avg_game = st.slider(
+#         "avg_game", min_value=1000, max_value=5000, value=3000, step=1000
+#     )
+# with col5:
+#     avg_medal = st.slider("avg_medal", 0, 1000, 500, 100)
 
 with col6:
-    month_list = ["1month", "2months", "3months"]
-    month = st.pills("集計期間を選択(準備中)", month_list, default=month_list[-1])
+    # month_list = ["1month", "2months", "3months"]
+    # month = st.pills("集計期間を選択(準備中)", month_list, default=month_list[-1])
+    query = supabase.table("prefectures").select("name")
+    rows = _fetch_all_rows(query)
+    prefectures = [row["name"] for row in rows]
+    pref = st.selectbox("都道府県を選択", prefectures)
 
 with col7:
-    day_lasts = rotate_list_by_tomorrow([i for i in range(10)]) + [ALL]
+    day_lasts = rotate_list_by_today([i for i in range(10)]) + [ALL]
     day_last = st.selectbox("day_last", day_lasts)
     # --- preprocess ---
-    df = fetch(day_last)
+    df = fetch(day_last, pref=pref)
     round_list = [
         "bb_rate",
         "rb_rate",
@@ -100,12 +110,40 @@ with col7:
     ]
     df[round_list] = df[round_list].round(0)
     df["win_rate"] = df["win_rate"].round(2)
-    df = df[df["avg_game"] >= avg_game]
-    df = df[df["avg_medal"] >= avg_medal]
-    df = df[df["medal_rate"] >= medal_rate]
+    # df = df[df["avg_game"] >= avg_game]
+    # df = df[df["avg_medal"] >= avg_medal]
+    # df = df[df["medal_rate"] >= medal_rate]
     df = df[df["win_rate"] >= win_rate]
     df = df[df["count"] >= count]
     df = df[df["rb_rate"] <= 322]
+
+    # st.dataframe(df)
+
+    df = df.rename(
+        columns={
+            "sum_game": "game",
+            "sum_medal": "medal",
+            "sum_bb": "bb",
+            "sum_rb": "rb",
+        }
+    )
+    df = calc_grape_rate(df)
+    # df["grape_rate"] = df["grape_rate"].astype(float).round(2)
+    df["grape_rate"] = pd.to_numeric(df["grape_rate"], errors="coerce").round(2)
+    df["weight_setting"] = df.apply(
+        lambda r: continuous_setting(
+            r["game"], r["rb"], r["bb"], r["grape_rate"], r["model"]
+        ),
+        axis=1,
+    ).round(1)
+    df["pred_setting"] = df.apply(
+        lambda row: predict_setting(
+            row["game"], row["rb"], row["bb"], row["grape_rate"], row["model"]
+        )[0],
+        axis=1,
+    )
+
+    df = df[df["weight_setting"] >= weight_setting]
 
 with col8:
     halls = df["hall"].value_counts().index.tolist() + [ALL]
@@ -113,24 +151,6 @@ with col8:
     if hall not in (None, ALL):
         df = df[df["hall"] == hall]
 
-df = df.rename(
-    columns={"sum_game": "game", "sum_medal": "medal", "sum_bb": "bb", "sum_rb": "rb"}
-)
-df = calc_grape_rate(df)
-# df["grape_rate"] = df["grape_rate"].astype(float).round(2)
-df["grape_rate"] = pd.to_numeric(df["grape_rate"], errors="coerce").round(2)
-df["weight_setting"] = df.apply(
-    lambda r: continuous_setting(
-        r["game"], r["rb"], r["bb"], r["grape_rate"], r["model"]
-    ),
-    axis=1,
-).round(1)
-df["pred_setting"] = df.apply(
-    lambda row: predict_setting(
-        row["game"], row["rb"], row["bb"], row["grape_rate"], row["model"]
-    )[0],
-    axis=1,
-)
 
 # --- display ---
 st.subheader("検索結果", divider="rainbow")
@@ -139,7 +159,7 @@ df_show = df
 hall_counts = df_show["hall"].value_counts()
 df_show["hall_count"] = df_show["hall"].map(hall_counts)
 df_show = df_show.sort_values(
-    ["hall_count", "hall", "model", "rb_rate"], ascending=[False, True, True, True]
+    ["hall", "weight_setting", "model"], ascending=[True, False, True]
 )
 df_show = df_show.drop(columns="hall_count")
 
@@ -220,13 +240,14 @@ elif len(df):
     if prev_on:
         st.markdown(f"前日と合わせて **{len(df_detail)}** 件を表示しています。")
     else:
-        st.markdown(f"**{len(df_detail)}** 件を表示しています。")
+        st.markdown(
+            f"**{len(df_detail)}** 件を表示しています。3000回転以下の台は設定予測はしていません。"
+        )
 
     # --- preprocess ---
     df_detail["bb_rate"] = (df_detail["game"] / df_detail["bb"]).round(0)
     df_detail["rb_rate"] = (df_detail["game"] / df_detail["rb"]).round(0)
     df_detail = calc_grape_rate(df_detail)
-    # df_detail["grape_rate"] = df_detail["grape_rate"].astype(float).round(2)
     df["grape_rate"] = pd.to_numeric(df["grape_rate"], errors="coerce").round(2)
     df_detail["weight_setting"] = df_detail.apply(
         lambda r: continuous_setting(
@@ -271,26 +292,39 @@ elif len(df):
             hide_index=True,
             column_config=column_config,
         )
-        
+
     with tab1:
         # --- graph ---
         df_show["date"] = pd.to_datetime(df_show["date"])
+        df_show["date_str"] = df_show["date"].dt.strftime("%m-%d")
         chart = (
             alt.Chart(df_show)
-            .mark_line(point=True)  # 点 + ライン
+            .mark_circle(size=80)
             .encode(
-                x="date:T",  # 横軸：日付
-                y="weight_setting:Q",  # 縦軸：数値
+                # x="date:T",
+                x=alt.X("date_str:N", title="Date"),
+                y=alt.Y(
+                    "weight_setting:Q",
+                    scale=alt.Scale(domain=[1, 6]),
+                ),
                 tooltip=["date", "weight_setting"],
             )
-            .properties(width="container", height=350)
         )
-        st.altair_chart(chart, use_container_width=True)
+        # 日付ごとの縦線（tick ではなくルール）
+        chart_lines = (
+            alt.Chart(df_show)
+            .mark_rule(color="#444444", strokeWidth=1)
+            .encode(
+                x="date_str:N",
+            )
+        )
+        chart = chart_lines + chart
+        st.altair_chart(chart)
 
-        st.markdown(
-            """
-            ##### weight_setting, pred_setting の違い
-            - 設定の"高さ指標"、集計なら → weight_setting を見る
-            - 設定を当てる（1つ選ぶ）なら pred_setting（整数）を見る
-            """
-        )
+    st.markdown(
+        """
+        ##### weight_setting, pred_setting の違い
+        - 設定の"高さ指標"、集計なら → weight_setting を見る
+        - 設定を当てる（1つ選ぶ）なら pred_setting（整数）を見る
+        """
+    )

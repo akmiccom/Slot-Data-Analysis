@@ -14,10 +14,13 @@ st.divider()
 
 st.subheader("分析データ一覧", divider="rainbow")
 st.page_link("pages/01_データベース検索.py", label="データベース検索", icon="📊")
-st.page_link("pages/02_ホール別出玉率履歴.py", label="ホール別の分析", icon="📈")
-st.page_link("pages/03_機種別出玉率履歴.py", label="機種別の分析", icon="📈")
-st.page_link("pages/04_台別出玉率履歴.py", label="台番号別の分析", icon="📈")
-st.page_link("pages/05_末尾日統計.py", label="末尾日別の分析", icon="📈")
+st.page_link("pages/98_Statistics_by_Hall.py", label="ホール別の分析", icon="📈")
+st.page_link("pages/97_Statistics_by_Model.py", label="機種別の分析", icon="📈")
+st.page_link("pages/96_Statistics_by_Unit.py", label="台番号別の分析", icon="📈")
+# st.page_link("pages/02_ホール別出玉率履歴.py", label="ホール別の分析", icon="📈")
+# st.page_link("pages/03_機種別出玉率履歴.py", label="機種別の分析", icon="📈")
+# st.page_link("pages/04_台別出玉率履歴.py", label="台番号別の分析", icon="📈")
+# st.page_link("pages/05_末尾日統計.py", label="末尾日別の分析", icon="📈")
 
 st.subheader("TOP PAGE に乗せるもの", divider="rainbow")
 st.markdown(
