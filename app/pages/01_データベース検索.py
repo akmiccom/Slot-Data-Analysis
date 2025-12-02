@@ -70,6 +70,7 @@ with col5:
     if unit != ALL:
         df_unit = df_model[df_model["unit_no"] == unit]
     df_unit = df_unit.drop_duplicates()
+    df_unit = df_unit.sort_values("date", ascending=False)
 
 # --- Display ---
 st.subheader("検索結果", divider="rainbow", help=help_text)

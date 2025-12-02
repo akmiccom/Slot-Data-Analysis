@@ -5,14 +5,13 @@ from data_from_supabase import fetch, fetch_halls, fetch_models, fetch_latest
 from utils import validate_dates
 
 
-title = "データ分析"
+title = "分析データ一覧"
 st.set_page_config(page_title=title, layout="wide",
                    initial_sidebar_state="collapsed")
 
-# st.subheader(title)
-st.divider()
+# st.divider()
 
-st.subheader("分析データ一覧", divider="rainbow")
+st.header(title, divider="rainbow")
 st.page_link("pages/01_データベース検索.py", label="データベース検索", icon="📊")
 st.page_link("pages/98_Statistics_by_Hall.py", label="ホール別の分析データ", icon="📈")
 st.page_link("pages/97_Statistics_by_Model.py", label="機種別の分析データ", icon="📈")
@@ -23,24 +22,16 @@ st.page_link("pages/95_History_by_Unit.py", label="台番号別の履歴デー�
 # st.page_link("pages/04_台別出玉率履歴.py", label="台番号別の分析", icon="📈")
 # st.page_link("pages/05_末尾日統計.py", label="末尾日別の分析", icon="📈")
 
-st.subheader("TOP PAGE に乗せるもの", divider="rainbow")
-st.markdown(
-    f"""
-    - ホール一覧
-    - グラフなどでホール分析の月別ダッシュボードを作成
-    - 機種別出玉推移
-    """
-)
 
 # --- Sample ---
-st.subheader("最新のホール・モデルの状況", divider="rainbow")
-df_latest = fetch_latest("result_joined", hall=None, model=None)
-tab1, tab2, tab3 = st.tabs(["ホール別台数", "モデル別台数", "その他"])
+st.subheader("最新データ状況", divider="rainbow")
+df_latest = fetch_latest("latest_units_results", hall=None, model=None)
+tab1, tab2, tab3 = st.tabs(["ホール別台数", "モデル別台数", "データベース"])
 with tab1:
     grouped = df_latest.groupby("hall")
     unit_count = grouped["unit_no"].count().sort_values(ascending=False)
     unit_count = pd.DataFrame(unit_count).rename(
-        columns={"unit_no": "ホール別ジャグラーの台数"}
+        columns={"unit_no": "ホール別ジャグラー台数"}
     )
     halls = unit_count.index.tolist()
     st.dataframe(unit_count, height="auto", width="content")
@@ -62,8 +53,20 @@ with tab3:
         models = df_hall["model"].value_counts().index.tolist()
         model = st.selectbox("モデル選択", models)
         df_model = df_hall if model == ALL else df_hall[df_hall["model"] == model]
+        columns = ['date', 'hall', 'model', 'unit_no', 'game', 'medal', 'bb', 'rb']
+        df_model = df_model[columns]
 
-    st.dataframe(df_model)
+    st.dataframe(df_model, hide_index=True)
+
+
+st.subheader("TOP PAGE に乗せるもの", divider="rainbow")
+st.markdown(
+    f"""
+    - ホール一覧
+    - ホール分析の月別ダッシュボードを作成
+    - 機種別出玉推移
+    """
+)
 
 st.markdown(
     """
@@ -73,4 +76,18 @@ st.markdown(
     - 箇条書き : 16文字/行
     - 文章 : 20文字/行
     """
+)
+
+# トップに戻るリンク
+st.markdown(
+    """
+    <div style="text-align: right;">
+        <a href="/"
+           target="_self"
+           style="font-size: 16px; text-decoration: none;">
+            🏠 HOME
+        </a>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
