@@ -28,8 +28,8 @@ supabase = get_supabase_client()
 def fetch(start_date, end_date, pref=None, hall=None, model=None):
     ALL = "すべて"
     query = supabase.table("latest_units_results").select("*")
-    query = query.gte("date", start)
-    query = query.lte("date", end)
+    query = query.gte("date", start_date)
+    query = query.lte("date", end_date)
     if pref not in (None, ALL):
         query = query.eq("prefecture", pref)
     if hall not in (None, ALL):
@@ -91,7 +91,7 @@ with col1:
         {col: "{:.1f}" for col in num_cols}
     )
     
-st.dataframe(df_styled, height=auto_height(pivot), width="content")
+st.dataframe(df_styled, height=auto_height(pivot), width="stretch")
 
 with col2:
     value_list = [3000, 4000, 5000, 6000]
@@ -104,4 +104,8 @@ with col2:
         {col: "{:.1f}" for col in num_cols}
     )
     
-st.dataframe(df_styled, height=auto_height(pivot), width="content")
+st.dataframe(df_styled, height=auto_height(pivot), width="stretch")
+
+medal = df.pivot_table(index=["hall", "model", "unit_no"], columns=["date"], values=["medal"])
+medal = medal.iloc[:, ::-1]
+st.dataframe(medal, height=auto_height(medal), width="stretch")
