@@ -1,5 +1,68 @@
 # config/halls.yaml
 halls:
+  - name: "P-PORT-PREGO-EX池袋南口"
+    prefecture: "東京都"
+    slug: "p-port-prego-ex池袋南口"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "エスパス日拓渋谷駅前新館"
+    prefecture: "東京都"
+    slug: "エスパス日拓渋谷駅前新館"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "エスパス日拓渋谷本館"
+    prefecture: "東京都"
+    slug: "エスパス日拓渋谷本館"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "楽園渋谷道玄坂店"
+    prefecture: "東京都"
+    slug: "楽園渋谷道玄坂店"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "楽園渋谷駅前店"
+    prefecture: "東京都"
+    slug: "楽園渋谷駅前店"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "TOHO池袋店"
+    prefecture: "東京都"
+    slug: "toho池袋店"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン入間店"
+    prefecture: "埼玉県"
+    slug: "マルハン入間店"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "レイト平塚"
+    prefecture: "茨城県"
+    slug: "麗都平塚"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "グランド-ラ・カータ1111瑞穂店"
+    prefecture: "東京都"
+    slug: "グランド-ラ・カータ1111瑞穂店"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "ミリオン平和台16号店"
     prefecture: "東京都"
     slug: "ミリオン平和台16号店"     # ← 人が読む用。エンコードはコード側で
@@ -139,13 +202,6 @@ halls:
     spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
     days_ago: 1
     period: 2
-
-  # - name: "レイト平塚" # 取得エラーが出る
-  #   prefecture: "茨城県"
-  #   slug: "麗都平塚"
-  #   spreadsheet_id: "1WlvgMk-u_tUWizQVOYDQVg7bECyVzLm0-wlJDgJteAw"
-  #   days_ago: 1
-  #   period: 2
 
   # - name: ""
   #   prefecture: ""

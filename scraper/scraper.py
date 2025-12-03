@@ -37,7 +37,7 @@ def scraper_all_hall(test_mode=False) -> pd.DataFrame:
 
     if test_mode:
         hall_list = hall_list[:2]
-        logger.info("***********現在はテストモードで実行しています。**********")
+        logger.info("*********** テストモードで実行しています。 **********")
 
     frames: list = []
     for i, h in enumerate(hall_list, start=1):
@@ -69,7 +69,7 @@ def scraper_all_hall(test_mode=False) -> pd.DataFrame:
 
 if __name__ == "__main__":
 
-    df = scraper_all_hall(test_mode=False)
+    df = scraper_all_hall(test_mode=True)
 
     df = df_data_clean(df)
 
