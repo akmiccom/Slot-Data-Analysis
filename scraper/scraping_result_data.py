@@ -52,8 +52,13 @@ def extract_result_data(hall_url: str, period: int = 1):
 if __name__ == "__main__":
 
     period = 1
-    hall_name = "大山オーシャン"
-    hall_name = "やすだ東池袋9号店"
-    hall_url = urljoin(config.MAIN_URL, quote(hall_name))
+    hall = "グランド-ラ・カータ1111瑞穂店"
+    hall = "麗都平塚"
+    hall = "エスパス日拓渋谷駅前新館"
+    hall = "エスパス日拓渋谷本館"
+    hall = "楽園渋谷道玄坂店"
+    hall = "楽園渋谷駅前店"
+    hall = "p-port-prego-ex池袋南口"
+    hall_url = urljoin(config.MAIN_URL, quote(hall))
 
     extract_result_data(hall_url, period)
