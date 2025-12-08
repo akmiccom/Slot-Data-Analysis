@@ -1,7 +1,8 @@
 import pandas as pd
-import datetime
+from datetime import date, timedelta
 import streamlit as st
-from data_from_supabase import fetch, fetch_halls, fetch_models, fetch_latest
+from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
+from fetch_functions import fetch_results_by_units
 from utils import validate_dates
 
 
@@ -17,47 +18,24 @@ st.page_link("pages/98_Statistics_by_Hall.py", label="ホール別の分析デ�
 st.page_link("pages/97_Statistics_by_Model.py", label="機種別の分析データ", icon="📈")
 st.page_link("pages/96_Statistics_by_Unit.py", label="台番号別の分析データ", icon="📈")
 st.page_link("pages/95_History_by_Unit.py", label="台番号別の履歴データ", icon="📈")
-# st.page_link("pages/02_ホール別出玉率履歴.py", label="ホール別の分析", icon="📈")
-# st.page_link("pages/03_機種別出玉率履歴.py", label="機種別の分析", icon="📈")
-# st.page_link("pages/04_台別出玉率履歴.py", label="台番号別の分析", icon="📈")
-# st.page_link("pages/05_末尾日統計.py", label="末尾日別の分析", icon="📈")
 
 
 # --- Sample ---
 st.subheader("最新データ状況", divider="rainbow")
-df_latest = fetch_latest("latest_units_results", hall=None, model=None)
-tab1, tab2, tab3 = st.tabs(["ホール別台数", "モデル別台数", "データベース"])
+
+today = date.today()
+start = today - timedelta(days=5)
+end = today - timedelta(days=1)
+tab1, tab2, tab3 = st.tabs(["都道府県一覧", "モデル一覧", "ホール一覧"])
 with tab1:
-    grouped = df_latest.groupby("hall")
-    unit_count = grouped["unit_no"].count().sort_values(ascending=False)
-    unit_count = pd.DataFrame(unit_count).rename(
-        columns={"unit_no": "ホール別ジャグラー台数"}
-    )
-    halls = unit_count.index.tolist()
-    st.dataframe(unit_count, height="auto", width="content")
+    prefectures = fetch_prefectures()
+    st.write(prefectures)
 with tab2:
     models = fetch_models()
-    grouped = df_latest.groupby("model")
-    unit_count = grouped["unit_no"].count().sort_values(ascending=False)
-    unit_count = pd.DataFrame(unit_count).rename(columns={"unit_no": "機種別の台数"})
-    st.dataframe(unit_count, height="auto", width="content")
+    st.write(models)
 with tab3:
-    ALL = "すべて表示"
-    col1, col2 = st.columns(2)
-    with col1:
-        if len(halls) > 5:
-            halls.insert(5, ALL)
-        hall = st.selectbox("ホール選択", halls)
-        df_hall = df_latest if hall == ALL else df_latest[df_latest["hall"] == hall]
-    with col2:
-        models = df_hall["model"].value_counts().index.tolist()
-        model = st.selectbox("モデル選択", models)
-        df_model = df_hall if model == ALL else df_hall[df_hall["model"] == model]
-        columns = ['date', 'hall', 'model', 'unit_no', 'game', 'medal', 'bb', 'rb']
-        df_model = df_model[columns]
-
-    st.dataframe(df_model, hide_index=True)
-
+    halls = fetch_halls()
+    st.write(halls)
 
 st.subheader("TOP PAGE に乗せるもの", divider="rainbow")
 st.markdown(
