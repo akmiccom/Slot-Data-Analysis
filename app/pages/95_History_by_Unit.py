@@ -4,7 +4,7 @@ import streamlit as st
 import altair as alt
 
 from fetch_functions import get_supabase_client, _fetch_all_rows
-from utils import validate_dates
+# from utils import validate_dates
 from utils import calc_grape_rate, predict_setting, continuous_setting
 from utils import auto_height, make_style_val
 from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
