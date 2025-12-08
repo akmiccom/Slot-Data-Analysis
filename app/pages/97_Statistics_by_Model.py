@@ -5,7 +5,7 @@ import pandas as pd
 from supabase import create_client, Client
 import streamlit as st
 
-from data_from_supabase import get_supabase_client, _fetch_all_rows
+from fetch_functions import get_supabase_client, _fetch_all_rows
 from utils import auto_height, make_style_val
 
 

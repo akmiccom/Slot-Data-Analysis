@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 from math import log, factorial
-from datetime import timedelta
+from datetime import date, timedelta
 
 
 
@@ -340,6 +340,7 @@ def predict_setting(game, rb, bb, grape_rate, model):
             continue
 
         logL_total = logL_rb + logL_bb + logL_grape
+        logL_total = logL_rb + logL_bb
         results[s] = logL_total
 
     # -----------------------------
@@ -350,9 +351,9 @@ def predict_setting(game, rb, bb, grape_rate, model):
         return None, {}
 
     best_setting = max(results, key=results.get)
-    if game <= 3000:
-        best_setting = None
-        results = None
+    # if game <= 3000:
+    #     best_setting = None
+    #     results = None
     
     return best_setting, results
 
@@ -368,7 +369,7 @@ def continuous_setting(game, rb, bb, grape_rate, model):
     best_setting, logL = predict_setting(game, rb, bb, grape_rate, model)
 
     # 結果なし → 重み 0 など好きなルールに
-    if not logL or game <= 3000:
+    if not logL:
         return None
 
     settings = np.array(list(logL.keys()), dtype=float)
@@ -383,6 +384,12 @@ def continuous_setting(game, rb, bb, grape_rate, model):
     # if game <= 3000:
     #     weight_setting = None
     return weight_setting
+
+
+def rotate_list_by_today(lst):
+    tomorrow_day = date.today().day  # 翌日の「日」
+    start = tomorrow_day % len(lst)
+    return lst[start:] + lst[:start]
 
 
 if __name__ == "__main__":

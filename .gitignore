@@ -219,5 +219,6 @@ trash/
 .venv/
 secret.json
 notebooks/
+notebook/
 db/
 data/

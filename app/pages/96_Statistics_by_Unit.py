@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 
-from data_from_supabase import get_supabase_client, _fetch_all_rows
+from fetch_functions import get_supabase_client, _fetch_all_rows
 from utils import calc_grape_rate, predict_setting, continuous_setting
 from utils import auto_height
 
