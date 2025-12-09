@@ -1,99 +1,106 @@
 # config/halls.yaml
 halls:
+  - name: "YASUDA5"
+    prefecture: "東京都"
+    slug: "yasuda5"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "P-PORT-PREGO-EX池袋南口"
     prefecture: "東京都"
-    slug: "p-port-prego-ex池袋南口"     # ← 人が読む用。エンコードはコード側で
+    slug: "p-port-prego-ex池袋南口"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "エスパス日拓渋谷駅前新館"
     prefecture: "東京都"
-    slug: "エスパス日拓渋谷駅前新館"     # ← 人が読む用。エンコードはコード側で
+    slug: "エスパス日拓渋谷駅前新館"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "エスパス日拓渋谷本館"
     prefecture: "東京都"
-    slug: "エスパス日拓渋谷本館"     # ← 人が読む用。エンコードはコード側で
+    slug: "エスパス日拓渋谷本館"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "楽園渋谷道玄坂店"
     prefecture: "東京都"
-    slug: "楽園渋谷道玄坂店"     # ← 人が読む用。エンコードはコード側で
+    slug: "楽園渋谷道玄坂店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "楽園渋谷駅前店"
     prefecture: "東京都"
-    slug: "楽園渋谷駅前店"     # ← 人が読む用。エンコードはコード側で
+    slug: "楽園渋谷駅前店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "TOHO池袋店"
     prefecture: "東京都"
-    slug: "toho池袋店"     # ← 人が読む用。エンコードはコード側で
+    slug: "toho池袋店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "マルハン入間店"
     prefecture: "埼玉県"
-    slug: "マルハン入間店"     # ← 人が読む用。エンコードはコード側で
+    slug: "マルハン入間店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "レイト平塚"
     prefecture: "茨城県"
-    slug: "麗都平塚"     # ← 人が読む用。エンコードはコード側で
+    slug: "麗都平塚"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "グランド-ラ・カータ1111瑞穂店"
     prefecture: "東京都"
-    slug: "グランド-ラ・カータ1111瑞穂店"     # ← 人が読む用。エンコードはコード側で
+    slug: "グランド-ラ・カータ1111瑞穂店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "ミリオン平和台16号店"
     prefecture: "東京都"
-    slug: "ミリオン平和台16号店"     # ← 人が読む用。エンコードはコード側で
+    slug: "ミリオン平和台16号店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "ミリオン東武練馬店スロット館"
     prefecture: "東京都"
-    slug: "ミリオン東武練馬13号店"     # ← 人が読む用。エンコードはコード側で
+    slug: "ミリオン東武練馬13号店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "パラッツォ千川店"
     prefecture: "東京都"
-    slug: "パラッツォ千川店"     # ← 人が読む用。エンコードはコード側で
+    slug: "パラッツォ千川店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "練馬オーシャン"
     prefecture: "東京都"
-    slug: "練馬オーシャン"     # ← 人が読む用。エンコードはコード側で
+    slug: "練馬オーシャン"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "EXA FIRST"
     prefecture: "東京都"
-    slug: "エクサファースト"     # ← 人が読む用。エンコードはコード側で
+    slug: "エクサファースト"
     spreadsheet_id: "10-B_vV1pvUzXmvGAiHhODGJgCloOsAmqSO9HvXpk_T8"
     days_ago: 1
     period: 2
