@@ -290,3 +290,8 @@ with tab2:
         height=auto_height(pivot),
         width="stretch",
     )
+
+# st.subheader("Test")
+# pt_model_medal = pt_model.xs("medal", level=1, axis=1)
+# st.dataframe(pt_model_medal)
+# st.bar_chart(pt_model_medal)
