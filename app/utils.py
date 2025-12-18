@@ -80,7 +80,7 @@ def validate_dates():
         ss.start_date = ss.end_date
 
 
-def calc_grape_rate(df, cherry=True):
+def calc_grape_rate(df, cherry=False):
     """
     計算に必要なデータをjsonから取得し
     データにマージしてブドウ確率を計算する
@@ -340,7 +340,8 @@ def predict_setting(game, rb, bb, grape_rate, model):
             continue
 
         logL_total = logL_rb + logL_bb + logL_grape
-        logL_total = logL_rb + logL_bb
+        # logL_total = logL_rb + logL_bb
+        # logL_total = logL_rb
         results[s] = logL_total
 
     # -----------------------------
@@ -365,7 +366,7 @@ def predict_setting(game, rb, bb, grape_rate, model):
 #     return float((weights * settings).sum())
 
 
-def continuous_setting(game, rb, bb, grape_rate, model):
+def continuous_setting(game, rb, bb, grape_rate, model, max_game=10000):
     best_setting, logL = predict_setting(game, rb, bb, grape_rate, model)
 
     # 結果なし → 重み 0 など好きなルールに
@@ -381,9 +382,12 @@ def continuous_setting(game, rb, bb, grape_rate, model):
     w = w / w.sum()
 
     weight_setting = float((settings * w).sum())
-    # if game <= 3000:
-    #     weight_setting = None
-    return weight_setting
+    
+    # ===== 追加部分：回転数による信頼度追加 =====
+    trust = min(1.0, np.sqrt(game / max_game))
+    adjusted_setting = max(1, weight_setting * trust)
+    
+    return adjusted_setting
 
 
 def rotate_list_by_today(lst):
@@ -395,7 +399,7 @@ def rotate_list_by_today(lst):
 if __name__ == "__main__":
     csv_path = r"data/csv/2025-11-26T23-18_export.csv"
     df_csv = pd.read_csv(csv_path)
-    df = calc_grape_rate(df_csv, cherry=True)
+    df = calc_grape_rate(df_csv, cherry=False)
 
     df["pred_setting"] = df.apply(
         lambda r: predict_setting(
