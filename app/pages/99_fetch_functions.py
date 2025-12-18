@@ -3,6 +3,8 @@ import streamlit as st
 from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
 from fetch_functions import fetch_results_by_units
 from utils import validate_dates
+import altair as alt
+import pandas as pd
 
 
 if __name__ == "__main__":
@@ -49,6 +51,43 @@ if __name__ == "__main__":
     else:
         st.dataframe(df_result, hide_index=True, width="stretch")
 
+    import altair as alt
+    import pandas as pd
+    import streamlit as st
+
+    # df の例（date は datetime 型が望ましい）
+    df_result["date"] = pd.to_datetime(df_result["date"])
+    df_result["date_str"] = df_result["date"].dt.strftime("%m-%d %a")
+
+    chart_game = (
+        alt.Chart(df_result)
+        .mark_bar(opacity=0.3, color="orange")  # 棒グラフ
+        .encode(
+            x=alt.X("date_str:N", title="Date"),
+            y=alt.Y("game:Q", title="Game Count"),
+            tooltip=["date", "hall", "model", "unit_no"],
+        )
+        .properties(width="container", height=350)
+    )
+    chart_medal = (
+        alt.Chart(df_result)
+        .mark_circle(size=80)  # 散布図
+        .mark_line(point=True)  # 散布図
+        .encode(
+            x=alt.X("date_str:N", title="Date"),
+            # y="medal:Q",  # 縦軸：数値
+            y=alt.Y("medal:Q", title="Medal"),
+            # tooltip=["date", "hall", "model", "unit_no"]
+        )
+        # .properties(width="container", height=350)
+    )
+    chart = alt.layer(
+        chart_game, chart_medal
+    ).resolve_scale(
+        y="independent"  # ← 縦軸を別に扱う（重要！）
+    )
+
+    st.altair_chart(chart)
 
     # --- fetch ---
     st.subheader("fetch_prefectures()", divider="rainbow")

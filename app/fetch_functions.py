@@ -82,7 +82,7 @@ def fetch(
 
 @st.cache_data
 def fetch_results_by_units(
-    start_date, end_date, pref=None, hall=None, model=None, unit_no=None
+    start_date, end_date, day_last=None, weekday=None, pref=None, hall=None, model=None, unit_no=None
 ) -> pd.DataFrame:
     """
     latest_units_results から、指定期間・指定条件でデータを取得する。
@@ -102,6 +102,12 @@ def fetch_results_by_units(
         .gte("date", start_date.isoformat())
         .lte("date", end_date.isoformat())
     )
+    # 末尾日フィルタ
+    if day_last not in (None, ALL):
+        query = query.eq("day_last", day_last)
+    # 曜日フィルタ
+    if weekday not in (None, ALL):
+        query = query.eq("weekday", weekday)
     # 都道府県フィルタ
     if pref not in (None, ALL):
         query = query.eq("prefecture", pref)
@@ -120,8 +126,6 @@ def fetch_results_by_units(
     # 対象列がない場合のエラーを避ける
     if df.empty:
         return df
-    # latest_units_results に day_last がある場合だけ落とす（なければスルー）
-    # df = df.drop(columns=["day_last"], errors="ignore")
 
     return df
 
