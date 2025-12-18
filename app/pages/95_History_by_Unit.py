@@ -37,6 +37,7 @@ column_config = {
 }
 
 
+
 def chunk_units_balanced(units, chunk_size=20, min_last=10):
     """
     unitsをchunk_sizeで分割。
@@ -398,3 +399,8 @@ with tab2:
 #     .properties(height=height, title=f"{start_date}-{end_date}, {hall}, {model} 設定予測値")
 # )
 # st.altair_chart(line)
+
+# st.subheader("Test")
+# pt_model_medal = pt_model.xs("medal", level=1, axis=1)
+# st.dataframe(pt_model_medal)
+# st.bar_chart(pt_model_medal)
