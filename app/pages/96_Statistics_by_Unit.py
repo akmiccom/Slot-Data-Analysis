@@ -84,6 +84,7 @@ def fetch_filter(day_last, pref=None, hall=None, count=5, rb_rate=322, win_rate=
     query = query.gte("win_rate", win_rate)
     rows = _fetch_all_rows(query)
     df = pd.DataFrame(rows)
+    print(df.columns)
     return df
 
 
@@ -112,7 +113,10 @@ with col7:
     df = fetch_filter(
         day_last, pref="東京都", hall=None, count=count, rb_rate=rb_rate, win_rate=win_rate
     )
-# st.text(len(df))
+if df.empty:
+    st.text("該当データ`は存在しません。検索条件を変更してください。")
+    # st.text(len(df))
+    st.stop()
 
 with col8:
     halls = df["hall"].value_counts().index.tolist() + [ALL]
