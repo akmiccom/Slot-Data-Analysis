@@ -18,6 +18,7 @@ st.page_link("pages/98_Statistics_by_Hall.py", label="ホール別の分析デ�
 st.page_link("pages/97_Statistics_by_Model.py", label="機種別の分析データ", icon="📈")
 st.page_link("pages/96_Statistics_by_Unit.py", label="台番号別の分析データ", icon="📈")
 st.page_link("pages/95_History_by_Unit.py", label="台番号別の履歴データ", icon="📈")
+st.page_link("pages/94_メダル推移グラフ.py", label="メダル推移グラフ", icon="📈")
 
 
 # --- Sample ---
