@@ -40,19 +40,21 @@ ss.setdefault("end_date", yesterday)
 
 # -- フィルター設定 ---
 ALL = "すべて表示"
-col1, col2, col3, col4, col5, col6 = st.columns(6)
+col1, col2, col3, col4 = st.columns([0.5, 1.2, 0.8, 0.5])
 with col1:
     prefectures = fetch_prefectures()
-    pref = st.selectbox("都道府県を選択", prefectures)
+    pref = st.selectbox("都道府県", prefectures)
 with col2:
     halls = fetch_halls(pref=pref)
-    hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
+    hall = st.selectbox("ホール", halls, help="お気に入り機能追加??")
 with col3:
     models = fetch_models(pref=pref, hall=hall)
-    model = st.selectbox("機種を選択", models, help="台数の多い順に表示")
+    model = st.selectbox("機種", models, help="台数の多い順に表示")
 with col4:
     units = fetch_units(pref=pref, hall=hall, model=model)
-    unit_no = st.selectbox("台番号を選択", units, help="すべて表示も可能")
+    unit_no = st.selectbox("台番号", units, help="すべて表示も可能")
+    
+col5, col6 = st.columns(2)
 with col5:
     start = st.date_input(
         "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
@@ -61,7 +63,8 @@ with col6:
     end = st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-    df = fetch_results_by_units(start, end, pref, hall, model, unit_no)
+    # df = fetch_results_by_units(start, end, pref, hall, model, unit_no)
+    df = fetch_results_by_units(start, end, day_last=None, weekday=None, pref=pref, hall=hall, model=model, unit_no=unit_no)
     if not df.empty:
         df = df.sort_values("date", ascending=False)
 

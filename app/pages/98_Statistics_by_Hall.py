@@ -91,7 +91,8 @@ line = (
 
 # --- display ---
 st.altair_chart(line)
-st.dataframe(df_styled, width="stretch")
+with st.expander("末尾日別出玉率テーブル"):
+    st.dataframe(df_styled, width="stretch")
 
 
 
@@ -162,4 +163,5 @@ line = (
 
 # --- display ---
 st.altair_chart(line)
-st.dataframe(df_styled, width="stretch")
+with st.expander("曜日別出玉率テーブル"):
+    st.dataframe(df_styled, width="stretch")
