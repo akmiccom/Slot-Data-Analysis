@@ -215,6 +215,11 @@ with tab1:
     pt = pt[interleaved_cols]
     pt = pt.swaplevel(0, 1, axis=1)
     pt_unit = pt
+    
+    st.subheader("ホール別履歴")
+    if not pt_hall.empty:
+        column_config["hall"] = st.column_config.Column(width=140)
+        st.dataframe(pt_hall, column_config=column_config)
 
     # unit_no を昇順でユニーク取得
     units = sorted(df["unit_no"].unique().tolist(), key=lambda x: int(x))
@@ -284,10 +289,7 @@ with tab1:
         column_config["hall"] = st.column_config.Column(width=50)
         column_config["model"] = st.column_config.Column(width=90)
         st.dataframe(pt_model, column_config=column_config)
-    st.subheader("ホール別履歴")
-    if not pt_hall.empty:
-        column_config["hall"] = st.column_config.Column(width=140)
-        st.dataframe(pt_hall, column_config=column_config)
+
 
 with tab2:
     column_config["hall"] = st.column_config.Column(width=40)
