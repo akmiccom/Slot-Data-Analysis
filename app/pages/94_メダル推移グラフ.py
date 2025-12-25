@@ -129,6 +129,7 @@ df = df.sort_values(["unit_no", "date"], ascending=[True, True])
 x_date = alt.X("date_str:N", title="日付")
 
 sel = alt.selection_point(fields=["unit_no"], bind="legend", toggle=True)
+
 medal_cum = (
     alt.Chart(df)
     .mark_line(strokeWidth=0.5, point=alt.OverlayMarkDef(size=40))
@@ -148,7 +149,7 @@ medal_cum = (
     )
     .add_params(sel)
     .properties(
-        height=700,
+        height=500
         # title=f"{start_date}-{end_date}, {hall}, {model} 設定予測値（{idx}/{len(chunks)}）",
     )
 )
@@ -171,15 +172,18 @@ common_tooltip = [
     alt.Tooltip("date_str:N", title="日付"),
     alt.Tooltip("game:Q", title="G数", format=","),
     alt.Tooltip("medal:Q", title="メダル数", format=","),
-    alt.Tooltip("medal_r3:Q", title="3日平均", format=","),
-    alt.Tooltip("medal_r7:Q", title="7日平均", format=","),
-    alt.Tooltip("medal_cum:Q", title="累計", format=","),
+    alt.Tooltip("bb:Q", title="BB"),
+    alt.Tooltip("rb:Q", title="RB"),
+    alt.Tooltip("rb_rate:Q", title="RB確率"),
+    # alt.Tooltip("medal_r3:Q", title="3日平均", format=","),
+    # alt.Tooltip("medal_r7:Q", title="7日平均", format=","),
+    # alt.Tooltip("medal_cum:Q", title="累計", format=","),
 ]
 
 # ① medal（棒）：背景として薄く
 medal = (
     alt.Chart(df)
-    .mark_bar(opacity=0.3)
+    .mark_bar(opacity=0.5)
     .encode(
         x=x_date,
         y=alt.Y("medal:Q", title="メダル数"),
@@ -193,9 +197,12 @@ medal_r3 = (
     .mark_line(strokeWidth=1.2, point=alt.OverlayMarkDef(size=20))
     .encode(
         x=x_date,
-        y=alt.Y("medal_r3:Q", title="medal_r3"),
+        y=alt.Y("medal_r3:Q", title="移動平均"),
         color=alt.value("#73a1eb"),
-        tooltip=common_tooltip,
+        tooltip=[
+            alt.Tooltip("medal_r3:Q", title="3日平均", format=","),
+            alt.Tooltip("medal_r7:Q", title="7日平均", format=","),
+        ],
     )
 )
 
@@ -204,9 +211,12 @@ medal_r7 = (
     .mark_line(point=alt.OverlayMarkDef(size=40))
     .encode(
         x=x_date,
-        y=alt.Y("medal_r7:Q", title="medal_r7"),
+        y=alt.Y("medal_r7:Q"),
         color=alt.value("#73b9c7"),
-        tooltip=common_tooltip,
+        tooltip=[
+            alt.Tooltip("medal_r3:Q", title="3日平均", format=","),
+            alt.Tooltip("medal_r7:Q", title="7日平均", format=","),
+        ],
     )
 )
 
@@ -215,16 +225,16 @@ medal_cum = (
     .mark_line(point=alt.OverlayMarkDef(size=60))
     .encode(
         x=x_date,
-        y=alt.Y("medal_cum:Q", title="medal_cum"),
+        y=alt.Y("medal_cum:Q"),
         color=alt.value("#d7abf5"),
-        tooltip=common_tooltip,
+        tooltip=[alt.Tooltip("medal_cum:Q", title="メダル累計", format=",")],
     )
 )
 
-chart = alt.layer(medal_r3 + medal_r7 + medal_cum, medal).resolve_scale(y="independent")
+chart = alt.layer(medal, medal_r3 + medal_r7 + medal_cum).resolve_scale(y="independent")
 if unit_no is not ALL:
-    chart = chart.properties(title=f"unit_no: {unit_no}")
-    st.altair_chart(chart)
+    chart = chart.properties(title=f"台番号 : {unit_no}")
+    st.altair_chart(chart, height=500)
 
 # # ---- 下段：詳細テーブル（スマホは折りたたみ） ----
 with st.expander("詳細（テーブル）"):
