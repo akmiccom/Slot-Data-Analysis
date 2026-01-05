@@ -15,7 +15,7 @@ def auto_height(df):
     max_height = 1000  # 上限（スクロール防止）
     height = min(base_height + rows * row_height, max_height)
     height = base_height + rows * row_height
-    if height < 500:
+    if height <= 480:
         height = "auto"
     return height
 
