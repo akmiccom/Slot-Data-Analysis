@@ -1,8 +1,29 @@
 # config/halls.yaml
 halls:
+  - name: "ビックマーチつくば学園の森店"
+    prefecture: "茨城県"
+    slug: "ビックマーチつくば学園の森店"     # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マックス石岡店"
+    prefecture: "茨城県"
+    slug: "マックス石岡店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン石岡店"
+    prefecture: "茨城県"
+    slug: "マルハン石岡店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "YASUDA5"
     prefecture: "東京都"
-    slug: "yasuda5"     # ← 人が読む用。エンコードはコード側で
+    slug: "yasuda5"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
