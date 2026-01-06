@@ -4,8 +4,18 @@ import numpy as np
 import streamlit as st
 from math import log, factorial
 from datetime import date, timedelta
+from dateutil.relativedelta import relativedelta
 
+# --- 日付 ---
+today = date.today()
+yesterday = today - timedelta(days=1)
+def n_days_ago(n):
+    return yesterday - timedelta(days=n)
+def prev_month_first(n):
+    return date(today.year, today.month, 1) - relativedelta(months=n)
 
+WEEKDAY_JA = ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"]
+WEEKDAY_JA_TO_INT = {ja: i for i, ja in enumerate(WEEKDAY_JA)}
 
 # --- 表示 ---
 def auto_height(df):
@@ -397,25 +407,8 @@ def rotate_list_by_today(lst):
 
 
 if __name__ == "__main__":
-    csv_path = r"data/csv/2025-11-26T23-18_export.csv"
-    df_csv = pd.read_csv(csv_path)
-    df = calc_grape_rate(df_csv, cherry=False)
-
-    df["pred_setting"] = df.apply(
-        lambda r: predict_setting(
-            r["game"], r["rb"], r["bb"], r["grape_rate"], r["model"]
-        )[0],
-        axis=1,
-    )
-
-    df["weight_setting"] = df.apply(
-        lambda r: continuous_setting(
-            r["game"], r["rb"], r["bb"], r["grape_rate"], r["model"]
-        ),
-        axis=1,
-    ).round(1)
-
-    # print(df["rb_rate"])
-    # print(df["pred_setting"])
-    # print(df["weight_setting"])
-    print(df)
+    
+    print(today)
+    print(yesterday)
+    print(n_days_ago(1))
+    print(prev_month_first(3))

@@ -3,16 +3,17 @@ import pandas as pd
 import streamlit as st
 import altair as alt
 
-from fetch_functions import get_supabase_client, _fetch_all_rows
+# from fetch_functions import get_supabase_client, _fetch_all_rows
 
-from utils import calc_grape_rate, predict_setting, continuous_setting
-from utils import auto_height, make_style_val
+from utils import WEEKDAY_JA, WEEKDAY_JA_TO_INT
+from utils import today, yesterday, n_days_ago, prev_month_first
+
+# from utils import calc_grape_rate, predict_setting, continuous_setting
+# from utils import auto_height, make_style_val
 from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
 from fetch_functions import fetch_results_by_units
 from utils import validate_dates, rotate_list_by_today
 
-
-INTIAL_PERIOD = 30
 
 column_config = {
     "date": st.column_config.DateColumn(width=80),
@@ -24,7 +25,6 @@ column_config = {
     "game": st.column_config.NumberColumn(width=50),
     "medal": st.column_config.NumberColumn(width=50),
 }
-
 
 
 def chunk_units_balanced(units, chunk_size=20, min_last=10):
@@ -56,20 +56,15 @@ st.markdown(
             """
 )
 
-
-today = date.today()
-yesterday = today - timedelta(days=1)
-n_d_ago = today - timedelta(days=INTIAL_PERIOD)
-
 ss = st.session_state
-ss.setdefault("start_date", n_d_ago)
+ss.setdefault("start_date", prev_month_first(1))
 ss.setdefault("end_date", yesterday)
 
 
 st.subheader("RB台別合算", divider="rainbow")
 
-col1, col2, col3 = st.columns([1, 2, 2])
 ALL = "すべて"
+col1, col2, col3 = st.columns([1, 2, 2])
 with col1:
     prefectures = fetch_prefectures()  # latest_models から都道府県だけユニーク取得
     pref = st.selectbox("都道府県", prefectures)
@@ -93,14 +88,14 @@ with col7:
     day_lasts = [ALL] + rotate_list_by_today([i for i in range(10)])
     day_last = st.selectbox("末尾日", day_lasts)
 with col8:
-    WEEKDAY_JA = ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"]
-    WEEKDAY_JA_TO_INT = {ja: i for i, ja in enumerate(WEEKDAY_JA)}
     weekdays = [ALL] + WEEKDAY_JA
     weekday_ja = st.selectbox("曜日", weekdays)
     weekday = WEEKDAY_JA_TO_INT[weekday_ja] if weekday_ja != ALL else ALL
 
 
-df = fetch_results_by_units(start_date, end_date, day_last, weekday, pref=pref, hall=hall, model=model)
+df = fetch_results_by_units(
+    start_date, end_date, day_last, weekday, pref=pref, hall=hall, model=model
+)
 df["date_str"] = pd.to_datetime(df["date"]).dt.strftime("%y-%m-%d %a")
 
 group_index = ["hall", "model", "unit_no"]
@@ -110,7 +105,9 @@ df_mean = df.groupby(group_index).mean(group_cols)
 
 df_sum["game_m"] = df_mean["game"]
 df_sum["medal_m"] = df_mean["medal"]
-df_sum["rb_rate"] = df_sum.apply(lambda r: r["game"] / r["rb"] if r["rb"] != 0 else None, axis=1)
+df_sum["rb_rate"] = df_sum.apply(
+    lambda r: r["game"] / r["rb"] if r["rb"] != 0 else None, axis=1
+)
 # df_sum = df_sum[df_sum["game_m"] >= 3000]
 # df_sum = df_sum[df_sum["medal_m"] > 0]
 df_sum["rb_rate"].round(1)
@@ -145,14 +142,13 @@ st.dataframe(df_show, column_config=column_config)
 # if df.empty:
 #     st.text(f"データが存在しません。検索条件の見直しをしてください。")
 #     st.stop()
-    
+
 # # df_sum = df.groupby(["date"]).sum()[["game", "medal", "bb", "rb"]]
 # df.loc["total"] = df.mean(numeric_only=True)
 # df.iloc[-1, 4] = None
 # df.iloc[-1, -1] = (df["game"].sum() / df["rb"].sum())
 # df = df.round(1)
-    
+
 
 # df_show = df[["unit_no", "game", "medal", "rb_rate", "total_rate", "bb", "rb"]]
 # st.dataframe(df_show, height=auto_height(df_show), hide_index=True)
-
