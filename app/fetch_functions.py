@@ -104,10 +104,11 @@ def fetch_results_by_units(
     )
     # 末尾日フィルタ
     if day_last not in (None, ALL):
-        query = query.eq("day_last", day_last)
+        query = query.in_("day_last", day_last)
     # 曜日フィルタ
     if weekday not in (None, ALL):
-        query = query.eq("weekday", weekday)
+        # query = query.eq("weekday", weekday)
+        query = query.in_("weekday", weekday)
     # 都道府県フィルタ
     if pref not in (None, ALL):
         query = query.eq("prefecture", pref)

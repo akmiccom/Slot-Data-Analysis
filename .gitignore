@@ -221,4 +221,4 @@ secret.json
 notebooks/
 notebook/
 db/
-data/
+/data/

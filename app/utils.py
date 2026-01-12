@@ -6,16 +6,62 @@ from math import log, factorial
 from datetime import date, timedelta
 from dateutil.relativedelta import relativedelta
 
-# --- 日付 ---
-today = date.today()
-yesterday = today - timedelta(days=1)
-def n_days_ago(n):
-    return yesterday - timedelta(days=n)
-def prev_month_first(n):
-    return date(today.year, today.month, 1) - relativedelta(months=n)
 
 WEEKDAY_JA = ["日曜日", "月曜日", "火曜日", "水曜日", "木曜日", "金曜日", "土曜日"]
+WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"]
 WEEKDAY_JA_TO_INT = {ja: i for i, ja in enumerate(WEEKDAY_JA)}
+
+PRIORITY_HALLS = [
+    "エスパス日拓渋谷駅前新館",
+    "エスパス日拓渋谷本館",
+    "楽園渋谷駅前店",
+    "楽園渋谷道玄坂店",
+    "楽園ハッピーロード大山",
+    "大山オーシャン",
+    "YASUDA5",
+    "マルハン大山店",
+    "マルハン池袋店",
+    "YASUDA9",
+    "楽園池袋店グリーンサイド",
+    "楽園池袋店",
+    "コンサートホールエフ成増",
+    "エクサファースト",
+    "マルハン青梅新町店",
+]
+
+PRIORITY_MODELS = [
+    "ネオアイムジャグラーEX",
+    "ゴーゴージャグラー3",
+    "マイジャグラーV",
+    "ジャグラーガールズ",
+    "ファンキージャグラー2",
+]
+
+
+# --- 日付 ---
+today = date.today()
+yesterday = date.today() - timedelta(days=1)
+def n_days_ago(n):
+    return date.today() - timedelta(days=n)
+
+
+def prev_month_first(n):
+    return date(date.today().year, date.today().month, 1) - relativedelta(months=n)
+
+
+# 共通UI ホームリンク設置
+def home_link(position="right"):
+    st.markdown(
+        f"""
+        <div style="text-align: {position};">
+            <a href="/" target="_self" style="font-size: 16px; text-decoration: none;">
+                🏠 HOME
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 # --- 表示 ---
 def auto_height(df):
@@ -365,7 +411,7 @@ def predict_setting(game, rb, bb, grape_rate, model):
     # if game <= 3000:
     #     best_setting = None
     #     results = None
-    
+
     return best_setting, results
 
 
@@ -392,11 +438,11 @@ def continuous_setting(game, rb, bb, grape_rate, model, max_game=10000):
     w = w / w.sum()
 
     weight_setting = float((settings * w).sum())
-    
+
     # ===== 追加部分：回転数による信頼度追加 =====
     trust = min(1.0, np.sqrt(game / max_game))
     adjusted_setting = max(1, weight_setting * trust)
-    
+
     return adjusted_setting
 
 
@@ -406,9 +452,33 @@ def rotate_list_by_today(lst):
     return lst[start:] + lst[:start]
 
 
+def get_rb_rate_from_json(model, setting=5, default=300):
+    json_path = r"config/jagglar_rate.json"
+    with open(json_path, "r", encoding="utf-8") as f:
+        model_data = json.load(f)
+    s = model_data.get(model, {}).get(str(setting), {}).get("RB_RATE")
+    if isinstance(s, str) and s.startswith("1/"):
+        return float(s.split("/")[1])
+    return default
+
+
+def get_total_rate_from_json(model, setting=5, default=125):
+    json_path = r"config/jagglar_rate.json"
+    with open(json_path, "r", encoding="utf-8") as f:
+        model_data = json.load(f)
+    s = model_data.get(model, {}).get(str(setting), {}).get("TOTAL_RATE")
+    if isinstance(s, str) and s.startswith("1/"):
+        return float(s.split("/")[1])
+    return default
+
+
 if __name__ == "__main__":
-    
-    print(today)
-    print(yesterday)
-    print(n_days_ago(1))
-    print(prev_month_first(3))
+
+    # print(today)
+    # print(yesterday)
+    # print(n_days_ago(1))
+    # print(prev_month_first(3))
+
+    model = "ネオアイムジャグラーEX"
+    model = "ゴーゴージャグラー3"
+    print(get_total_rate_from_json(model, setting=5, default=125))
