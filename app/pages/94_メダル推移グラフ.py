@@ -5,6 +5,7 @@ import altair as alt
 from datetime import date, timedelta
 from dateutil import relativedelta
 
+from utils import WEEKDAY_JA, WEEKDAY_JA_TO_INT
 from utils import auto_height
 from utils import today, yesterday, n_days_ago, prev_month_first
 from fetch_functions import fetch_results_by_units
@@ -79,6 +80,7 @@ def auto_height(n):
 
 
 # ---------- UI ----------
+st.page_link("Slot_Data_Analysis.py", label="HOME", icon="🏠")
 st.subheader("メダル推移", divider="rainbow")
 
 # スマホは横幅が狭いので「フォーム→実行」型にすると操作が楽
@@ -102,10 +104,13 @@ with st.form("filters", border=True):
         if day_last == ALL:
             day_last = None
     with c6:
-        weekdays = [ALL] + [i for i in range(7)]
-        weekday = st.selectbox("曜日", weekdays)
-        if weekday == ALL:
-            weekday = None
+        # weekdays = [ALL] + [i for i in range(7)]
+        # weekday = st.selectbox("曜日", weekdays)
+        # if weekday == ALL:
+        #     weekday = None
+        weekdays = [ALL] + WEEKDAY_JA
+        weekday_ja = st.selectbox("曜日", weekdays)
+        weekday = WEEKDAY_JA_TO_INT[weekday_ja] if weekday_ja != ALL else None
     with c7:
         start_date = st.date_input("開始日", prev_month_first(1))
     with c8:
@@ -188,10 +193,11 @@ common_tooltip = [
     alt.Tooltip("medal_r7:Q", title="7日平均", format=","),
     alt.Tooltip("medal_cum:Q", title="累計", format=","),
 ]
-df = df.sort_values(["unit_no", "date"], ascending=[True, True])
-
-date_order = df["date"].drop_duplicates().tolist()
+# df = df.sort_values(["unit_no", "date"], ascending=[True, True])
+date_order = df["date_str"].drop_duplicates().tolist()[::-1]
+# st.write(date_order)
 x_date = alt.X("date_str:N", title="日付", sort=date_order)
+# st.write(x_date)
 
 if unit_no == ALL:
 
@@ -233,12 +239,13 @@ if unit_no == ALL:
         chart = chart.properties(title=f"{model} をすべて表示")
         st.altair_chart(chart)
 
-elif unit_no != ALL:
+else:
     # ---- 中段：時系列グラフ（スマホでも読める。表より強い） ----
     # df = df.sort_values(["unit_no", "date"], ascending=[True, True])
 
     # 日付ソートはユニークな順序を使う（重複で崩れるのを防ぐ）
     # date_order = df["date"].drop_duplicates().tolist()
+    # st.write(date_order)
     # x_date = alt.X("date_str:N", title="日付", sort=date_order)
 
     # ツールチップは一本化（見たい情報をここへ）
@@ -334,13 +341,14 @@ elif unit_no != ALL:
             tooltip=[alt.Tooltip("rb_rate:Q", title="RB確率", format=".1f")],
         )
     )
-    line = (
-        alt.Chart(df)
-        .mark_line(color="blue", point=True)
-        .encode(
-            x="date:T",
-            y=alt.Y("weight_setting:Q", scale=alt.Scale(domain=[1, 6])),
-        )
+
+    # ターゲットRB確率ライン
+    from utils import get_rb_rate_from_json
+    threshold = get_rb_rate_from_json(model, setting=5)
+    rule = (
+        alt.Chart(pd.DataFrame({"y": [threshold]}))
+        .mark_rule(color="red", strokeDash=[4, 4])
+        .encode(y="y:Q")
     )
 
     lines = medal_r3 + medal_r7 + medal_cum
@@ -349,9 +357,10 @@ elif unit_no != ALL:
         title=f"{model} {unit_no} 番台 メダル分析", height=250
     )
 
-    chart_rb_rate = alt.layer(game, rb_rate).resolve_scale(y="independent")
+    rb_layer = rb_rate + rule
+    chart_rb_rate = alt.layer(rb_layer, game).resolve_scale(y="independent")
     chart_rb_rate = chart_rb_rate.properties(
-        title=f"{model} {unit_no} 番台 RB分析 (1/500以上は非表示)", height=250
+        title=f"{model} {unit_no} 番台 RB分析 (1/500以下は非表示)", height=250
     )
 
     chart = chart_medal & chart_rb_rate
