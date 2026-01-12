@@ -32,18 +32,25 @@ def filters(*, state_prefix: str = "filters") -> dict:
             pref = st.selectbox("都道府県", fetch_prefectures())
 
         with c2:
-            halls = fetch_halls(pref=pref)
-            hall = st.selectbox("ホール", order_by_priority(halls, PRIORITY_HALLS))
+            halls_raw = fetch_halls(pref=pref) or []
+            halls = halls_raw
+            hall_sel = st.selectbox("ホール", order_by_priority(halls, PRIORITY_HALLS))
+            hall = None if hall_sel == ALL_LABEL else hall_sel
 
         with c3:
-            models = fetch_models(pref=pref, hall=hall)
-            model = st.selectbox("機種", order_by_priority(models, PRIORITY_MODELS))
+            models_raw = fetch_models(pref=pref, hall=hall) or []
+            models = models_raw
+            model_sel = st.selectbox("機種", order_by_priority(models, PRIORITY_MODELS))
+            model = None if model_sel == ALL_LABEL else model_sel
 
         with c4:
             units_raw = fetch_units(pref=pref, hall=hall, model=model) or []
-            units = units_raw + [ALL_LABEL]  # 破壊しない
-            unit_sel = st.selectbox("台番号", units)
-            unit_no = None if unit_sel == ALL_LABEL else unit_sel
+            if hall is not None:
+                units = units_raw + [ALL_LABEL]  # 破壊しない
+                unit_sel = st.selectbox("台番号", units)
+                unit_no = None if unit_sel == ALL_LABEL else unit_sel
+            else:
+                unit_no = None
 
         # -----------------------------
         # weekday (exclusive)
