@@ -6,10 +6,11 @@ import streamlit as st
 from config.constants import ALL_LABEL, PRIORITY_MODELS, PRIORITY_HALLS
 from config.constants import WEEKDAY_STR, WEEKDAY_STR_TO_INT
 from config.constants import INITIAL_PERIOD
-from config.dates import n_days_ago
+from config.dates import n_days_ago, prev_month_first
 
 from ui.helpers import order_by_priority
 from ui.exclusive_checkboxes import exclusive_checkbox_row
+# from ui.exclusive_checkboxes import exclusive_checkbox_row_for_sidebar
 
 from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
 
@@ -98,7 +99,7 @@ def filters(*, state_prefix: str = "filters") -> dict:
         st.error("開始日が終了日より後になっています。日付を確認してください。")
         submitted = False
 
-    fitlers = {
+    filters = {
         "pref": pref,
         "hall": hall,
         "model": model,
@@ -109,4 +110,63 @@ def filters(*, state_prefix: str = "filters") -> dict:
         "end_date": end_date,
     }
 
-    return submitted, fitlers
+    return submitted, filters
+
+
+def filters_for_sidebar(*, state_prefix: str = "filters") -> dict:
+    """
+    即時反映（pref/hall/model/unit + weekday/day_last）と、
+    実行時反映（start/end + submit）をまとめて返す。
+    """
+
+    pref = st.sidebar.selectbox("都道府県", fetch_prefectures())
+
+    halls_raw = fetch_halls(pref=pref) or []
+    halls = halls_raw
+    hall_sel = st.sidebar.selectbox("ホール", order_by_priority(halls, PRIORITY_HALLS))
+    hall = None if hall_sel == ALL_LABEL else hall_sel
+
+    models_raw = fetch_models(pref=pref, hall=hall) or []
+    models = models_raw
+    model_sel = st.sidebar.selectbox("機種", order_by_priority(models, PRIORITY_MODELS))
+    model = None if model_sel == ALL_LABEL else model_sel
+
+    unit_no = None
+    units_raw = fetch_units(pref=pref, hall=hall, model=model) or []
+    if hall is not None:
+        units = sorted(units_raw) + [ALL_LABEL]  # 破壊しない
+        unit_sel = st.sidebar.selectbox("台番号", units)
+        unit_no = None if unit_sel == ALL_LABEL else unit_sel
+
+    with st.sidebar.form(f"{state_prefix}__form", border=False):
+        DAY_LAST_LABELS = {f"{i}のつく日": i for i in range(10)}
+        day_last_sel = st.multiselect("末尾日", options=list(DAY_LAST_LABELS.keys()), default=[f"{5}のつく日"])
+        day_last_list = [DAY_LAST_LABELS[label] for label in day_last_sel]
+
+        weekday_ja_sel = st.multiselect("曜日", WEEKDAY_STR, default=[])
+        weekday_int_list = [WEEKDAY_STR_TO_INT[w] for w in weekday_ja_sel]
+
+        prev_month = 3
+        start_date = st.date_input("開始日", prev_month_first(prev_month))
+        end_date = st.date_input("終了日", n_days_ago(1))
+
+        submitted = st.form_submit_button("実行", use_container_width=True)
+        
+    if not day_last_list:
+        day_last_list = None
+    if not weekday_int_list:
+        weekday_int_list = None
+
+    filters = {
+        "pref": pref,
+        "hall": hall,
+        "model": model,
+        "unit_no": unit_no,
+        "day_last_list": day_last_list,  # None or list[int]
+        "weekday_int_list": weekday_int_list,  # None or list[int]
+        "start_date": start_date,
+        "end_date": end_date,
+        "submitted": submitted,
+    }
+
+    return filters
