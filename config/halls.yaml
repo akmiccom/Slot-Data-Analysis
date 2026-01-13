@@ -1,22 +1,8 @@
 # config/halls.yaml
 halls:
-  - name: "ビックマーチつくば学園の森店"
-    prefecture: "茨城県"
-    slug: "ビックマーチつくば学園の森店"     # ← 人が読む用。エンコードはコード側で
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "マックス石岡店"
-    prefecture: "茨城県"
-    slug: "マックス石岡店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン石岡店"
-    prefecture: "茨城県"
-    slug: "マルハン石岡店"
+  - name: "みとや水道橋"
+    prefecture: "東京都"
+    slug: "みとや水道橋"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
@@ -66,20 +52,6 @@ halls:
   - name: "TOHO池袋店"
     prefecture: "東京都"
     slug: "toho池袋店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン入間店"
-    prefecture: "埼玉県"
-    slug: "マルハン入間店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "レイト平塚"
-    prefecture: "茨城県"
-    slug: "麗都平塚"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
@@ -223,11 +195,46 @@ halls:
     spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
     days_ago: 1
     period: 2
+  
+  - name: "ビックマーチつくば学園の森店"
+    prefecture: "茨城県"
+    slug: "ビックマーチつくば学園の森店" # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マックス石岡店"
+    prefecture: "茨城県"
+    slug: "マックス石岡店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン石岡店"
+    prefecture: "茨城県"
+    slug: "マルハン石岡店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "レイト平塚"
+    prefecture: "茨城県"
+    slug: "麗都平塚"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
   - name: "パールショップともえ川越店"
     prefecture: "埼玉県"
     slug: "パールショップともえ川越店"
     spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン入間店"
+    prefecture: "埼玉県"
+    slug: "マルハン入間店"
+    spreadsheet_id: ""
     days_ago: 1
     period: 2
 
