@@ -35,7 +35,7 @@ def preprocess_for_table(df):
 
     df = preprocess(df)
 
-    df["date"] = df["date"].dt.strftime("%y-%m-%d %a")
+    df["date_str"] = df["date"].dt.strftime("%y-%m-%d %a")
     # df["weekday"] = pd.to_datetime(df["date"]).dt.strftime("%a")
 
     df["grape_rate"] = cal_grape_rate(df, cherry=True)
@@ -70,7 +70,7 @@ def preprocess_for_chart(df, model):
 def preprocess_for_rb_rate(df):
 
     df = preprocess(df)
-    df["date"] = df["date"].dt.strftime("%y-%m-%d %a")
+    # df["date"] = df["date"].dt.strftime("%y-%m-%d %a")
 
     group_index = ["hall", "model", "unit_no"]
     group_cols = ["game", "medal", "bb", "rb"]
@@ -82,12 +82,15 @@ def preprocess_for_rb_rate(df):
         lambda r: r["game"] / r["rb"] if r["rb"] != 0 else None, axis=1
     )
     df_sum["medal_rate"] = (df_sum["game"] * 3 + df_sum["medal"]) / (df_sum["game"] * 3)
-    df_sum = df_sum[df_sum["medal_rate"] > 1.01]
+    df_sum = df_sum[df_sum["medal_rate"] > 1.0]
     df_sum = df_sum[df_sum["count"] > df_sum["count"].quantile(0.05)]
     df_sum = df_sum[df_sum["game"] >= 15000]
 
-    df_sum = df_sum.sort_values(["rb_rate"])[["count", "rb_rate", "game", "medal", "medal_rate"]]
+    df_sum = df_sum.sort_values(["rb_rate"])
     df_sum["rb_rate"] = df_sum["rb_rate"].round(1)
     df_sum["medal_rate"] = df_sum["medal_rate"].round(2)
+    df_sum = df_sum.reset_index()
+    cols = ["count", "rb_rate", "game", "medal", "medal_rate"]
+    df_sum = df_sum[["hall", "unit_no"] + cols]
 
     return df_sum

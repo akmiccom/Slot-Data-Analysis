@@ -2,7 +2,7 @@ import streamlit as st
 
 from config.constants import KEY_MAP
 from config.dates import prev_month_first
-from ui.filters import filters, filters_for_sidebar
+from ui.filters import filters
 from ui.components import home_link
 from ui.charts import charts_on_unit_no, charts_on_all_model
 from logic.preprocess import preprocess_for_table, preprocess_for_rb_rate
@@ -15,16 +15,15 @@ page_title = "Dashboard"
 st.set_page_config(page_title=page_title, page_icon="📊", layout="wide")
 
 # Title
-# st.title(page_title)
+st.title(page_title)
 
-fi = filters_for_sidebar()
-st.sidebar.write(fi)
-
-
-r1c1, r1c2 = st.columns([1.2, 2], gap="small")
+r1c1, r1c2 = st.columns([1, 2], gap="small")
 
 with r1c1:
-   
+    # filters
+    with st.expander("FILTER", expanded=True):
+        submitted, fi = filters()
+    
     # RB_RATE_LIST
     if fi["day_last_list"] is not None or fi["weekday_int_list"] is not None:
         prev_month = 3
@@ -40,12 +39,12 @@ with r1c1:
                 model=fi["model"],
             )
             df_rb_rate = preprocess_for_rb_rate(df_for_rb)
-            st.dataframe(df_rb_rate, height=500, width="stretch")
+            st.dataframe(df_rb_rate, height=600)
     else:
         with st.expander(f"RB確率 : 曜日もしくは末尾日を選択してください", expanded=False):
             st.write("曜日もしくは末尾日を選択してください" )
     
-    if not fi["submitted"]:
+    if not submitted:
         st.stop()
     # st.write(filter_info)
 
