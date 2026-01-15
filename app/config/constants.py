@@ -7,6 +7,7 @@ UI・ロジック横断の定数を集約
 # UI表示
 ALL_LABEL = "すべて表示"
 INITIAL_PERIOD = 11
+
 KEY_MAP = {
     "start_date": "start_date",
     "end_date": "end_date",

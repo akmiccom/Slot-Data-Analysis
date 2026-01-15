@@ -8,6 +8,7 @@ from dateutil.relativedelta import relativedelta
 # --- 日付 ---
 today = date.today()
 yesterday = date.today() - timedelta(days=1)
+initial_day_last = today.day % 10
 
 # --- n日前を指定 ---
 def n_days_ago(n):
