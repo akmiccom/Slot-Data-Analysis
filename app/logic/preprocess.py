@@ -35,8 +35,7 @@ def preprocess_for_table(df):
 
     df = preprocess(df)
 
-    df["date_str"] = df["date"].dt.strftime("%y-%m-%d %a")
-    # df["weekday"] = pd.to_datetime(df["date"]).dt.strftime("%a")
+    df["date"] = df["date"].dt.strftime("%y-%m-%d %a")
 
     df["grape_rate"] = cal_grape_rate(df, cherry=True)
     df = df.round(3)
@@ -82,9 +81,9 @@ def preprocess_for_rb_rate(df):
         lambda r: r["game"] / r["rb"] if r["rb"] != 0 else None, axis=1
     )
     df_sum["medal_rate"] = (df_sum["game"] * 3 + df_sum["medal"]) / (df_sum["game"] * 3)
-    df_sum = df_sum[df_sum["medal_rate"] > 1.0]
     df_sum = df_sum[df_sum["count"] > df_sum["count"].quantile(0.05)]
-    df_sum = df_sum[df_sum["game"] >= 15000]
+    df_sum = df_sum[df_sum["medal_rate"] > 1.0]
+    df_sum = df_sum[df_sum["game"] >= 10000]
 
     df_sum = df_sum.sort_values(["rb_rate"])
     df_sum["rb_rate"] = df_sum["rb_rate"].round(1)
