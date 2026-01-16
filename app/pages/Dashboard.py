@@ -1,76 +1,68 @@
 import streamlit as st
 
 from config.constants import KEY_MAP
-from config.dates import prev_month_first, initial_day_last
-from ui.filters import filters, filters_for_rb_rate
+from ui.filters import filters_for_rb_rate
 from ui.components import home_link
-from ui.charts import charts_on_unit_no, charts_on_all_model
-from logic.preprocess import preprocess_for_table, preprocess_for_rb_rate, preprocess
+from ui.charts import charts_on_unit_no
+from logic.preprocess import preprocess_for_table
 
 from fetch_functions import fetch_results_by_units
 
+from pages.rb_probability_by_unit import rb_prob_by_unit
 
-# page_config（必ず最初）
-page_title = "Dashboard"
-st.set_page_config(page_title=page_title, page_icon="📊", layout="wide")
 
-fi = filters_for_rb_rate()
-# st.write(fi)
 
-prev_month = 3
-sel_rows = None
-ss = st.session_state
+# def rb_prob_by_unit(fi):
+#     sel_rows = None
+#     ss = st.session_state
 
-r1c1, r1c2 = st.columns([1, 2], gap="small")
+#     if fi["day_last_list"] is not None or fi["weekday_int_list"] is not None:
+#         with st.expander(
+#             f"{fi['model']} , {fi['day_last_list']}のつく日集計",
+#             expanded=True,
+#         ):
+#             df = fetch_results_by_units(
+#                 fi["start_date"],
+#                 fi["end_date"],
+#                 day_last=fi["day_last_list"],
+#                 weekday=fi["weekday_int_list"],
+#                 pref=fi["pref"],
+#                 # hall=None,
+#                 model=fi["model"],
+#             )
+#             df_rb_rate = preprocess_for_rb_rate(df)
+#             event = st.dataframe(
+#                 df_rb_rate,
+#                 width="stretch",
+#                 hide_index=True,
+#                 selection_mode="single-row",
+#                 on_select="rerun",  # 選択されたら再実行して event が更新される
+#             )
+#             sel_rows = event.selection.get("rows", [])
 
-with r1c1:
-    # RB_RATE_LIST
-    if fi["day_last_list"] is not None or fi["weekday_int_list"] is not None:
-        with st.expander(
-            f"{fi['model']} , {fi['day_last_list']}のつく日集計",
-            expanded=True,
-        ):
-            df = fetch_results_by_units(
-                fi["start_date"],
-                fi["end_date"],
-                day_last=fi["day_last_list"],
-                weekday=fi["weekday_int_list"],
-                pref=fi["pref"],
-                # hall=None,
-                model=fi["model"],
-            )
-            df_rb_rate = preprocess_for_rb_rate(df)
-            event = st.dataframe(
-                df_rb_rate,
-                width="stretch",
-                hide_index=True,
-                selection_mode="single-row",
-                on_select="rerun",  # 選択されたら再実行して event が更新される
-            )
-            sel_rows = event.selection.get("rows", [])
+#             if sel_rows:
+#                 row = df_rb_rate.iloc[sel_rows[0]]
+#                 ss["selected_unit"] = {
+#                     "hall": row["hall"],
+#                     "model": fi["model"],
+#                     "unit_no": int(row["unit_no"]),
+#                     "start_date": fi["start_date"],
+#                     "end_date": fi["end_date"],
+#                     "pref": fi["pref"],
+#                     "day_last_list": fi["day_last_list"],
+#                     "weekday_int_list": fi["weekday_int_list"],
+#                 }
+#             # else:
+#             #     st.write()
+#     else:
+#         st.info("曜日もしくは末尾日を選択してください")
+#         st.stop()
 
-            if sel_rows:
-                row = df_rb_rate.iloc[sel_rows[0]]
-                ss["selected_unit"] = {
-                    "hall": row["hall"],
-                    "model": fi["model"],
-                    "unit_no": int(row["unit_no"]),
-                    "start_date": fi["start_date"],
-                    "end_date": fi["end_date"],
-                    "pref": fi["pref"],
-                    "day_last_list": fi["day_last_list"],
-                    "weekday_int_list": fi["weekday_int_list"],
-                }
-            # else:
-            #     st.write()
-    else:
-        # st.write("曜日もしくは末尾日を選択してください")
-        st.stop()
+#     selected = ss.get("selected_unit")
+#     return sel_rows, selected
 
-selected = ss.get("selected_unit")
 
-with r1c2:
-    # if not sel_rows:
+def reslut_by_unit(sel_rows, selected):
     if sel_rows and selected:
         day_last_list = selected["day_last_list"]
         if not selected["day_last_list"]:
@@ -110,4 +102,22 @@ with r1c2:
             st.stop()
 
 
-home_link(position="right")
+
+# page_config
+page_title = "Dashboard"
+st.set_page_config(page_title=page_title, page_icon="📊", layout="wide")
+
+# filters
+fi = filters_for_rb_rate()
+
+r1c1, r1c2 = st.columns([1, 2], gap="small")
+
+with r1c1:
+    sel_rows, selected = rb_prob_by_unit(fi)
+    home_link(position="left")
+
+with r1c2:
+    reslut_by_unit(sel_rows, selected)
+
+
+
