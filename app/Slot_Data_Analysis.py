@@ -13,7 +13,8 @@ st.set_page_config(page_title=title, layout="wide",
 # st.divider()
 
 st.header(title, divider="rainbow")
-st.page_link("pages/Dashboard.py", label="ダッシュボード", icon="📊")
+st.page_link("pages/Analysis_Dashboard.py", label="分析ダッシュボード", icon="📊")
+st.page_link("pages/History_Dashboard.py", label="履歴ダッシュボード", icon="📊")
 st.page_link("pages/01_データベース検索.py", label="データベース検索", icon="📊")
 st.page_link("pages/98_Statistics_by_Hall.py", label="ホール別の分析データ", icon="📈")
 st.page_link("pages/97_Statistics_by_Model.py", label="機種別の分析データ", icon="📈")

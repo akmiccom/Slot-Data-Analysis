@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 
 from config.constants import KEY_MAP
@@ -83,7 +84,7 @@ def reslut_by_unit(sel_rows, selected):
                 pref=selected["pref"],
                 hall=selected["hall"],
                 model=selected["model"],
-                unit_no=selected["unit_no"],
+                unit_no=[selected["unit_no"]],
             )
             if df_unit is None or df_unit.empty:
                 st.info("選択した台のデータがありません。")
@@ -104,7 +105,8 @@ def reslut_by_unit(sel_rows, selected):
 
 
 # page_config
-page_title = "Dashboard"
+# page_title = "Analysis Dashboard"
+page_title = os.path.splitext(os.path.basename(__file__))[0]
 st.set_page_config(page_title=page_title, page_icon="📊", layout="wide")
 
 # filters

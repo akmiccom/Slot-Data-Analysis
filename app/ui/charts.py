@@ -20,12 +20,15 @@ common_tooltip = [
 ]
 
 
-def charts_on_unit_no(df, model):
+def charts_on_unit_no(df, model, single_day=False):
 
     df = preprocess_for_chart(df, model)
 
     # x軸(日付)
-    base = alt.Chart(df).encode(x=alt.X("date_str:N", title="日付"))
+    if single_day:  # single day
+        base = alt.Chart(df).encode(x=alt.X("unit_no:N", title="日付"))
+    else:  # multiple days
+        base = alt.Chart(df).encode(x=alt.X("date_str:N", title="日付"))
 
     # y軸(グラフ)
     chart_game = base.mark_bar().encode(
@@ -33,7 +36,8 @@ def charts_on_unit_no(df, model):
         color=alt.Color(
             "medal:Q",
             title="MEDAL",
-            scale=alt.Scale(scheme="greys", domain=[-2000, 5000], reverse=True),
+            scale=alt.Scale(scheme="greys", domain=[-2000, 0, 5000], reverse=True),
+            # scale=alt.Scale(scheme="redblue", domain=[-2000, 0, 5000], reverse=True),
             legend=alt.Legend(orient="top", direction="horizontal", titleOrient="left"),
         ),
         tooltip=common_tooltip,

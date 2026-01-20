@@ -120,7 +120,8 @@ def fetch_results_by_units(
         query = query.eq("model", model)
     # 台番号フィルタ
     if unit_no not in (None, ALL):
-        query = query.eq("unit_no", unit_no)
+        # query = query.eq("unit_no", unit_no)
+        query = query.in_("unit_no", unit_no)
     # 実行
     rows = _fetch_all_rows(query)
     df = pd.DataFrame(rows)
