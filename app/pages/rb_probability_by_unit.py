@@ -63,6 +63,7 @@ def rb_prob_by_unit(fi):
             #     st.write()
     else:
         st.info("曜日もしくは末尾日を選択してください")
+        home_link(position="left")
         st.stop()
 
     selected = ss.get("selected_unit")

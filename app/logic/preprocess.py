@@ -81,7 +81,7 @@ def preprocess_for_rb_rate(df):
         lambda r: r["game"] / r["rb"] if r["rb"] != 0 else None, axis=1
     )
     df_sum["medal_rate"] = (df_sum["game"] * 3 + df_sum["medal"]) / (df_sum["game"] * 3)
-    df_sum = df_sum[df_sum["count"] > df_sum["count"].quantile(0.05)]
+    df_sum = df_sum[df_sum["count"] > 4]
     df_sum = df_sum[df_sum["medal_rate"] > 1.0]
     df_sum = df_sum[df_sum["game"] >= 10000]
 

@@ -141,49 +141,6 @@ if not submitted:
     st.stop()
 
 
-# ---- 中段：時系列グラフ ----
-# common_tooltip = [
-#     alt.Tooltip("date_str:N", title="日付"),
-#     alt.Tooltip("unit_no:Q", title="unit_no"),
-#     alt.Tooltip("game:Q", title="G数", format=","),
-#     alt.Tooltip("medal:Q", title="メダル数", format=","),
-#     alt.Tooltip("medal_r3:Q", title="3日平均", format=","),
-#     alt.Tooltip("medal_r7:Q", title="7日平均", format=","),
-#     alt.Tooltip("medal_cum:Q", title="累計", format=","),
-# ]
-# df = df.sort_values(["unit_no", "date"], ascending=[True, True])
-# date_order = df["date"].drop_duplicates().tolist()
-# x_date = alt.X("date_str:N", title="日付", sort=date_order)
-
-
-# unit_count = df["unit_no"].nunique()
-# sel = alt.selection_point(fields=["unit_no"], bind="legend", toggle=True)
-
-# medal_cum = (
-#     alt.Chart(df)
-#     .mark_line(strokeWidth=0.5, point=alt.OverlayMarkDef(size=40))
-#     .encode(
-#         x=x_date,
-#         y=alt.Y(
-#             "medal_cum:Q",
-#             title="medal_cum",
-#             axis=alt.Axis(tickMinStep=5000),
-#         ),
-#         tooltip=common_tooltip,
-#         color=alt.Color("unit_no:N"),
-#         opacity=alt.condition(sel, alt.value(1.0), alt.value(0.08)),
-#     )
-#     .add_params(sel)
-#     .properties(
-#         # height=750
-#         height=auto_height(unit_count)
-#     )
-# )
-
-# chart = alt.layer(medal_cum).resolve_scale(y="independent")
-# if unit_no is ALL:
-#     chart = chart.properties(title=f"{model} をすべて表示")
-#     st.altair_chart(chart)
 common_tooltip = [
     alt.Tooltip("date_str:N", title="日付"),
     alt.Tooltip("unit_no:Q", title="unit_no"),
@@ -344,6 +301,7 @@ else:
 
     # ターゲットRB確率ライン
     from utils import get_rb_rate_from_json
+
     threshold = get_rb_rate_from_json(model, setting=5)
     rule = (
         alt.Chart(pd.DataFrame({"y": [threshold]}))
