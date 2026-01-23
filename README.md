@@ -1,20 +1,61 @@
 # Slot Data Analisis
 
 スロットデータを収集して分析するツール
+- パチスロ（主にジャグラー系など）の日次データを収集 → 前処理 → DBへ蓄積 → 集計/可視化 →（将来）予測までを一気通貫で行うためのデータ分析プロジェクトです。
+- Streamlitで「立ち回り目線」のダッシュボードを作成
+- Supabase(PostgreSQL)を中核DBとして運用
+- GitHub Actionsで定期更新
 
-## やること
+---
 
-- Web サイトから必要なデータをスクレイピングする。
-- クラウド上で自動実行できるようにする。
-- クラウドデータベースを使ってデータを保存する。
-- Web アプリを使って分析データをデプロイする。
+## できること(概要)
 
-## アプリ構成
+- スクレイピング（Python）
+  - 動的サイトも想定（Playwright / undetected-chromedriver 等）
+  - 県 → ホール → 機種 → 台番 → 日付のような階層データ取得
+  - 取得結果を CSV保存（生データ） し、再現性を確保
+ 
+- 前処理 → DB登録
+  - 不要列・記号除去、型変換、正規化
+  - 一意制約で重複を防止し、追記運用しやすくする
+  - Supabase(PostgreSQL)を基本。必要に応じてローカルSQLiteも併用可
+ 
+- 分析・可視化（Streamlit）
+  - ホール / 機種 / 台番でフィルタ
+  - 末尾日（day_last: 1日/7日/末尾3など）の傾向集計
+  - RB/BB確率、合算、メダル率、勝率などの指標を表示
+  - 期間集計（例：過去◯ヶ月）や、単日×複数日の並列表現
+ 
+- 自動化（GitHub Actions）
+  - 毎日/毎朝などの定期実行でデータ更新
+  - 成果物の整理（artifact削除等）・ログ保存
+ 
+- （将来）予測
+  - XGBoost等で「翌日のRB確率」推定、など
+ 
+---
 
-- Python
-- Github Actions
-- Supabase
-- Streamlit
+## アーキテクチャ（データフロー）
+
+1. **Scraper**：サイトから日次データ取得  
+2. **Raw CSV**：加工しない生データとして保存  
+3. **Preprocess**：クレンジング・型変換・正規化  
+4. **DB（Supabase/PostgreSQL）**：テーブルに登録、集計用Viewも用意  
+5. **Analysis/UI（Streamlit）**：フィルタ → 集計 → グラフ/表で表示  
+6. **Automation（GitHub Actions）**：定期実行で 1〜5 を回す
+
+---
+
+## 技術スタック
+
+- **Python**：スクレイピング / 前処理 / 分析
+- **Playwright / undetected-chromedriver**：動的サイト対策（必要に応じて）
+- **pandas**：前処理・集計
+- **Supabase (PostgreSQL)**：DB、将来的にAuth/Storage/Functionsも拡張可
+- **Streamlit + Altair**：UI・可視化
+- **GitHub Actions**：定期実行、CI補助
+
+---
 
 ## フォルダ構成
 
