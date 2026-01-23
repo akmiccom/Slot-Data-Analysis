@@ -1,5 +1,27 @@
 # config/halls.yaml
 halls:
+
+  - name: "p-port-prego立川店"
+    prefecture: "東京都"
+    slug: "p-port-prego立川店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "楽園立川店"
+    prefecture: "東京都"
+    slug: "楽園立川店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ハイパージアス立川"
+    prefecture: "東京都"
+    slug: "ハイパージアス立川"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "みとや水道橋"
     prefecture: "東京都"
     slug: "みとや水道橋"
@@ -234,6 +256,20 @@ halls:
   - name: "マルハン入間店"
     prefecture: "埼玉県"
     slug: "マルハン入間店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "第一プラザ霞ヶ関店"
+    prefecture: "埼玉県"
+    slug: "第一プラザ霞ヶ関店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ジャラン若葉駅前店"
+    prefecture: "埼玉県"
+    slug: "ジャラン若葉駅前店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2

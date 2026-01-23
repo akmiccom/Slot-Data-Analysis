@@ -59,30 +59,30 @@ with c1:
 
 with c2:
     st.subheader("複数日 ✕ 台番号", divider="rainbow")
-    if fi["start_date"] == fi["end_date"]:
-        st.info("開始日と終了日を異なる日にすると複数日履歴表示が可能です。")
+    # if fi["start_date"] == fi["end_date"]:
+    #     st.info("開始日と終了日を異なる日にすると複数日履歴表示が可能です。")
+    # else:
+    df = fetch_results_by_units(
+        fi["start_date"],
+        n_days_ago(1),
+        pref=fi["pref"],
+        hall=fi["hall"],
+        model=fi["model"],
+        unit_no=fi["unit_no"],
+    )
+    if df is None or df.empty:
+        st.info("台番号を選択してください。")
+        # st.stop()
     else:
-        df = fetch_results_by_units(
-            fi["start_date"],
-            n_days_ago(1),
-            pref=fi["pref"],
-            hall=fi["hall"],
-            model=fi["model"],
-            unit_no=fi["unit_no"],
-        )
-        if df is None or df.empty:
-            st.info("台番号を選択してください。")
-            # st.stop()
-        else:
-            for unit_no in fi["unit_no"]:
-                df_unit = df[df["unit_no"] == unit_no]
-                if df_unit is None or df_unit.empty:
-                    st.info(f"台番号 {unit_no} のデータがありません。")
-                    continue
-                else:
-                    expander_title = f"{fi['hall']}: {fi['model']}: {unit_no}"
-                    with st.expander(expander_title, expanded=True):
-                        charts = charts_on_unit_no(df_unit, fi['model'], single_day=False)
-                        st.altair_chart(charts, width="stretch")
+        for unit_no in fi["unit_no"]:
+            df_unit = df[df["unit_no"] == unit_no]
+            if df_unit is None or df_unit.empty:
+                st.info(f"台番号 {unit_no} のデータがありません。")
+                continue
+            else:
+                expander_title = f"{fi['hall']}: {fi['model']}: {unit_no}"
+                with st.expander(expander_title, expanded=True):
+                    charts = charts_on_unit_no(df_unit, fi['model'], single_day=False)
+                    st.altair_chart(charts, width="stretch")
 
     home_link(position="right")
