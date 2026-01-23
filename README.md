@@ -157,5 +157,3 @@ git push -u origin feature/add-x
 # 4. レビュー後 develop にマージ
 # 5. ステージング確認 → main にマージ
 ```
-
-
