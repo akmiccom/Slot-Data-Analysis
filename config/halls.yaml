@@ -1,6 +1,13 @@
 # config/halls.yaml
 halls:
 
+  - name: "ジャラン若葉駅前店"
+    prefecture: "埼玉県"
+    slug: "ジャラン若葉駅前店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 200
+
   - name: "p-port-prego立川店"
     prefecture: "東京都"
     slug: "p-port-prego立川店"
@@ -267,12 +274,6 @@ halls:
     days_ago: 1
     period: 2
 
-  - name: "ジャラン若葉駅前店"
-    prefecture: "埼玉県"
-    slug: "ジャラン若葉駅前店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
 
   # - name: ""
   #   prefecture: ""
