@@ -1,37 +1,8 @@
 # config/halls.yaml
 halls:
-
-  - name: "ジャラン若葉駅前店"
+  - name: "マルハン川越店"
     prefecture: "埼玉県"
-    slug: "ジャラン若葉駅前店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 200
-
-  - name: "p-port-prego立川店"
-    prefecture: "東京都"
-    slug: "p-port-prego立川店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "楽園立川店"
-    prefecture: "東京都"
-    slug: "楽園立川店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ハイパージアス立川"
-    prefecture: "東京都"
-    slug: "ハイパージアス立川"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "みとや水道橋"
-    prefecture: "東京都"
-    slug: "みとや水道橋"
+    slug: "マルハン川越店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
@@ -197,6 +168,34 @@ halls:
     days_ago: 1
     period: 2
 
+  - name: "p-port-prego立川店"
+    prefecture: "東京都"
+    slug: "p-port-prego立川店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "楽園立川店"
+    prefecture: "東京都"
+    slug: "楽園立川店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ハイパージアス立川"
+    prefecture: "東京都"
+    slug: "ハイパージアス立川"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "みとや水道橋"
+    prefecture: "東京都"
+    slug: "みとや水道橋"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "レイトスロットステージ土浦"
     prefecture: "茨城県"
     slug: "麗都スロットステージ土浦"
@@ -224,7 +223,7 @@ halls:
     spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
     days_ago: 1
     period: 2
-  
+
   - name: "ビックマーチつくば学園の森店"
     prefecture: "茨城県"
     slug: "ビックマーチつくば学園の森店" # ← 人が読む用。エンコードはコード側で
@@ -274,6 +273,12 @@ halls:
     days_ago: 1
     period: 2
 
+  - name: "ジャラン若葉駅前店"
+    prefecture: "埼玉県"
+    slug: "ジャラン若葉駅前店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
   # - name: ""
   #   prefecture: ""
