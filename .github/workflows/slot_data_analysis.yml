@@ -5,8 +5,8 @@ on:
   schedule:
     # 毎朝 6:00 JST（= 前日 21:00 UTC）
     - cron: "0 20 * * *"
-    # 毎朝 9:30 JST（= 当日 0:30 UTC）
-    - cron: "30 0 * * *"
+    # 毎朝 12:00 JST（= 当日 0:30 UTC）
+    - cron: "0 3 * * *"
 
   # 手動実行
   workflow_dispatch:
