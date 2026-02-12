@@ -1,11 +1,5 @@
 # config/halls.yaml
 halls:
-  - name: "マルハン川越店"
-    prefecture: "埼玉県"
-    slug: "マルハン川越店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
 
   - name: "YASUDA5"
     prefecture: "東京都"
@@ -276,6 +270,13 @@ halls:
   - name: "ジャラン若葉駅前店"
     prefecture: "埼玉県"
     slug: "ジャラン若葉駅前店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン川越店"
+    prefecture: "埼玉県"
+    slug: "マルハン川越店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
