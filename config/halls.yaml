@@ -1,6 +1,13 @@
 # config/halls.yaml
 halls:
 
+  - name: "グランドホール西高島平店"
+    prefecture: "東京都"
+    slug: "グランドホール西高島平店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "YASUDA5"
     prefecture: "東京都"
     slug: "yasuda5"
