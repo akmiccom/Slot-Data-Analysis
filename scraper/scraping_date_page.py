@@ -42,14 +42,19 @@ def extract_model_url(
     logger.info("Page title: %s", title)
 
     model_urls: list[tuple[str, str, str, str, str]] = []
-    css = "table.kishu tbody tr td a"
+    css_table = "table.kishu"
+    first_table = page.locator(css_table).nth(0)
+
     try:
-        page.wait_for_selector(css, timeout=10_000)
+        page.wait_for_selector(css_table, timeout=10_000)
     except PWTimeout:
         logger.warning("機種リンクが見つかりません: %s", date_url)
         return model_urls
 
-    links = page.locator(css)
+    css_table = "tbody tr td a"
+    links = first_table.locator(css_table)
+    # links = page.locator(css)
+    
     count = links.count()
     for j in range(count):
         model_text = _norm_text(links.nth(j).inner_text())
@@ -68,8 +73,11 @@ def extract_model_url(
 
 if __name__ == "__main__":
 
-    hall = "やすだ東池袋9号店"
-    hall = "大山オーシャン"
+    hall = "グランド-ラ・カータ1111瑞穂店"
+    hall = "麗都平塚"
+    hall = "マルハン入間店"
+    hall = "エスパス日拓渋谷本館"
+    hall = "エスパス日拓渋谷駅前新館"
     hall_url = urljoin(config.MAIN_URL, quote(hall))
 
     with sync_playwright() as p:

@@ -1,36 +1,100 @@
 # config/halls.yaml
 halls:
+
+  - name: "グランドホール西高島平店"
+    prefecture: "東京都"
+    slug: "グランドホール西高島平店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "YASUDA5"
+    prefecture: "東京都"
+    slug: "yasuda5"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "P-PORT-PREGO-EX池袋南口"
+    prefecture: "東京都"
+    slug: "p-port-prego-ex池袋南口"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "エスパス日拓渋谷駅前新館"
+    prefecture: "東京都"
+    slug: "エスパス日拓渋谷駅前新館"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "エスパス日拓渋谷本館"
+    prefecture: "東京都"
+    slug: "エスパス日拓渋谷本館"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "楽園渋谷道玄坂店"
+    prefecture: "東京都"
+    slug: "楽園渋谷道玄坂店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "楽園渋谷駅前店"
+    prefecture: "東京都"
+    slug: "楽園渋谷駅前店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "TOHO池袋店"
+    prefecture: "東京都"
+    slug: "toho池袋店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "グランド-ラ・カータ1111瑞穂店"
+    prefecture: "東京都"
+    slug: "グランド-ラ・カータ1111瑞穂店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "ミリオン平和台16号店"
     prefecture: "東京都"
-    slug: "ミリオン平和台16号店"     # ← 人が読む用。エンコードはコード側で
+    slug: "ミリオン平和台16号店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "ミリオン東武練馬店スロット館"
     prefecture: "東京都"
-    slug: "ミリオン東武練馬13号店"     # ← 人が読む用。エンコードはコード側で
+    slug: "ミリオン東武練馬13号店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "パラッツォ千川店"
     prefecture: "東京都"
-    slug: "パラッツォ千川店"     # ← 人が読む用。エンコードはコード側で
+    slug: "パラッツォ千川店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "練馬オーシャン"
     prefecture: "東京都"
-    slug: "練馬オーシャン"     # ← 人が読む用。エンコードはコード側で
+    slug: "練馬オーシャン"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
 
   - name: "EXA FIRST"
     prefecture: "東京都"
-    slug: "エクサファースト"     # ← 人が読む用。エンコードはコード側で
+    slug: "エクサファースト"
     spreadsheet_id: "10-B_vV1pvUzXmvGAiHhODGJgCloOsAmqSO9HvXpk_T8"
     days_ago: 1
     period: 2
@@ -105,47 +169,124 @@ halls:
     days_ago: 1
     period: 2
 
-  # - name: "レイト平塚"
-  #   prefecture: "茨城県"
-  #   slug: "麗都平塚"
-  #   spreadsheet_id: "1WlvgMk-u_tUWizQVOYDQVg7bECyVzLm0-wlJDgJteAw"
-  #   days_ago: 1
-  #   period: 2
+  - name: "p-port-prego立川店"
+    prefecture: "東京都"
+    slug: "p-port-prego立川店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
-  # - name: "レイトスロットステージ土浦"
-  #   prefecture: "茨城県"
-  #   slug: "麗都スロットステージ土浦"
-  #   spreadsheet_id: "1WO9qw9rBBUwJlmWe-b71sMMIh3ZlfUJJDSdh-hOhunQ"
-  #   days_ago: 1
-  #   period: 2
+  - name: "楽園立川店"
+    prefecture: "東京都"
+    slug: "楽園立川店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
-  # - name: "レイトつくば"
-  #   prefecture: "茨城県"
-  #   slug: "麗都つくば"
-  #   spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
-  #   days_ago: 1
-  #   period: 2
+  - name: "ハイパージアス立川"
+    prefecture: "東京都"
+    slug: "ハイパージアス立川"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
-  # - name: "マルハンつくば店"
-  #   prefecture: "茨城県"
-  #   slug: "マルハンつくば店"
-  #   spreadsheet_id: ""
-  #   days_ago: 1
-  #   period: 2
+  - name: "みとや水道橋"
+    prefecture: "東京都"
+    slug: "みとや水道橋"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
-  # - name: "ビックマーチつくば本店"
-  #   prefecture: "茨城県"
-  #   slug: "ビックマーチつくば本店"
-  #   spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
-  #   days_ago: 1
-  #   period: 2
+  - name: "レイトスロットステージ土浦"
+    prefecture: "茨城県"
+    slug: "麗都スロットステージ土浦"
+    spreadsheet_id: "1WO9qw9rBBUwJlmWe-b71sMMIh3ZlfUJJDSdh-hOhunQ"
+    days_ago: 1
+    period: 2
 
-  # - name: "パールショップともえ川越店"
-  #   prefecture: "埼玉県"
-  #   slug: "パールショップともえ川越店"
-  #   spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
-  #   days_ago: 1
-  #   period: 2
+  - name: "レイトつくば"
+    prefecture: "茨城県"
+    slug: "麗都つくば"
+    spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
+    days_ago: 1
+    period: 2
+
+  - name: "マルハンつくば店"
+    prefecture: "茨城県"
+    slug: "マルハンつくば店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ビックマーチつくば本店"
+    prefecture: "茨城県"
+    slug: "ビックマーチつくば本店"
+    spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
+    days_ago: 1
+    period: 2
+
+  - name: "ビックマーチつくば学園の森店"
+    prefecture: "茨城県"
+    slug: "ビックマーチつくば学園の森店" # ← 人が読む用。エンコードはコード側で
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マックス石岡店"
+    prefecture: "茨城県"
+    slug: "マックス石岡店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン石岡店"
+    prefecture: "茨城県"
+    slug: "マルハン石岡店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "レイト平塚"
+    prefecture: "茨城県"
+    slug: "麗都平塚"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "パールショップともえ川越店"
+    prefecture: "埼玉県"
+    slug: "パールショップともえ川越店"
+    spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン入間店"
+    prefecture: "埼玉県"
+    slug: "マルハン入間店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "第一プラザ霞ヶ関店"
+    prefecture: "埼玉県"
+    slug: "第一プラザ霞ヶ関店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ジャラン若葉駅前店"
+    prefecture: "埼玉県"
+    slug: "ジャラン若葉駅前店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "マルハン川越店"
+    prefecture: "埼玉県"
+    slug: "マルハン川越店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
   # - name: ""
   #   prefecture: ""

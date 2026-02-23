@@ -1,10 +1,9 @@
-# import os
 import streamlit as st
 # import pandas as pd
 import datetime
-import time
 from utils import validate_dates
-from data_from_supabase import fetch, get_latest_data
+from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
+from fetch_functions import fetch_results_by_units
 
 
 PAST_N_DAYS = 5
@@ -39,56 +38,76 @@ ss = st.session_state
 ss.setdefault("start_date", n_d_ago)
 ss.setdefault("end_date", yesterday)
 
-# --- 初期読み込み ---
-
 # -- フィルター設定 ---
 ALL = "すべて表示"
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4 = st.columns([0.5, 1.2, 0.8, 0.5])
 with col1:
+    prefectures = fetch_prefectures()
+    pref = st.selectbox("都道府県", prefectures)
+with col2:
+    halls = fetch_halls(pref=pref)
+    hall = st.selectbox("ホール", halls, help="お気に入り機能追加??")
+with col3:
+    models = fetch_models(pref=pref, hall=hall)
+    model = st.selectbox("機種", models, help="台数の多い順に表示")
+with col4:
+    units = fetch_units(pref=pref, hall=hall, model=model) + [ALL]
+    unit_no = st.selectbox("台番号", units, help="すべて表示も可能")
+
+
+col5, col6 = st.columns(2)
+with col5:
     start = st.date_input(
         "検索開始日", key="start_date", max_value=yesterday, on_change=validate_dates
     )
-with col2:
+with col6:
     end = st.date_input(
         "検索終了日", key="end_date", max_value=yesterday, on_change=validate_dates
     )
-with col3:
-    df = fetch("result_joined", start, end)
-    halls = sorted(df["hall"].unique().tolist())
-    # df_unique, df_final, halls = get_latest_data("result_joined", start, end)
-    hall = st.selectbox("ホールを選択", halls, help="お気に入り機能追加??")
-    df_hall = df[(df["hall"] == hall)]
-    df_hall = df_hall.drop_duplicates()
-with col4:
-    models = df_hall["model"].value_counts().index.tolist()
-    model = st.selectbox("機種を選択", models, help="台数の多い順に表示")
-    df_model = df_hall[(df_hall["model"] == model)]
-    df_model = df_model.drop_duplicates()
-with col5:
-    units = sorted(df_model["unit_no"].unique().tolist()) + [ALL]
-    unit = st.selectbox("台番号を選択", units, help="すべて表示も可能")
-    df_unit = df_model
-    if unit != ALL:
-        df_unit = df_model[df_model["unit_no"] == unit]
-    df_unit = df_unit.drop_duplicates()
+    if unit_no == ALL:
+        unit_no = None
+        start = end
+    df = fetch_results_by_units(start, end, day_last=None, weekday=None, pref=pref, hall=hall, model=model, unit_no=unit_no)
+    if not df.empty:
+        df = df.sort_values("date", ascending=False)
+
+df_sum = df.sum().to_dict()
+bb_rate = df_sum["game"] / df_sum["bb"] if df_sum["bb"] != 0 else None
+rb_rate = df_sum["game"] / df_sum["rb"] if df_sum["rb"] != 0 else None
+bbrb_total = df_sum["bb"] + df_sum["rb"]
+total_rate = df_sum["game"] / bbrb_total if bbrb_total != 0 else None
+# st.write(df_sum["game"])
+# st.write(df_sum["medal"])
+# st.write(df_sum["bb"])
+# st.write(df_sum["rb"])
+# st.write(f"{bb_rate:.1f}")
+# st.write(f"{rb_rate:.1f}")
+# st.write(f"{total_rate:.1f}")
+        
+
 
 # --- Display ---
 st.subheader("検索結果", divider="rainbow", help=help_text)
-st.markdown(
-    f"""
-    - 📅 検索期間: {ss.start_date} ～ {ss.end_date}
-    - 📅 ホール: {df_unit.hall.values[0]}
-    - 📅 機種: {df_unit.model.values[0]}
-    """
-)
-show_cols = ["model", "date", "unit_no", "game", "medal", "bb", "rb"]
-show_df = df_unit[show_cols]
 
-st.dataframe(show_df, height="auto", width="stretch", hide_index=True)
-if show_df.shape[0]:
-    st.text(f"{show_df.shape[0]} 件のデータが存在します。")
-else:
+if df.empty:
     st.text(f"データが存在しません。検索条件の見直しをしてください。")
+else:
+    st.markdown(
+        f"""
+        - 📅 検索期間: {ss.start_date} ～ {ss.end_date}
+        - 📅 ホール: {df.hall.values[0]}
+        - 📅 機種: {df.model.values[0]}
+        - BB合算: {bb_rate:.1f}
+        - RB合算: {rb_rate:.1f}
+        - TOTAL合算: {total_rate:.1f}
+        """
+    )
+    show_cols = ["model", "date", "unit_no", "game", "medal", "bb", "rb"]
+    show_df = df[show_cols]
+
+    st.dataframe(show_df, height="auto", width="stretch", hide_index=True)
+    st.text(f"{show_df.shape[0]} 件のデータが存在します。")
+
 
 # トップに戻るリンク
 st.markdown(

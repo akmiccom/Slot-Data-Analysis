@@ -87,9 +87,8 @@ def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
 
 if __name__ == "__main__":
 
-    hall = "やすだ東池袋9号店"
-    hall = "大山オーシャン"
-
+    hall = "グランド-ラ・カータ1111瑞穂店"
+    hall = "麗都平塚"
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()

@@ -2,7 +2,7 @@ import os
 import pandas as pd
 import yaml
 from utils import WEEKDAY_MAP
-from data_from_supabase import fetch
+from app.fetch_functions import fetch
 
 def build_mapping(key, default):
     # yaml  読み込み

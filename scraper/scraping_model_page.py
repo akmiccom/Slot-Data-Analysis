@@ -48,6 +48,7 @@ def extract_model_data(
         # 機種名 (h2 に "ジャグラー" を含むものを優先)
         model = ""
         css = "div.tab_content > h2"
+        # css  = "div > h2"
         try:
             TARGET_MODEL = "ジャグラー"
             page.wait_for_selector(css, timeout=10_000)
@@ -105,8 +106,10 @@ if __name__ == "__main__":
 
     period = 1
 
-    hall_name = "大山オーシャン"
-    hall_name = "やすだ東池袋9号店"
+    hall_name = "グランド-ラ・カータ1111瑞穂店"
+    hall_name = "麗都平塚"
+    hall_name = "マルハン入間店"
+    hall_name = "toho池袋店"
     hall_url = urljoin(config.MAIN_URL, quote(hall_name))
 
     df_frames: list = []
