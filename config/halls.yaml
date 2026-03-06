@@ -6,21 +6,21 @@ halls:
     slug: "やすだ西池袋6号店"
     spreadsheet_id: ""
     days_ago: 1
-    period: 201
+    period: 2
 
   - name: "将軍下赤塚店"
     prefecture: "東京都"
     slug: "将軍下赤塚店"
     spreadsheet_id: ""
     days_ago: 1
-    period: 200
+    period: 2
 
   - name: "エスパス日拓渋谷駅前新館"
     prefecture: "東京都"
     slug: "エスパス日拓渋谷駅前新館"
     spreadsheet_id: ""
     days_ago: 1
-    period: 200
+    period: 2
     
   - name: "グランドホール西高島平店"
     prefecture: "東京都"
