@@ -43,8 +43,15 @@ def df_data_clean(df):
 
     df = df.rename(columns=COULMNS_RENAME_MAP)
     df["model"] = df["model"].replace(MODELS_ALIAS_MAP)
-    df["game"] = df["game"].str.replace(",", "").astype(int)
     df["medal"] = df["medal"].str.replace(",", "").astype(int)
+    
+    # エラー発生行
+    # df["game"] = df["game"].str.replace(",", "").astype(int)
+    # エラー発生による追加修正
+    df["game"] = df["game"].astype(str).str.replace(",", "", regex=False)
+    df["game"] = pd.to_numeric(df["game"], errors="coerce")
+    df = df.dropna(subset=["game"])
+    df["game"] = df["game"].astype(int)
 
     df.to_csv(config.CSV_DIR / "cleaned_all_result_data.csv", index=False)
     logger.debug(df.info())
