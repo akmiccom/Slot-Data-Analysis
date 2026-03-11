@@ -1,5 +1,11 @@
 # config/halls.yaml
 halls:
+  - name: "やすだ清水町店"
+    prefecture: "東京都"
+    slug: "やすだ清水町店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
 
   - name: "やすだ西池袋6号店"
     prefecture: "東京都"
@@ -8,9 +14,16 @@ halls:
     days_ago: 1
     period: 2
 
-  - name: "将軍下赤塚店"
+  - name: "やすだ仲宿店"
     prefecture: "東京都"
-    slug: "将軍下赤塚店"
+    slug: "やすだ仲宿店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "クラウン-東京都"
+    prefecture: "東京都"
+    slug: "クラウン-東京都"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
@@ -21,7 +34,13 @@ halls:
     spreadsheet_id: ""
     days_ago: 1
     period: 2
-    
+
+  - name: "将軍下赤塚店"
+    prefecture: "東京都"
+    slug: "将軍下赤塚店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
   - name: "グランドホール西高島平店"
     prefecture: "東京都"
     slug: "グランドホール西高島平店"
@@ -42,7 +61,6 @@ halls:
     spreadsheet_id: ""
     days_ago: 1
     period: 2
-
 
   - name: "エスパス日拓渋谷本館"
     prefecture: "東京都"
@@ -299,6 +317,20 @@ halls:
   - name: "マルハン川越店"
     prefecture: "埼玉県"
     slug: "マルハン川越店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "やすだ朝霞店"
+    prefecture: "埼玉県"
+    slug: "やすだ朝霞店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "朝霞ウノ"
+    prefecture: "埼玉県"
+    slug: "朝霞ウノ"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
