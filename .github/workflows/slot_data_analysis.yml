@@ -3,8 +3,8 @@ name: slot_data_analysis
 # 自動実行のタイミングを指定
 on:
   schedule:
-    # 毎朝 6:00 JST（= 前日 21:00 UTC）
-    - cron: "0 21 * * *"
+    # 毎朝 8:00 JST（= 前日 23:00 UTC）
+    - cron: "0 23 * * *"
     # 毎朝 12:30 JST（= 当日 3:30 UTC）
     - cron: "30 3 * * *"
 
