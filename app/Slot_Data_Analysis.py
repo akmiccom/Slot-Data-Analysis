@@ -4,11 +4,11 @@ import streamlit as st
 from fetch_functions import fetch_prefectures, fetch_halls, fetch_models, fetch_units
 from fetch_functions import fetch_results_by_units
 from utils import validate_dates
+from ui.components import home_link
 
 
 title = "分析データ一覧"
-st.set_page_config(page_title=title, layout="wide",
-                   initial_sidebar_state="collapsed")
+st.set_page_config(page_title=title, layout="wide", initial_sidebar_state="collapsed")
 
 # st.divider()
 
@@ -60,15 +60,4 @@ st.markdown(
 )
 
 # トップに戻るリンク
-st.markdown(
-    """
-    <div style="text-align: right;">
-        <a href="/"
-           target="_self"
-           style="font-size: 16px; text-decoration: none;">
-            🏠 HOME
-        </a>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
+home_link(position="right")

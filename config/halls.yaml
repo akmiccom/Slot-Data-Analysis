@@ -1,5 +1,40 @@
 # config/halls.yaml
 halls:
+  - name: "ジャラン高島平店"
+    prefecture: "東京都"
+    slug: "ジャラン高島平店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "コンサートホール志村"
+    prefecture: "東京都"
+    slug: "コンサートホール志村"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "パラッツォ志村店"
+    prefecture: "東京都"
+    slug: "パラッツォ志村店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "パチンコ大王-高島平店"
+    prefecture: "東京都"
+    slug: "パチンコ大王-高島平店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "スロットエランドール田無店"
+    prefecture: "東京都"
+    slug: "スロットエランドール田無店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+  
   - name: "やすだ清水町店"
     prefecture: "東京都"
     slug: "やすだ清水町店"
@@ -41,6 +76,7 @@ halls:
     spreadsheet_id: ""
     days_ago: 1
     period: 2
+
   - name: "グランドホール西高島平店"
     prefecture: "東京都"
     slug: "グランドホール西高島平店"
@@ -260,7 +296,7 @@ halls:
 
   - name: "ビックマーチつくば学園の森店"
     prefecture: "茨城県"
-    slug: "ビックマーチつくば学園の森店" # ← 人が読む用。エンコードはコード側で
+    slug: "ビックマーチつくば学園の森店"
     spreadsheet_id: ""
     days_ago: 1
     period: 2
