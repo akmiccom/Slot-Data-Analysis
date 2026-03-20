@@ -1,66 +1,14 @@
 import os
 import streamlit as st
 
-from config.constants import KEY_MAP
-from ui.filters import filters_for_rb_rate
 from ui.components import home_link
 from ui.charts import charts_on_unit_no
-from logic.preprocess import preprocess_for_table
-
+from ui.filters import filters_for_rb_rate
+from ui.filters import filters
 from fetch_functions import fetch_results_by_units
-
+from logic.preprocess import preprocess_for_table
 from pages.rb_probability_by_unit import rb_prob_by_unit
-
-
-
-# def rb_prob_by_unit(fi):
-#     sel_rows = None
-#     ss = st.session_state
-
-#     if fi["day_last_list"] is not None or fi["weekday_int_list"] is not None:
-#         with st.expander(
-#             f"{fi['model']} , {fi['day_last_list']}のつく日集計",
-#             expanded=True,
-#         ):
-#             df = fetch_results_by_units(
-#                 fi["start_date"],
-#                 fi["end_date"],
-#                 day_last=fi["day_last_list"],
-#                 weekday=fi["weekday_int_list"],
-#                 pref=fi["pref"],
-#                 # hall=None,
-#                 model=fi["model"],
-#             )
-#             df_rb_rate = preprocess_for_rb_rate(df)
-#             event = st.dataframe(
-#                 df_rb_rate,
-#                 width="stretch",
-#                 hide_index=True,
-#                 selection_mode="single-row",
-#                 on_select="rerun",  # 選択されたら再実行して event が更新される
-#             )
-#             sel_rows = event.selection.get("rows", [])
-
-#             if sel_rows:
-#                 row = df_rb_rate.iloc[sel_rows[0]]
-#                 ss["selected_unit"] = {
-#                     "hall": row["hall"],
-#                     "model": fi["model"],
-#                     "unit_no": int(row["unit_no"]),
-#                     "start_date": fi["start_date"],
-#                     "end_date": fi["end_date"],
-#                     "pref": fi["pref"],
-#                     "day_last_list": fi["day_last_list"],
-#                     "weekday_int_list": fi["weekday_int_list"],
-#                 }
-#             # else:
-#             #     st.write()
-#     else:
-#         st.info("曜日もしくは末尾日を選択してください")
-#         st.stop()
-
-#     selected = ss.get("selected_unit")
-#     return sel_rows, selected
+from config.dates import n_days_ago, yesterday, prev_month_first
 
 
 def reslut_by_unit(sel_rows, selected):
@@ -96,30 +44,50 @@ def reslut_by_unit(sel_rows, selected):
             if df_unit is not None and not df_unit.empty:
                 df_table = preprocess_for_table(df_unit)
                 st.dataframe(df_table, hide_index=True, width="stretch")
+        home_link(position="right")
 
     else:
         expander_title = f"RB確率一覧から台を選択してください"
-        with st.expander(expander_title, expanded=True):
-            st.stop()
-
+        st.write(expander_title)
+        home_link(position="right")
+        st.stop()
 
 
 # page_config
-# page_title = "Analysis Dashboard"
 page_title = os.path.splitext(os.path.basename(__file__))[0]
 st.set_page_config(page_title=page_title, page_icon="📊", layout="wide")
 
-# filters
-fi = filters_for_rb_rate()
+home_link(position="left")
+
+st.header(page_title)
+
+# fi = filters_for_rb_rate()
+
+PAST_N_DAYS = 10
+
+ss = st.session_state
+ss.setdefault("start_date", prev_month_first(3))
+ss.setdefault("end_date", yesterday)
+
+fi = filters(
+    state_prefix="page_a",
+    start_date_default = prev_month_first(3),
+    visible_fields={
+        "pref",
+        # "hall",
+        "model",
+        # "unit_no",
+        "day_last_list",
+        "weekday_int_list",
+        "start_date",
+        "end_date",
+    },
+)
 
 r1c1, r1c2 = st.columns([1, 2], gap="small")
 
 with r1c1:
     sel_rows, selected = rb_prob_by_unit(fi)
-    home_link(position="left")
 
 with r1c2:
     reslut_by_unit(sel_rows, selected)
-
-
-
