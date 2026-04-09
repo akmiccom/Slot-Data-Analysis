@@ -1,5 +1,41 @@
 # config/halls.yaml
 halls:
+
+  - name: "多賀城ひまわり"
+    prefecture: "東京都"
+    slug: "多賀城ひまわり"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ベガスベガス北仙台店"
+    prefecture: "東京都"
+    slug: "ベガスベガス北仙台店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ベガスワンダープラザ店"
+    prefecture: "東京都"
+    slug: "ベガスワンダープラザ店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "パチンコタイガー塩釜店"
+    prefecture: "東京都"
+    slug: "パチンコタイガー塩釜店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "パラディソ泉店"
+    prefecture: "東京都"
+    slug: "パラディソ泉店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "ジャラン高島平店"
     prefecture: "東京都"
     slug: "ジャラン高島平店"
