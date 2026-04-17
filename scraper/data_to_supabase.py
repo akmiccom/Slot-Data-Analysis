@@ -155,39 +155,6 @@ if __name__ == "__main__":
 
     df = pd.read_csv(config.CSV_DIR / "cleaned_all_result_data.csv")
     
-    # df = pd.read_csv("minrepo_01_from_sqlite.csv")
-    # df["date"] = pd.to_datetime(df["date"]).dt.date
-
-    # target_models = [
-    #     "ハッピージャグラーVIII",
-    #     "ジャグラーガールズ",
-    #     "ファンキージャグラー2",
-    #     "ネオアイムジャグラーEX",
-    #     "マイジャグラーV",
-    #     "ゴーゴージャグラー3",
-    #     "ウルトラミラクルジャグラー",
-    #     "ミスタージャグラー",
-    #     "アイムジャグラーEX-TP",
-    # ]
-
-    # target_halls = [
-    #     "コンサートホールエフ成増",
-    #     "マルハン大山店",
-    #     "マルハン青梅新町店",
-    #     "大山オーシャン",
-    #     "楽園ハッピーロード大山",
-    #     "楽園池袋店",
-    #     "楽園池袋店グリーンサイド",
-    #     "スーパースロットサンフラワー+",
-    #     "YASUDA9",
-    #     "エクサファースト",
-    #     "マルハン池袋店",
-    # ]
-
-    # df = df[df["hall"].isin(target_halls)]
-    # df = df[df["model"].isin(target_models)]
-    # df = df[(df["date"] >= "2025-11-01") & (df["date"] <= "2025-11-30")]
-
     print(df.date.unique())
     print(df.hall.unique())
     print(df.model.unique())

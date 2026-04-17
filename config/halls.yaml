@@ -36,6 +36,20 @@ halls:
     days_ago: 1
     period: 2
 
+  - name: "パーラーディオス下赤塚本店"
+    prefecture: "東京都"
+    slug: "パーラーディオス下赤塚本店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+    
+  - name: "ウイングあすと長町店"
+    prefecture: "東京都"
+    slug: "ウイングあすと長町店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "ジャラン高島平店"
     prefecture: "東京都"
     slug: "ジャラン高島平店"
