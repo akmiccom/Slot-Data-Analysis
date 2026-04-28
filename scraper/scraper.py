@@ -21,7 +21,7 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 # ページ操作
 # =========================
-def scraper_all_hall(test_mode=False) -> pd.DataFrame:
+def scraper_all_hall(test_mode=False, test_count=2) -> pd.DataFrame:
     start = time.perf_counter()
 
 
@@ -36,7 +36,7 @@ def scraper_all_hall(test_mode=False) -> pd.DataFrame:
     ]
 
     if test_mode:
-        hall_list = hall_list[:2]
+        hall_list = hall_list[:test_count]
         logger.info("*********** テストモードで実行しています。 **********")
 
     frames: list = []
@@ -69,7 +69,7 @@ def scraper_all_hall(test_mode=False) -> pd.DataFrame:
 
 if __name__ == "__main__":
 
-    df = scraper_all_hall(test_mode=False)
+    df = scraper_all_hall(test_mode=False, test_count=2)
 
     df = df_data_clean(df)
 
