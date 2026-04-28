@@ -1,6 +1,27 @@
 # config/halls.yaml
 halls:
 
+  - name: "やすだひばりヶ丘店"
+    prefecture: "東京都"
+    slug: "やすだひばりヶ丘店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ガイア大泉学園店"
+    prefecture: "東京都"
+    slug: "ガイア大泉学園店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "ガイア富士見台南口店"
+    prefecture: "東京都"
+    slug: "ガイア富士見台南口店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "多賀城ひまわり"
     prefecture: "東京都"
     slug: "多賀城ひまわり"
