@@ -1,6 +1,20 @@
 # config/halls.yaml
 halls:
 
+  - name: "プレサス"
+    prefecture: "東京都"
+    slug: "プレサス"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "エスパス日拓秋葉原駅前店"
+    prefecture: "東京都"
+    slug: "エスパス日拓秋葉原駅前店"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "やすだひばりヶ丘店"
     prefecture: "東京都"
     slug: "やすだひばりヶ丘店"
