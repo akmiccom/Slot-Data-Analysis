@@ -1,6 +1,13 @@
 # config/halls.yaml
 halls:
 
+  - name: "toyo-hall"
+    prefecture: "東京都"
+    slug: "toyo-hall"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "プレサス"
     prefecture: "東京都"
     slug: "プレサス"
