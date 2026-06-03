@@ -1,6 +1,20 @@
 # config/halls.yaml
 halls:
 
+  - name: "ビックディッパー門前仲町店"
+    prefecture: "東京都"
+    slug: "toyo-hall"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
+  - name: "門前仲町スターダスト"
+    prefecture: "東京都"
+    slug: "門前仲町スターダスト"
+    spreadsheet_id: ""
+    days_ago: 1
+    period: 2
+
   - name: "toyo-hall"
     prefecture: "東京都"
     slug: "toyo-hall"
