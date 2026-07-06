@@ -69,13 +69,20 @@ def extract_model_data(
         try:
             page.wait_for_selector(css, timeout=15_000)
         except PWTimeout:
-            logger.debug("テーブルが見つかりません。")
-            # return []
+            logger.warning("テーブルが見つからないためスキップします: %s", url)
+            continue
 
         rows = page.locator(css)
+        if rows.count() == 0:
+            logger.warning("テーブル行が空のためスキップします: %s", url)
+            continue
+
         # th行(header)処理
         ths = rows.nth(0).locator("th")
         header = [_norm_text(ths.nth(i).inner_text()) for i in range(ths.count())]
+        if not header:
+            logger.warning("テーブルヘッダーが空のためスキップします: %s", url)
+            continue
         logger.debug(header)
         # td(date)行処理
         table: list[list[str]] = []
@@ -88,10 +95,16 @@ def extract_model_data(
                 table.append(row)
 
         logger.info(f"{len(table)} 行の機種データを取得")
+        if not table:
+            logger.warning("テーブルデータが空のためスキップします: %s", url)
+            continue
         for t in table:
             logger.debug(t)
 
         df = pd.DataFrame(table, columns=header)
+        if "台番" not in df.columns:
+            logger.warning("台番列が見つからないためスキップします: %s", url)
+            continue
         df = df[~df["台番"].astype(str).str.contains("平均")]
         df["pref"] = pref
         df["hall"] = hall

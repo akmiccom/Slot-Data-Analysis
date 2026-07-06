@@ -11,6 +11,14 @@ from scraper.scraping_hall_page import extract_date_url
 from scraper.scraping_date_page import extract_model_url
 from scraper.scraping_model_page import extract_model_data
 
+# =========================
+# 設定・ロガー
+# =========================
+filename, ext = os.path.splitext(os.path.basename(__file__))
+logger = setup_logger(filename, log_file=config.LOG_PATH)
+
+RESULT_COLUMNS = ["pref", "hall", "model", "date", "台番", "G数", "BB", "RB", "差枚"]
+MODEL_URL_COLUMNS = ["pref", "hall", "date", "date_url", "model_url"]
 
 def extract_result_data(hall_url: str, period: int = 1):
     """
@@ -24,29 +32,37 @@ def extract_result_data(hall_url: str, period: int = 1):
 
         date_urls = extract_date_url(hall_url, page, period=period)
 
+        pref = hall = "unknown"
         try:
             df_model_urls: list = []
-            columns = ["pref", "hall", "date", "date_url", "model_url"]
             for pref, hall, date, date_url in date_urls:
                 model_urls = extract_model_url(page, hall, pref, date_url, date)
                 if not model_urls:
                     continue
-                df_model_url = pd.DataFrame(model_urls, columns=columns)
+                df_model_url = pd.DataFrame(model_urls, columns=MODEL_URL_COLUMNS)
                 df_model_urls.append(df_model_url)
 
                 df_model = extract_model_data(page, model_urls)
                 if not df_model.empty:
                     df_frames.append(df_model)
 
-            df_csv = pd.concat(df_model_urls)
-            df_csv.to_csv(config.CSV_DIR / f"{pref}_{hall}_model_urls.csv", index=False)
+            if df_model_urls:
+                df_model_urls_result = pd.concat(df_model_urls, ignore_index=True)
+            else:
+                logger.warning("機種URLが取得できませんでした: %s", hall_url)
+                df_model_urls_result = pd.DataFrame(columns=MODEL_URL_COLUMNS)
+            df_model_urls_result.to_csv(config.CSV_DIR / f"{pref}_{hall}_model_urls.csv", index=False)
 
         finally:
             browser.close()
-            df_csv = pd.concat(df_frames, ignore_index=True)
-            df_csv.to_csv(config.CSV_DIR / f"{pref}_{hall}_result_data.csv", index=False)
+            if df_frames:
+                df_result = pd.concat(df_frames, ignore_index=True)
+            else:
+                logger.warning("結果データが取得できませんでした: %s", hall_url)
+                df_result = pd.DataFrame(columns=RESULT_COLUMNS)
+            df_result.to_csv(config.CSV_DIR / f"{pref}_{hall}_result_data.csv", index=False)
 
-        return df_csv
+        return df_result
 
 
 if __name__ == "__main__":

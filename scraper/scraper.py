@@ -2,7 +2,6 @@ import pandas as pd
 from urllib.parse import quote, urljoin
 import os
 import time
-import os
 import yaml
 
 from config import config
@@ -40,21 +39,26 @@ def scraper_all_hall(test_mode=False, test_count=2) -> pd.DataFrame:
         logger.info("*********** テストモードで実行しています。 **********")
 
     frames: list = []
+    cols = ["pref", "hall", "model", "date", "台番", "G数", "BB", "RB", "差枚"]
     for i, h in enumerate(hall_list, start=1):
         try:
             encoded_slug = quote(h.slug)
             hall_url = urljoin(config.MAIN_URL, encoded_slug)
             logger.info("(%d/%d) 処理中: %s", i, len(hall_list), hall_url)
             df_hall = extract_result_data(hall_url, h.period)
+            logger.info("ホール取得件数: %s / %d 件", hall_url, len(df_hall))
             if not df_hall.empty:
                 frames.append(df_hall)
         except Exception as e:
             logger.exception("ホール処理でエラー: %s", e)
 
-    df_all = pd.concat(frames, ignore_index=True)
+    if frames:
+        df_all = pd.concat(frames, ignore_index=True)
+    else:
+        logger.warning("取得データが空のため、空DataFrameを出力します。")
+        df_all = pd.DataFrame(columns=cols)
 
     # 列の順番を固定（下流の処理を安定化）
-    cols = ["pref", "hall", "model", "date", "台番", "G数", "BB", "RB", "差枚"]
     for c in cols:
         if c not in df_all.columns:
             df_all[c] = pd.NA
