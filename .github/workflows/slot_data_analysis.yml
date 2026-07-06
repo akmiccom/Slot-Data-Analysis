@@ -42,8 +42,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install playwright
-          playwright install
-          playwright install-deps
+          python -m playwright install --with-deps chromium
 
       - name: Run Playwright script
         # run: python scraper/scraping_hall_page.py
@@ -53,11 +52,15 @@ jobs:
         # run: python scraper/scraper.py
         run: python -m scraper.scraper
 
-      - name: Save scraped results
+      - name: Save scraped logs and csv
+        if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: scraped-results
-          path: data/  # フォルダ全体
+          name: scraped-logs-and-csv
+          path: |
+            data/logs
+            data/csv
+          if-no-files-found: warn
 
 
 

@@ -84,9 +84,16 @@ def df_data_clean(df):
 
     # 予測RB回数を計算して列修正
     calc_rb_count(df)
-    
+
     # 予測メダル数を計算して列修正
     calc_medal(df)
+
+    duplicate_keys = ["pref", "hall", "model", "date", "unit_no"]
+    duplicate_count = df.duplicated(subset=duplicate_keys, keep=False).sum()
+    logger.info("clean後の重複件数(%s): %d 件", duplicate_keys, duplicate_count)
+    if duplicate_count:
+        df = df.drop_duplicates(subset=duplicate_keys, keep="last")
+        logger.info("重複除去後の件数: %d 件", len(df))
 
     df.to_csv(config.CSV_DIR / "cleaned_all_result_data.csv", index=False)
     logger.debug(df.info())
@@ -174,7 +181,7 @@ def calc_medal(df):
         (out_bb + out_rb + out_replay + out_cherry + out_grape) - in_medal
     ).round().astype(int)
     
-    print(df_specific_halls)
+    logger.debug("補正対象ホールのmedal計算結果:\n%s", df_specific_halls)
 
     df.loc[df_specific_halls.index, "medal"] = df_specific_halls["medal_calc"]
 

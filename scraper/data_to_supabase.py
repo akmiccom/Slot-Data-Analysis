@@ -136,16 +136,42 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> None:
         logger.warning("results に挿入するデータがありません。")
         return
 
+    conflict_keys = ["hall_id", "model_id", "unit_no", "date"]
+    before_dedup = len(records)
+    records_df = pd.DataFrame(records)
+    duplicate_count = records_df.duplicated(subset=conflict_keys, keep=False).sum()
+    logger.info("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
+    if duplicate_count:
+        records_df = records_df.drop_duplicates(subset=conflict_keys, keep="last")
+        logger.info("results upsert前の重複除去: %d 件 -> %d 件", before_dedup, len(records_df))
+    records = records_df.to_dict("records")
+    logger.info("results upsert対象件数: %d 件", len(records))
+
     # 3) 一括 upsert（unique(hall_id, model_id, unit_no, date) を想定）
     #    行数が多い場合はバッチに分ける
     batch_size = 1000
     inserted = 0
     for i in range(0, len(records), batch_size):
+        batch_no = i // batch_size + 1
         batch = records[i : i + batch_size]
-        supabase.table("results").upsert(
-            batch,
-            on_conflict="hall_id,model_id,unit_no,date",
-        ).execute()
+        logger.info("results upsert batch %d: %d 件", batch_no, len(batch))
+        try:
+            supabase.table("results").upsert(
+                batch,
+                on_conflict="hall_id,model_id,unit_no,date",
+            ).execute()
+        except Exception:
+            key_samples = [
+                {key: record.get(key) for key in ["hall_id", "model_id", "unit_no", "date"]}
+                for record in batch[:5]
+            ]
+            logger.exception(
+                "results upsert失敗: batch=%d, 件数=%d, key_samples=%s",
+                batch_no,
+                len(batch),
+                key_samples,
+            )
+            raise
         inserted += len(batch)
 
     logger.info(f"results upsert: {inserted} 件（新規/既存含む）")
@@ -155,10 +181,10 @@ if __name__ == "__main__":
 
     df = pd.read_csv(config.CSV_DIR / "cleaned_all_result_data.csv")
     
-    print(df.date.unique())
-    print(df.hall.unique())
-    print(df.model.unique())
-    print(df.shape[0])
+    logger.debug("date unique: %s", df.date.unique())
+    logger.debug("hall unique: %s", df.hall.unique())
+    logger.debug("model unique: %s", df.model.unique())
+    logger.debug("row count: %d", df.shape[0])
 
     supabase = get_supabase_client()
     add_model(df, supabase)
