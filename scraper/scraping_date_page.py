@@ -7,6 +7,7 @@ import os
 from config import config
 from utils.logger_setup import setup_logger
 from utils.utils import _norm_text
+from utils.target_models import build_alias_to_canonical, match_target_model
 from scraper.scraping_hall_page import extract_date_url
 
 # =========================
@@ -21,10 +22,10 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 def extract_model_url(
     page: Page, hall: str, pref: str, date_url: str, date: str
-) -> list[tuple[str, str, str, str, str]]:
+) -> list[tuple[str, str, str, str, str, str]]:
     """
-    日付ページから、"ジャグラー" を含む機種リンクを抽出
-    returns: List[(pref, hall, date, date_url, model_url)]
+    日付ページから、target_models.yaml に一致する機種リンクを抽出
+    returns: List[(pref, hall, date, date_url, model_url, canonical_model_name)]
     """
 
     logger.info("日付ページにアクセス: %s", date_url)
@@ -41,7 +42,8 @@ def extract_model_url(
     title = _norm_text(page.locator("h1").first.text_content())
     logger.info("Page title: %s", title)
 
-    model_urls: list[tuple[str, str, str, str, str]] = []
+    model_urls: list[tuple[str, str, str, str, str, str]] = []
+    alias_to_canonical = build_alias_to_canonical()
     css_table = "table.kishu"
     first_table = page.locator(css_table).nth(0)
 
@@ -58,9 +60,18 @@ def extract_model_url(
     count = links.count()
     for j in range(count):
         model_text = _norm_text(links.nth(j).inner_text())
-        if "ジャグラー" in model_text:
-            href = links.nth(j).get_attribute("href") or ""
-            model_urls.append((pref, hall, date, date_url, href))
+        href = links.nth(j).get_attribute("href") or ""
+        canonical_model = match_target_model(model_text, alias_to_canonical)
+        if canonical_model:
+            logger.info(
+                "対象機種に一致: raw_model_name=%s, canonical_model_name=%s, url=%s",
+                model_text,
+                canonical_model,
+                href,
+            )
+            model_urls.append((pref, hall, date, date_url, href, canonical_model))
+        else:
+            logger.debug("対象外機種: raw_model_name=%s, url=%s", model_text, href)
 
     logger.info("機種リンク抽出: %d 件", len(model_urls))
     if model_urls:
@@ -87,7 +98,7 @@ if __name__ == "__main__":
         date_urls = extract_date_url(hall_url, page, period=3)
 
         df_model_urls: list = []
-        columns = ["pref", "hall", "date", "date_url", "model_url"]
+        columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name"]
         for pref, hall, date, date_url in date_urls:
             model_urls = extract_model_url(page, hall, pref, date_url, date)
             df_model_url = pd.DataFrame(model_urls, columns=columns)
