@@ -33,6 +33,8 @@ def build_mapping(key, default):
 # =========================
 def df_data_clean(df):
 
+    # TODO: スクレイピング時の指定機種方式と二重管理にならないよう、
+    # 将来的には config/target_models.yaml に寄せる。
     MODELS_ALIAS_MAP = {
         "SミスタージャグラーKK": "ミスタージャグラー",
         "S ミスタージャグラー KK": "ミスタージャグラー",

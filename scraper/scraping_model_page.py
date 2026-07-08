@@ -57,7 +57,7 @@ def _log_model_skip(
 
 
 def extract_model_data(
-    page: Page, model_urls: list[tuple[str, str, str, str, str]]
+    page: Page, model_urls: list[tuple[str, str, str, str, str] | tuple[str, str, str, str, str, str]]
 ) -> pd.DataFrame:
     """
     各機種ページに移動し、台データを DataFrame で返す
@@ -66,7 +66,9 @@ def extract_model_data(
 
     frames: list[pd.DataFrame] = []
 
-    for pref, hall, date, date_url, model_url in model_urls:
+    for model_url_tuple in model_urls:
+        pref, hall, date, date_url, model_url = model_url_tuple[:5]
+        canonical_model_name = model_url_tuple[5] if len(model_url_tuple) >= 6 else None
         url = urljoin(date_url, model_url)
         try:
             logger.info(f"機種ページにアクセスします。")
@@ -81,7 +83,7 @@ def extract_model_data(
             #     quality=50,
             # )
 
-            # 機種名 (h2 に "ジャグラー" を含むものを優先)
+            # 機種名 (DB保存用は canonical_model_name を優先)
             model = ""
             css = "div.tab_content > h2"
             # css  = "div > h2"
@@ -96,9 +98,17 @@ def extract_model_data(
                         break
                 if not model and h2s.count():
                     model = extract_model_name(h2s.nth(i).inner_text())
-                logger.info(f"機種名: {model}")
+                logger.info("機種名(h2): %s", model)
             except PWTimeout:
                 logger.warning("機種タイトルが取得できませんでした: %s", url)
+
+            if canonical_model_name:
+                logger.info(
+                    "DB保存用機種名に canonical_model_name を使用: h2_model=%s, canonical_model_name=%s",
+                    model,
+                    canonical_model_name,
+                )
+                model = canonical_model_name
 
             # テーブルの取得
             css = "div > div.table_wrap > table > tbody > tr"
@@ -179,7 +189,7 @@ if __name__ == "__main__":
 
         try:
             df_model_urls: list = []
-            columns = ["pref", "hall", "date", "date_url", "model_url"]
+            columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name"]
             for pref, hall, date, date_url in date_urls:
                 model_urls = extract_model_url(page, hall, pref, date_url, date)
                 if not model_urls:

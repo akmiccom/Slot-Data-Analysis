@@ -29,13 +29,30 @@ def _load_hall_list(test_mode: bool = False, test_count: int = 2) -> list[config
     with open(config.HALLS_YAML, "r", encoding="utf-8") as f:
         halls_cfg = yaml.safe_load(f).get("halls", [])
 
-    hall_list: list[config.HallInfo] = [
-        config.HallInfo(slug=h["slug"], period=int(h["period"])) for h in halls_cfg
+    all_halls: list[config.HallInfo] = [
+        config.HallInfo(
+            name=h.get("name", h.get("slug", "")),
+            prefecture=h.get("prefecture", ""),
+            slug=h["slug"],
+            enabled=h.get("enabled", True),
+            period=int(h["period"]),
+        )
+        for h in halls_cfg
     ]
+    disabled_count = sum(not h.enabled for h in all_halls)
+    hall_list = [h for h in all_halls if h.enabled]
 
+    enabled_count = len(hall_list)
     if test_mode:
         hall_list = hall_list[:test_count]
         logger.info("*********** テストモードで実行しています。 **********")
+
+    logger.info(
+        "ホール設定読み込み: enabled_halls=%d, processing_halls=%d, disabled_halls=%d",
+        enabled_count,
+        len(hall_list),
+        disabled_count,
+    )
     return hall_list
 
 
@@ -84,7 +101,7 @@ def scraper_all_hall(
             for i, h in enumerate(hall_list, start=1):
                 encoded_slug = quote(h.slug)
                 hall_url = urljoin(config.MAIN_URL, encoded_slug)
-                logger.info("(%d/%d) 処理中: %s", i, len(hall_list), hall_url)
+                logger.info("(%d/%d) 処理中: name=%s, prefecture=%s, url=%s", i, len(hall_list), h.name, h.prefecture, hall_url)
 
                 def should_scrape(pref: str, hall: str, date: str) -> bool:
                     nonlocal target_count, skipped_count, scrape_target_count
