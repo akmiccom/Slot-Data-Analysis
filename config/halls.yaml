@@ -1,485 +1,342 @@
 # config/halls.yaml
 halls:
-
-  - name: "ビックディッパー門前仲町店"
-    prefecture: "東京都"
-    slug: "ビックディッパー門前仲町店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "門前仲町スターダスト"
-    prefecture: "東京都"
-    slug: "門前仲町スターダスト"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "toyo-hall"
-    prefecture: "東京都"
-    slug: "toyo-hall"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "プレサス"
-    prefecture: "東京都"
-    slug: "プレサス"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "エスパス日拓秋葉原駅前店"
-    prefecture: "東京都"
-    slug: "エスパス日拓秋葉原駅前店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "やすだひばりヶ丘店"
-    prefecture: "東京都"
-    slug: "やすだひばりヶ丘店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ガイア大泉学園店"
-    prefecture: "東京都"
-    slug: "ガイア大泉学園店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ガイア富士見台南口店"
-    prefecture: "東京都"
-    slug: "ガイア富士見台南口店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "多賀城ひまわり"
-    prefecture: "東京都"
-    slug: "多賀城ひまわり"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ベガスベガス北仙台店"
-    prefecture: "東京都"
-    slug: "ベガスベガス北仙台店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ベガスワンダープラザ店"
-    prefecture: "東京都"
-    slug: "ベガスワンダープラザ店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パチンコタイガー塩釜店"
-    prefecture: "東京都"
-    slug: "パチンコタイガー塩釜店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パラディソ泉店"
-    prefecture: "東京都"
-    slug: "パラディソ泉店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パーラーディオス下赤塚本店"
-    prefecture: "東京都"
-    slug: "パーラーディオス下赤塚本店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-    
-  - name: "ウイングあすと長町店"
-    prefecture: "東京都"
-    slug: "ウイングあすと長町店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ジャラン高島平店"
-    prefecture: "東京都"
-    slug: "ジャラン高島平店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "コンサートホール志村"
-    prefecture: "東京都"
-    slug: "コンサートホール志村"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パラッツォ志村店"
-    prefecture: "東京都"
-    slug: "パラッツォ志村店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パチンコ大王-高島平店"
-    prefecture: "東京都"
-    slug: "パチンコ大王-高島平店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "スロットエランドール田無店"
-    prefecture: "東京都"
-    slug: "スロットエランドール田無店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-  
-  - name: "やすだ清水町店"
-    prefecture: "東京都"
-    slug: "やすだ清水町店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "やすだ西池袋6号店"
-    prefecture: "東京都"
-    slug: "やすだ西池袋6号店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "やすだ仲宿店"
-    prefecture: "東京都"
-    slug: "やすだ仲宿店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "クラウン-東京都"
-    prefecture: "東京都"
-    slug: "クラウン-東京都"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "エスパス日拓渋谷駅前新館"
-    prefecture: "東京都"
-    slug: "エスパス日拓渋谷駅前新館"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "将軍下赤塚店"
-    prefecture: "東京都"
-    slug: "将軍下赤塚店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "グランドホール西高島平店"
-    prefecture: "東京都"
-    slug: "グランドホール西高島平店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "YASUDA5"
-    prefecture: "東京都"
-    slug: "yasuda5"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "P-PORT-PREGO-EX池袋南口"
-    prefecture: "東京都"
-    slug: "p-port-prego-ex池袋南口"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "エスパス日拓渋谷本館"
-    prefecture: "東京都"
-    slug: "エスパス日拓渋谷本館"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "楽園渋谷道玄坂店"
-    prefecture: "東京都"
-    slug: "楽園渋谷道玄坂店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "楽園渋谷駅前店"
-    prefecture: "東京都"
-    slug: "楽園渋谷駅前店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "TOHO池袋店"
-    prefecture: "東京都"
-    slug: "toho池袋店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "グランド-ラ・カータ1111瑞穂店"
-    prefecture: "東京都"
-    slug: "グランド-ラ・カータ1111瑞穂店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ミリオン平和台16号店"
-    prefecture: "東京都"
-    slug: "ミリオン平和台16号店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ミリオン東武練馬店スロット館"
-    prefecture: "東京都"
-    slug: "ミリオン東武練馬13号店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パラッツォ千川店"
-    prefecture: "東京都"
-    slug: "パラッツォ千川店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "練馬オーシャン"
-    prefecture: "東京都"
-    slug: "練馬オーシャン"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "EXA FIRST"
-    prefecture: "東京都"
-    slug: "エクサファースト"
-    spreadsheet_id: "10-B_vV1pvUzXmvGAiHhODGJgCloOsAmqSO9HvXpk_T8"
-    days_ago: 1
-    period: 2
-
-  - name: "コンサートホールエフ成増"
-    prefecture: "東京都"
-    slug: "コンサートホールエフ成増"
-    spreadsheet_id: "1EDY2RfjDQNsapVrl2X-UrqPKoXrkQmYJnk3uPqccBxY"
-    days_ago: 1
-    period: 2
-
-  - name: "楽園大山店"
-    prefecture: "東京都"
-    slug: "楽園大山店"
-    spreadsheet_id: "1dewRwbCe783UAj7C_r5tn4CA7JyPfwxCahc8aOf9M2I"
-    days_ago: 1
-    period: 2
-
-  - name: "大山オーシャン"
-    prefecture: "東京都"
-    slug: "大山オーシャン"
-    spreadsheet_id: "1sJMqNDHE2eGzrRnaCSGUM60ky-DqE-rGK7L_e3R-N0w"
-    days_ago: 1
-    period: 2
-
-  - name: "楽園池袋店"
-    prefecture: "東京都"
-    slug: "楽園池袋店"
-    spreadsheet_id: "1WpX0BkiZtwXnxWiWvuC2lxOzH2c08rTZ4s-PXWO2YfU"
-    days_ago: 1
-    period: 2
-
-  - name: "楽園池袋店グリーンサイド"
-    prefecture: "東京都"
-    slug: "楽園池袋店グリーンサイド"
-    spreadsheet_id: "1ApsF9qay7gOj6S75u28lQvOp2EkleHRH1WGSdB_TlSw"
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン大山店"
-    prefecture: "東京都"
-    slug: "マルハン大山店"
-    spreadsheet_id: "14EO39e7xjHu-H7kBOTz3ZI3M0RN6hkbFIN8XD-ZKmPE"
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン池袋店"
-    prefecture: "東京都"
-    slug: "マルハン池袋店"
-    spreadsheet_id: "1EJtt8vWketvvUwwkD69H86791NUlecwIG30Ldns_qws"
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン青梅新町店"
-    prefecture: "東京都"
-    slug: "マルハン青梅新町店"
-    spreadsheet_id: "1VVCzgpDuwxyuQ0AR51xBeya6ZTETvSXDoKA2tyLmnjE"
-    days_ago: 1
-    period: 2
-
-  - name: "スーパースロットサンフラワー⁺"
-    prefecture: "東京都"
-    slug: "サンフラワー瑞穂店"
-    spreadsheet_id: "1eKhvDcZsnntvwe-ehvWNepCAmkXI379n1q4EICtH-R4"
-    days_ago: 1
-    period: 2
-
-  - name: "YASUDA9"
-    prefecture: "東京都"
-    slug: "やすだ東池袋9号店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "p-port-prego立川店"
-    prefecture: "東京都"
-    slug: "p-port-prego立川店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "楽園立川店"
-    prefecture: "東京都"
-    slug: "楽園立川店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ハイパージアス立川"
-    prefecture: "東京都"
-    slug: "ハイパージアス立川"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "みとや水道橋"
-    prefecture: "東京都"
-    slug: "みとや水道橋"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "レイトスロットステージ土浦"
-    prefecture: "茨城県"
-    slug: "麗都スロットステージ土浦"
-    spreadsheet_id: "1WO9qw9rBBUwJlmWe-b71sMMIh3ZlfUJJDSdh-hOhunQ"
-    days_ago: 1
-    period: 2
-
-  - name: "レイトつくば"
-    prefecture: "茨城県"
-    slug: "麗都つくば"
-    spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
-    days_ago: 1
-    period: 2
-
-  - name: "マルハンつくば店"
-    prefecture: "茨城県"
-    slug: "マルハンつくば店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ビックマーチつくば本店"
-    prefecture: "茨城県"
-    slug: "ビックマーチつくば本店"
-    spreadsheet_id: "1yrPQ4clEFo33iT2WpeOnnEEHc7XriczG_OJYGeiWe9Y"
-    days_ago: 1
-    period: 2
-
-  - name: "ビックマーチつくば学園の森店"
-    prefecture: "茨城県"
-    slug: "ビックマーチつくば学園の森店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "マックス石岡店"
-    prefecture: "茨城県"
-    slug: "マックス石岡店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン石岡店"
-    prefecture: "茨城県"
-    slug: "マルハン石岡店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "レイト平塚"
-    prefecture: "茨城県"
-    slug: "麗都平塚"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "パールショップともえ川越店"
-    prefecture: "埼玉県"
-    slug: "パールショップともえ川越店"
-    spreadsheet_id: "1i70joJ27Hs7inS-D89z9YMSJO1aRvaBeeWn0n9xpktY"
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン入間店"
-    prefecture: "埼玉県"
-    slug: "マルハン入間店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "第一プラザ霞ヶ関店"
-    prefecture: "埼玉県"
-    slug: "第一プラザ霞ヶ関店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "ジャラン若葉駅前店"
-    prefecture: "埼玉県"
-    slug: "ジャラン若葉駅前店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "マルハン川越店"
-    prefecture: "埼玉県"
-    slug: "マルハン川越店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "やすだ朝霞店"
-    prefecture: "埼玉県"
-    slug: "やすだ朝霞店"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  - name: "朝霞ウノ"
-    prefecture: "埼玉県"
-    slug: "朝霞ウノ"
-    spreadsheet_id: ""
-    days_ago: 1
-    period: 2
-
-  # - name: ""
-  #   prefecture: ""
-  #   slug: ""
-  #   spreadsheet_id: ""
-  #   days_ago: 1
-  #   period: 2
+- name: ビックディッパー門前仲町店
+  prefecture: 東京都
+  slug: ビックディッパー門前仲町店
+  enabled: true
+  period: 2
+- name: 門前仲町スターダスト
+  prefecture: 東京都
+  slug: 門前仲町スターダスト
+  enabled: true
+  period: 2
+- name: toyo-hall
+  prefecture: 東京都
+  slug: toyo-hall
+  enabled: true
+  period: 2
+- name: プレサス
+  prefecture: 東京都
+  slug: プレサス
+  enabled: true
+  period: 2
+- name: エスパス日拓秋葉原駅前店
+  prefecture: 東京都
+  slug: エスパス日拓秋葉原駅前店
+  enabled: true
+  period: 2
+- name: やすだひばりヶ丘店
+  prefecture: 東京都
+  slug: やすだひばりヶ丘店
+  enabled: true
+  period: 2
+- name: ガイア大泉学園店
+  prefecture: 東京都
+  slug: ガイア大泉学園店
+  enabled: true
+  period: 2
+- name: ガイア富士見台南口店
+  prefecture: 東京都
+  slug: ガイア富士見台南口店
+  enabled: true
+  period: 2
+- name: 多賀城ひまわり
+  prefecture: 東京都
+  slug: 多賀城ひまわり
+  enabled: true
+  period: 2
+- name: ベガスベガス北仙台店
+  prefecture: 東京都
+  slug: ベガスベガス北仙台店
+  enabled: true
+  period: 2
+- name: ベガスワンダープラザ店
+  prefecture: 東京都
+  slug: ベガスワンダープラザ店
+  enabled: true
+  period: 2
+- name: パチンコタイガー塩釜店
+  prefecture: 東京都
+  slug: パチンコタイガー塩釜店
+  enabled: true
+  period: 2
+- name: パラディソ泉店
+  prefecture: 東京都
+  slug: パラディソ泉店
+  enabled: true
+  period: 2
+- name: パーラーディオス下赤塚本店
+  prefecture: 東京都
+  slug: パーラーディオス下赤塚本店
+  enabled: true
+  period: 2
+- name: ウイングあすと長町店
+  prefecture: 東京都
+  slug: ウイングあすと長町店
+  enabled: true
+  period: 2
+- name: ジャラン高島平店
+  prefecture: 東京都
+  slug: ジャラン高島平店
+  enabled: true
+  period: 2
+- name: コンサートホール志村
+  prefecture: 東京都
+  slug: コンサートホール志村
+  enabled: true
+  period: 2
+- name: パラッツォ志村店
+  prefecture: 東京都
+  slug: パラッツォ志村店
+  enabled: true
+  period: 2
+- name: パチンコ大王-高島平店
+  prefecture: 東京都
+  slug: パチンコ大王-高島平店
+  enabled: true
+  period: 2
+- name: スロットエランドール田無店
+  prefecture: 東京都
+  slug: スロットエランドール田無店
+  enabled: true
+  period: 2
+- name: やすだ清水町店
+  prefecture: 東京都
+  slug: やすだ清水町店
+  enabled: true
+  period: 2
+- name: やすだ西池袋6号店
+  prefecture: 東京都
+  slug: やすだ西池袋6号店
+  enabled: true
+  period: 2
+- name: やすだ仲宿店
+  prefecture: 東京都
+  slug: やすだ仲宿店
+  enabled: true
+  period: 2
+- name: クラウン-東京都
+  prefecture: 東京都
+  slug: クラウン-東京都
+  enabled: true
+  period: 2
+- name: エスパス日拓渋谷駅前新館
+  prefecture: 東京都
+  slug: エスパス日拓渋谷駅前新館
+  enabled: true
+  period: 2
+- name: 将軍下赤塚店
+  prefecture: 東京都
+  slug: 将軍下赤塚店
+  enabled: true
+  period: 2
+- name: グランドホール西高島平店
+  prefecture: 東京都
+  slug: グランドホール西高島平店
+  enabled: true
+  period: 2
+- name: YASUDA5
+  prefecture: 東京都
+  slug: yasuda5
+  enabled: true
+  period: 2
+- name: P-PORT-PREGO-EX池袋南口
+  prefecture: 東京都
+  slug: p-port-prego-ex池袋南口
+  enabled: true
+  period: 2
+- name: エスパス日拓渋谷本館
+  prefecture: 東京都
+  slug: エスパス日拓渋谷本館
+  enabled: true
+  period: 2
+- name: 楽園渋谷道玄坂店
+  prefecture: 東京都
+  slug: 楽園渋谷道玄坂店
+  enabled: true
+  period: 2
+- name: 楽園渋谷駅前店
+  prefecture: 東京都
+  slug: 楽園渋谷駅前店
+  enabled: true
+  period: 2
+- name: TOHO池袋店
+  prefecture: 東京都
+  slug: toho池袋店
+  enabled: true
+  period: 2
+- name: グランド-ラ・カータ1111瑞穂店
+  prefecture: 東京都
+  slug: グランド-ラ・カータ1111瑞穂店
+  enabled: true
+  period: 2
+- name: ミリオン平和台16号店
+  prefecture: 東京都
+  slug: ミリオン平和台16号店
+  enabled: true
+  period: 2
+- name: ミリオン東武練馬店スロット館
+  prefecture: 東京都
+  slug: ミリオン東武練馬13号店
+  enabled: true
+  period: 2
+- name: パラッツォ千川店
+  prefecture: 東京都
+  slug: パラッツォ千川店
+  enabled: true
+  period: 2
+- name: 練馬オーシャン
+  prefecture: 東京都
+  slug: 練馬オーシャン
+  enabled: true
+  period: 2
+- name: EXA FIRST
+  prefecture: 東京都
+  slug: エクサファースト
+  enabled: true
+  period: 2
+- name: コンサートホールエフ成増
+  prefecture: 東京都
+  slug: コンサートホールエフ成増
+  enabled: true
+  period: 2
+- name: 楽園大山店
+  prefecture: 東京都
+  slug: 楽園大山店
+  enabled: true
+  period: 2
+- name: 大山オーシャン
+  prefecture: 東京都
+  slug: 大山オーシャン
+  enabled: true
+  period: 2
+- name: 楽園池袋店
+  prefecture: 東京都
+  slug: 楽園池袋店
+  enabled: true
+  period: 2
+- name: 楽園池袋店グリーンサイド
+  prefecture: 東京都
+  slug: 楽園池袋店グリーンサイド
+  enabled: true
+  period: 2
+- name: マルハン大山店
+  prefecture: 東京都
+  slug: マルハン大山店
+  enabled: true
+  period: 2
+- name: マルハン池袋店
+  prefecture: 東京都
+  slug: マルハン池袋店
+  enabled: true
+  period: 2
+- name: マルハン青梅新町店
+  prefecture: 東京都
+  slug: マルハン青梅新町店
+  enabled: true
+  period: 2
+- name: スーパースロットサンフラワー⁺
+  prefecture: 東京都
+  slug: サンフラワー瑞穂店
+  enabled: true
+  period: 2
+- name: YASUDA9
+  prefecture: 東京都
+  slug: やすだ東池袋9号店
+  enabled: true
+  period: 2
+- name: p-port-prego立川店
+  prefecture: 東京都
+  slug: p-port-prego立川店
+  enabled: true
+  period: 2
+- name: 楽園立川店
+  prefecture: 東京都
+  slug: 楽園立川店
+  enabled: true
+  period: 2
+- name: ハイパージアス立川
+  prefecture: 東京都
+  slug: ハイパージアス立川
+  enabled: true
+  period: 2
+- name: みとや水道橋
+  prefecture: 東京都
+  slug: みとや水道橋
+  enabled: true
+  period: 2
+- name: レイトスロットステージ土浦
+  prefecture: 茨城県
+  slug: 麗都スロットステージ土浦
+  enabled: true
+  period: 2
+- name: レイトつくば
+  prefecture: 茨城県
+  slug: 麗都つくば
+  enabled: true
+  period: 2
+- name: マルハンつくば店
+  prefecture: 茨城県
+  slug: マルハンつくば店
+  enabled: true
+  period: 2
+- name: ビックマーチつくば本店
+  prefecture: 茨城県
+  slug: ビックマーチつくば本店
+  enabled: true
+  period: 2
+- name: ビックマーチつくば学園の森店
+  prefecture: 茨城県
+  slug: ビックマーチつくば学園の森店
+  enabled: true
+  period: 2
+- name: マックス石岡店
+  prefecture: 茨城県
+  slug: マックス石岡店
+  enabled: true
+  period: 2
+- name: マルハン石岡店
+  prefecture: 茨城県
+  slug: マルハン石岡店
+  enabled: true
+  period: 2
+- name: レイト平塚
+  prefecture: 茨城県
+  slug: 麗都平塚
+  enabled: true
+  period: 2
+- name: パールショップともえ川越店
+  prefecture: 埼玉県
+  slug: パールショップともえ川越店
+  enabled: true
+  period: 2
+- name: マルハン入間店
+  prefecture: 埼玉県
+  slug: マルハン入間店
+  enabled: true
+  period: 2
+- name: 第一プラザ霞ヶ関店
+  prefecture: 埼玉県
+  slug: 第一プラザ霞ヶ関店
+  enabled: true
+  period: 2
+- name: ジャラン若葉駅前店
+  prefecture: 埼玉県
+  slug: ジャラン若葉駅前店
+  enabled: true
+  period: 2
+- name: マルハン川越店
+  prefecture: 埼玉県
+  slug: マルハン川越店
+  enabled: true
+  period: 2
+- name: やすだ朝霞店
+  prefecture: 埼玉県
+  slug: やすだ朝霞店
+  enabled: true
+  period: 2
+- name: 朝霞ウノ
+  prefecture: 埼玉県
+  slug: 朝霞ウノ
+  enabled: true
+  period: 2

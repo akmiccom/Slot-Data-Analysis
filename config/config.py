@@ -20,8 +20,11 @@ for d in [DATA_DIR, LOG_DIR, CSV_DIR, IMG_DIR]:
 
 @dataclass
 class HallInfo:
+    name: str
+    prefecture: str
     slug: str
-    period: int
+    enabled: bool = True
+    period: int = 2
 
 
 if __name__ == "__main__":
