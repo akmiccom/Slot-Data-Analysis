@@ -64,7 +64,16 @@ def scraper_all_hall(
     hall_list = _load_hall_list(test_mode=test_mode, test_count=test_count)
     supabase = data_to_supabase.get_supabase_client() if upsert_each_date else None
 
+    jst_date = os.getenv("JST_DATE")
+    jst_hour = os.getenv("JST_HOUR")
+    if jst_date or jst_hour:
+        logger.info("実行基準時刻: JST_DATE=%s, JST_HOUR=%s", jst_date, jst_hour)
+
     frames: list[pd.DataFrame] = []
+    target_count = 0
+    skipped_count = 0
+    scrape_target_count = 0
+    scraped_rows = 0
     total_upserted = 0
     cols = RESULT_COLUMNS
 
@@ -78,7 +87,10 @@ def scraper_all_hall(
                 logger.info("(%d/%d) 処理中: %s", i, len(hall_list), hall_url)
 
                 def should_scrape(pref: str, hall: str, date: str) -> bool:
+                    nonlocal target_count, skipped_count, scrape_target_count
+                    target_count += 1
                     if supabase is None:
+                        scrape_target_count += 1
                         return True
                     should_skip, existing_count, _ = has_enough_results(
                         supabase,
@@ -88,6 +100,7 @@ def scraper_all_hall(
                         min_existing_rows=min_existing_rows,
                     )
                     if should_skip:
+                        skipped_count += 1
                         logger.info(
                             "取得済みのためスキップ: hall=%s, date=%s, existing_count=%d",
                             hall,
@@ -95,6 +108,7 @@ def scraper_all_hall(
                             existing_count,
                         )
                         return False
+                    scrape_target_count += 1
                     return True
 
                 try:
@@ -120,6 +134,7 @@ def scraper_all_hall(
                     if df_hall_date.empty:
                         logger.warning("空データです: hall=%s, date=%s", hall, date)
                         continue
+                    scraped_rows += row_count
                     frames.append(df_hall_date)
                     if upsert_each_date and supabase is not None:
                         try:
@@ -128,6 +143,9 @@ def scraper_all_hall(
                             logger.exception("DB登録でエラー: hall=%s, date=%s, error=%s", hall, date, e)
         finally:
             browser.close()
+
+    if scrape_target_count == 0:
+        logger.info("全対象が取得済みのため、今回のスクレイピングは実行せず終了します。")
 
     if frames:
         df_all = pd.concat(frames, ignore_index=True)
@@ -145,6 +163,16 @@ def scraper_all_hall(
         refresh_materialized_views(supabase)
     elif upsert_each_date:
         logger.info("新規登録対象がないためマテビュー更新は呼びません。")
+
+    logger.info(
+        "スクレイピング対象確認結果: target_count=%d, skipped_count=%d, "
+        "scrape_target_count=%d, scraped_rows=%d, upserted_rows=%d",
+        target_count,
+        skipped_count,
+        scrape_target_count,
+        scraped_rows,
+        total_upserted,
+    )
 
     end = time.perf_counter()
     logger.info("全体処理時間: %.2f 秒", end - start)
