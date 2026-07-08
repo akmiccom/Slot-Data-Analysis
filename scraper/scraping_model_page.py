@@ -1,4 +1,3 @@
-from playwright.sync_api import sync_playwright
 from playwright.sync_api import Page, sync_playwright, TimeoutError as PWTimeout
 import pandas as pd
 from urllib.parse import quote, urljoin
@@ -20,6 +19,43 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 # ページ操作
 # =========================
+def goto_with_retry(page: Page, url: str, retries: int = 2) -> None:
+    """機種ページへ軽くリトライしながら遷移する。"""
+    last_error: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            page.goto(url, timeout=90_000, wait_until="domcontentloaded")
+            return
+        except Exception as e:
+            last_error = e
+            logger.warning(
+                "機種ページへのアクセスに失敗しました。retry=%d/%d, url=%s, error=%s",
+                attempt,
+                retries,
+                url,
+                e,
+            )
+    if last_error is not None:
+        raise last_error
+
+
+def _log_model_skip(
+    hall: str,
+    date: str,
+    model_url: str,
+    url: str,
+    error: str | Exception,
+) -> None:
+    logger.warning(
+        "機種データをスキップします: hall=%s, date=%s, model_url=%s, url=%s, error=%s",
+        hall,
+        date,
+        model_url,
+        url,
+        error,
+    )
+
+
 def extract_model_data(
     page: Page, model_urls: list[tuple[str, str, str, str, str]]
 ) -> pd.DataFrame:
@@ -32,85 +68,94 @@ def extract_model_data(
 
     for pref, hall, date, date_url, model_url in model_urls:
         url = urljoin(date_url, model_url)
-        logger.info(f"機種ページにアクセスします。")
-        logger.info(f"{url}")
-        page.goto(url, timeout=90_000, wait_until="domcontentloaded")
-        page.reload()  # これは必ず入れる!!!
-
-        # スクリーンショット
-        # page.screenshot(
-        #     path=config.IMG_DIR / f"{hall}_model_page.jpg",
-        #     full_page=True,
-        #     type="jpeg",
-        #     quality=50,
-        # )
-
-        # 機種名 (h2 に "ジャグラー" を含むものを優先)
-        model = ""
-        css = "div.tab_content > h2"
-        # css  = "div > h2"
         try:
+            logger.info(f"機種ページにアクセスします。")
+            logger.info(f"{url}")
+            goto_with_retry(page, url, retries=2)
+
+            # スクリーンショット
+            # page.screenshot(
+            #     path=config.IMG_DIR / f"{hall}_model_page.jpg",
+            #     full_page=True,
+            #     type="jpeg",
+            #     quality=50,
+            # )
+
+            # 機種名 (h2 に "ジャグラー" を含むものを優先)
+            model = ""
+            css = "div.tab_content > h2"
+            # css  = "div > h2"
             TARGET_MODEL = "ジャグラー"
-            page.wait_for_selector(css, timeout=10_000)
-            h2s = page.locator(css)
-            for i in range(h2s.count()):
-                txt = extract_model_name(h2s.nth(i).inner_text())
-                if TARGET_MODEL in txt:
-                    model = txt
-                    break
-            if not model and h2s.count():
-                model = extract_model_name(h2s.nth(i).inner_text())
-            logger.info(f"機種名: {model}")
-        except PWTimeout:
-            logger.warning("機種タイトルが取得できませんでした: %s", url)
+            try:
+                page.wait_for_selector(css, timeout=10_000)
+                h2s = page.locator(css)
+                for i in range(h2s.count()):
+                    txt = extract_model_name(h2s.nth(i).inner_text())
+                    if TARGET_MODEL in txt:
+                        model = txt
+                        break
+                if not model and h2s.count():
+                    model = extract_model_name(h2s.nth(i).inner_text())
+                logger.info(f"機種名: {model}")
+            except PWTimeout:
+                logger.warning("機種タイトルが取得できませんでした: %s", url)
 
-        # テーブルの取得
-        css = "div > div.table_wrap > table > tbody > tr"
-        try:
-            page.wait_for_selector(css, timeout=15_000)
-        except PWTimeout:
-            logger.warning("テーブルが見つからないためスキップします: %s", url)
-            continue
+            # テーブルの取得
+            css = "div > div.table_wrap > table > tbody > tr"
+            try:
+                page.wait_for_selector(css, timeout=15_000)
+            except PWTimeout as e:
+                _log_model_skip(hall, date, model_url, url, e)
+                continue
 
-        rows = page.locator(css)
-        if rows.count() == 0:
-            logger.warning("テーブル行が空のためスキップします: %s", url)
-            continue
+            rows = page.locator(css)
+            if rows.count() == 0:
+                _log_model_skip(hall, date, model_url, url, "テーブル行が空")
+                continue
 
-        # th行(header)処理
-        ths = rows.nth(0).locator("th")
-        header = [_norm_text(ths.nth(i).inner_text()) for i in range(ths.count())]
-        if not header:
-            logger.warning("テーブルヘッダーが空のためスキップします: %s", url)
-            continue
-        logger.debug(header)
-        # td(date)行処理
-        table: list[list[str]] = []
-        for j in range(rows.count()):
-            tds = rows.nth(j).locator("td")
-            row = []
-            for k in range(tds.count()):
-                row.append(_norm_text(tds.nth(k).inner_text()))
-            if row:  # 空行スキップ
-                table.append(row)
+            # th行(header)処理
+            ths = rows.nth(0).locator("th")
+            header = [_norm_text(ths.nth(i).inner_text()) for i in range(ths.count())]
+            if not header:
+                _log_model_skip(hall, date, model_url, url, "テーブルヘッダーが空")
+                continue
+            logger.debug(header)
+            # td(date)行処理
+            table: list[list[str]] = []
+            for j in range(rows.count()):
+                tds = rows.nth(j).locator("td")
+                row = []
+                for k in range(tds.count()):
+                    row.append(_norm_text(tds.nth(k).inner_text()))
+                if row:  # 空行スキップ
+                    table.append(row)
 
-        logger.info(f"{len(table)} 行の機種データを取得")
-        if not table:
-            logger.warning("テーブルデータが空のためスキップします: %s", url)
-            continue
-        for t in table:
-            logger.debug(t)
+            if not table:
+                _log_model_skip(hall, date, model_url, url, "テーブルデータが空")
+                continue
+            for t in table:
+                logger.debug(t)
 
-        df = pd.DataFrame(table, columns=header)
-        if "台番" not in df.columns:
-            logger.warning("台番列が見つからないためスキップします: %s", url)
+            df = pd.DataFrame(table, columns=header)
+            if "台番" not in df.columns:
+                _log_model_skip(hall, date, model_url, url, "台番列が見つからない")
+                continue
+            df = df[~df["台番"].astype(str).str.contains("平均")]
+            df["pref"] = pref
+            df["hall"] = hall
+            df["model"] = model
+            df["date"] = date
+            logger.info(
+                "機種データ取得成功: hall=%s, date=%s, model=%s, rows=%d",
+                hall,
+                date,
+                model,
+                len(df),
+            )
+            frames.append(df)
+        except Exception as e:
+            _log_model_skip(hall, date, model_url, url, e)
             continue
-        df = df[~df["台番"].astype(str).str.contains("平均")]
-        df["pref"] = pref
-        df["hall"] = hall
-        df["model"] = model
-        df["date"] = date
-        frames.append(df)
 
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 

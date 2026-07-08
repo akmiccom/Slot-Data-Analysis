@@ -74,8 +74,12 @@ def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
         logger.warning("ホールなし")
 
 
-def add_data_result(df: pd.DataFrame, supabase: Client) -> None:
-    """--- results テーブルへデータ登録 ---"""
+def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
+    """--- results テーブルへデータ登録 ---
+
+    Returns:
+        upsert 対象として送信できた件数（新規/既存更新を含む）
+    """
 
     # 1) 最新の prefectures / halls / models を取得して ID マップを作る
     pref_res = supabase.table("prefectures").select("prefecture_id, name").execute()
@@ -134,7 +138,7 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> None:
 
     if not records:
         logger.warning("results に挿入するデータがありません。")
-        return
+        return 0
 
     conflict_keys = ["hall_id", "model_id", "unit_no", "date"]
     before_dedup = len(records)
@@ -175,6 +179,7 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> None:
         inserted += len(batch)
 
     logger.info(f"results upsert: {inserted} 件（新規/既存含む）")
+    return inserted
 
 
 if __name__ == "__main__":

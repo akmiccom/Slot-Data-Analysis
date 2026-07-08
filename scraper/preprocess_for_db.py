@@ -59,6 +59,16 @@ def df_data_clean(df):
     logger.info("データの前処理を行います。")
 
     df = df.rename(columns=COULMNS_RENAME_MAP)
+
+    required_cols = ["pref", "hall", "model", "date", "unit_no", "game", "bb", "rb", "medal"]
+    missing_cols = [col for col in required_cols if col not in df.columns]
+    if missing_cols:
+        logger.warning("前処理に必要な列が不足しています: %s", missing_cols)
+        return pd.DataFrame(columns=required_cols)
+    if df.empty:
+        logger.warning("前処理対象データが空です。")
+        return df[required_cols].copy()
+
     df["model"] = df["model"].replace(MODELS_ALIAS_MAP)
 
     # エラー発生行
