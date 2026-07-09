@@ -34,7 +34,7 @@ def add_model(df: pd.DataFrame, supabase: Client) -> None:
     # UNIQUE(models.name) 前提で upsert
     rows = [{"name": m} for m in models]
     supabase.table("models").upsert(rows, on_conflict="name").execute()
-    logger.info(f"モデル upsert: {len(rows)} 件（新規/既存含む）")
+    logger.debug(f"モデル upsert: {len(rows)} 件（新規/既存含む）")
 
 
 def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
@@ -47,7 +47,7 @@ def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
     # 1) prefectures upsert
     pref_rows = [{"name": p} for p in prefectures]
     supabase.table("prefectures").upsert(pref_rows, on_conflict="name").execute()
-    logger.info(f"都道府県 upsert: {len(pref_rows)} 件（新規/既存含む）")
+    logger.debug(f"都道府県 upsert: {len(pref_rows)} 件（新規/既存含む）")
 
     # 2) prefecture_id を取得してマップ化
     pref_res = supabase.table("prefectures").select("prefecture_id, name").execute()
@@ -69,7 +69,7 @@ def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
             hall_rows,
             on_conflict="name,prefecture_id",
         ).execute()
-        logger.info(f"ホール upsert: {len(hall_rows)} 件（新規/既存含む）")
+        logger.debug(f"ホール upsert: {len(hall_rows)} 件（新規/既存含む）")
     else:
         logger.warning("ホールなし")
 
@@ -144,12 +144,14 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
     before_dedup = len(records)
     records_df = pd.DataFrame(records)
     duplicate_count = records_df.duplicated(subset=conflict_keys, keep=False).sum()
-    logger.info("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
     if duplicate_count:
+        logger.warning("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
         records_df = records_df.drop_duplicates(subset=conflict_keys, keep="last")
-        logger.info("results upsert前の重複除去: %d 件 -> %d 件", before_dedup, len(records_df))
+        logger.debug("results upsert前の重複除去: %d 件 -> %d 件", before_dedup, len(records_df))
+    else:
+        logger.debug("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
     records = records_df.to_dict("records")
-    logger.info("results upsert対象件数: %d 件", len(records))
+    logger.debug("results upsert対象件数: %d 件", len(records))
 
     # 3) 一括 upsert（unique(hall_id, model_id, unit_no, date) を想定）
     #    行数が多い場合はバッチに分ける
@@ -178,7 +180,7 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
             raise
         inserted += len(batch)
 
-    logger.info(f"results upsert: {inserted} 件（新規/既存含む）")
+    logger.debug(f"results upsert: {inserted} 件（新規/既存含む）")
     return inserted
 
 
