@@ -14,30 +14,36 @@ target_models:
       - "マイジャグラーⅤ"
       - "マイジャグ5"
 
-  - canonical_name: "アイムジャグラーEX-TP"
-    enabled: true
-    aliases:
-      - "アイムジャグラーEX"
-      - "アイムジャグラーEX-TP"
-      - "SアイムジャグラーEX"
-      - "アイムEX"
-
   - canonical_name: "ネオアイムジャグラーEX"
     enabled: true
     aliases:
-      - "ネオアイムジャグラー"
+      - "ネオアイムジャグラーEX"
+      - "SネオアイムジャグラーEX"
+      - "SネオアイムジャグラーEX-KK"
+      - "SネオアイムジャグラーEXKK"
+
+  - canonical_name: "アイムジャグラーEX-TP"
+    enabled: true
+    aliases:
+      - "アイムジャグラーEX-TP"
+      - "アイムジャグラーEX"
+      - "SアイムジャグラーEX"
+      - "SアイムジャグラーEX-TP"
 
   - canonical_name: "ファンキージャグラー2"
     enabled: true
     aliases:
       - "ファンキージャグラー2"
       - "ファンキージャグラー２"
+      - "ファンキージャグラー2KT"
+      - "ファンキージャグラー２ＫＴ"
       - "ファンキー2"
 
   - canonical_name: "ハッピージャグラーVIII"
     enabled: true
     aliases:
       - "ハッピージャグラーVIII"
+      - "ハッピージャグラーＶＩＩＩ"
       - "ハッピージャグラーVⅢ"
       - "ハッピージャグラー8"
       - "ハッピー8"

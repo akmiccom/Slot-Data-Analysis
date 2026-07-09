@@ -1,4 +1,6 @@
 import os
+import io
+
 import pandas as pd
 import numpy as np
 import yaml
@@ -108,7 +110,9 @@ def df_data_clean(df):
         logger.info("重複除去後の件数: %d 件", len(df))
 
     df.to_csv(config.CSV_DIR / "cleaned_all_result_data.csv", index=False)
-    logger.debug(df.info())
+    info_buffer = io.StringIO()
+    df.info(buf=info_buffer)
+    logger.debug("DataFrame info:\n%s", info_buffer.getvalue())
     logger.info("データを出力しました。")
 
     return df

@@ -158,7 +158,7 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
     for i in range(0, len(records), batch_size):
         batch_no = i // batch_size + 1
         batch = records[i : i + batch_size]
-        logger.info("results upsert batch %d: %d 件", batch_no, len(batch))
+        logger.debug("results upsert batch %d: %d 件", batch_no, len(batch))
         try:
             supabase.table("results").upsert(
                 batch,

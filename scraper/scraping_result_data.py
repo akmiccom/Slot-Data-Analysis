@@ -18,7 +18,7 @@ filename, ext = os.path.splitext(os.path.basename(__file__))
 logger = setup_logger(filename, log_file=config.LOG_PATH)
 
 RESULT_COLUMNS = ["pref", "hall", "model", "date", "台番", "G数", "BB", "RB", "差枚"]
-MODEL_URL_COLUMNS = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name"]
+MODEL_URL_COLUMNS = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name", "raw_model_name", "normalized_model_name", "match_type", "matched_alias"]
 
 def extract_result_data_by_dates(
     page,
