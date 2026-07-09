@@ -48,45 +48,9 @@ halls:
     enabled: true
     period: 2
 
-  - name: "多賀城ひまわり"
-    prefecture: "東京都"
-    slug: "多賀城ひまわり"
-    enabled: true
-    period: 2
-
-  - name: "ベガスベガス北仙台店"
-    prefecture: "東京都"
-    slug: "ベガスベガス北仙台店"
-    enabled: true
-    period: 2
-
-  - name: "ベガスワンダープラザ店"
-    prefecture: "東京都"
-    slug: "ベガスワンダープラザ店"
-    enabled: true
-    period: 2
-
-  - name: "パチンコタイガー塩釜店"
-    prefecture: "東京都"
-    slug: "パチンコタイガー塩釜店"
-    enabled: true
-    period: 2
-
-  - name: "パラディソ泉店"
-    prefecture: "東京都"
-    slug: "パラディソ泉店"
-    enabled: true
-    period: 2
-
   - name: "パーラーディオス下赤塚本店"
     prefecture: "東京都"
     slug: "パーラーディオス下赤塚本店"
-    enabled: true
-    period: 2
-
-  - name: "ウイングあすと長町店"
-    prefecture: "東京都"
-    slug: "ウイングあすと長町店"
     enabled: true
     period: 2
 
@@ -177,7 +141,7 @@ halls:
   - name: "エスパス日拓渋谷本館"
     prefecture: "東京都"
     slug: "エスパス日拓渋谷本館"
-    enabled: true
+    enabled: false
     period: 2
 
   - name: "楽園渋谷道玄坂店"
@@ -405,5 +369,41 @@ halls:
   - name: "朝霞ウノ"
     prefecture: "埼玉県"
     slug: "朝霞ウノ"
+    enabled: true
+    period: 2
+
+  - name: "多賀城ひまわり"
+    prefecture: "宮城県"
+    slug: "多賀城ひまわり"
+    enabled: true
+    period: 2
+
+  - name: "ベガスベガス北仙台店"
+    prefecture: "宮城県"
+    slug: "ベガスベガス北仙台店"
+    enabled: true
+    period: 2
+
+  - name: "ベガスワンダープラザ店"
+    prefecture: "宮城県"
+    slug: "ベガスワンダープラザ店"
+    enabled: true
+    period: 2
+
+  - name: "パチンコタイガー塩釜店"
+    prefecture: "宮城県"
+    slug: "パチンコタイガー塩釜店"
+    enabled: true
+    period: 2
+
+  - name: "パラディソ泉店"
+    prefecture: "宮城県"
+    slug: "パラディソ泉店"
+    enabled: true
+    period: 2
+
+  - name: "ウイングあすと長町店"
+    prefecture: "宮城県"
+    slug: "ウイングあすと長町店"
     enabled: true
     period: 2
