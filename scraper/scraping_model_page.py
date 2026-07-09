@@ -6,6 +6,7 @@ import os
 from config import config
 from utils.logger_setup import setup_logger
 from utils.utils import _norm_text, extract_model_name
+from utils.target_models import build_alias_to_canonical, match_target_model_detail
 from scraper.scraping_hall_page import extract_date_url
 from scraper.scraping_date_page import extract_model_url
 
@@ -57,7 +58,7 @@ def _log_model_skip(
 
 
 def extract_model_data(
-    page: Page, model_urls: list[tuple[str, str, str, str, str] | tuple[str, str, str, str, str, str]]
+    page: Page, model_urls: list[tuple]
 ) -> pd.DataFrame:
     """
     各機種ページに移動し、台データを DataFrame で返す
@@ -65,10 +66,15 @@ def extract_model_data(
     """
 
     frames: list[pd.DataFrame] = []
+    alias_to_canonical = build_alias_to_canonical()
 
     for model_url_tuple in model_urls:
         pref, hall, date, date_url, model_url = model_url_tuple[:5]
         canonical_model_name = model_url_tuple[5] if len(model_url_tuple) >= 6 else None
+        raw_model_name = model_url_tuple[6] if len(model_url_tuple) >= 7 else None
+        normalized_model_name = model_url_tuple[7] if len(model_url_tuple) >= 8 else None
+        match_type = model_url_tuple[8] if len(model_url_tuple) >= 9 else None
+        matched_alias = model_url_tuple[9] if len(model_url_tuple) >= 10 else None
         url = urljoin(date_url, model_url)
         try:
             logger.debug("機種ページにアクセスします。")
@@ -103,18 +109,32 @@ def extract_model_data(
                 logger.warning("機種タイトルが取得できませんでした: %s", url)
 
             if canonical_model_name:
-                if model and canonical_model_name not in model and model not in canonical_model_name:
+                h2_match = match_target_model_detail(model, alias_to_canonical) if model else None
+                if model and (h2_match is None or h2_match.canonical_name != canonical_model_name):
                     logger.warning(
-                        "h2_model と canonical_model_name が想定外に違います: h2_model=%s, canonical_model_name=%s",
+                        "h2_model と canonical_model_name が想定外に違うため機種データをスキップします: "
+                        "raw_model_name=%s, normalized_model_name=%s, h2_model=%s, "
+                        "canonical_model_name=%s, match_type=%s, matched_alias=%s",
+                        raw_model_name,
+                        normalized_model_name,
                         model,
                         canonical_model_name,
+                        match_type,
+                        matched_alias,
                     )
-                else:
-                    logger.debug(
-                        "DB保存用機種名に canonical_model_name を使用: h2_model=%s, canonical_model_name=%s",
-                        model,
-                        canonical_model_name,
-                    )
+                    continue
+
+                logger.debug(
+                    "DB保存用機種名に canonical_model_name を使用: raw_model_name=%s, "
+                    "normalized_model_name=%s, h2_model=%s, canonical_model_name=%s, "
+                    "match_type=%s, matched_alias=%s",
+                    raw_model_name,
+                    normalized_model_name,
+                    model,
+                    canonical_model_name,
+                    match_type,
+                    matched_alias,
+                )
                 model = canonical_model_name
 
             # テーブルの取得
@@ -196,7 +216,7 @@ if __name__ == "__main__":
 
         try:
             df_model_urls: list = []
-            columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name"]
+            columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name", "raw_model_name", "normalized_model_name", "match_type", "matched_alias"]
             for pref, hall, date, date_url in date_urls:
                 model_urls = extract_model_url(page, hall, pref, date_url, date)
                 if not model_urls:

@@ -1,4 +1,5 @@
 import unicodedata
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
@@ -12,7 +13,16 @@ PREFIXES_TO_STRIP = ("S", "L")
 TARGET_MODELS_YAML = config.BASE_DIR / "config" / "target_models.yaml"
 
 
-def normalize_model_name(text: str | None, strip_prefix: bool = True) -> str:
+@dataclass(frozen=True)
+class ModelMatch:
+    canonical_name: str
+    raw_model_name: str
+    normalized_model_name: str
+    match_type: str
+    matched_alias: str
+
+
+def normalize_model_name(text: str | None, strip_prefix: bool = False) -> str:
     """機種名比較用に表記ゆれを正規化する。"""
     normalized = unicodedata.normalize("NFKC", text or "")
     normalized = normalized.replace("Ⅴ", "V").replace("ⅴ", "V")
@@ -69,13 +79,38 @@ def build_alias_to_canonical(target_models: list[dict] | None = None) -> dict[st
     return alias_to_canonical
 
 
-def match_target_model(raw_model_name: str, alias_to_canonical: dict[str, str]) -> str | None:
-    """正規化 + aliases + 部分一致で対象機種に一致する canonical_name を返す。"""
+def match_target_model_detail(raw_model_name: str, alias_to_canonical: dict[str, str]) -> ModelMatch | None:
+    """完全一致、先頭接頭辞除去後の完全一致の順で対象機種を判定する。"""
     normalized_raw = normalize_model_name(raw_model_name)
     if not normalized_raw:
         return None
 
+    canonical_name = alias_to_canonical.get(normalized_raw)
+    if canonical_name:
+        return ModelMatch(
+            canonical_name=canonical_name,
+            raw_model_name=raw_model_name,
+            normalized_model_name=normalized_raw,
+            match_type="exact",
+            matched_alias=normalized_raw,
+        )
+
+    stripped_raw = normalize_model_name(raw_model_name, strip_prefix=True)
     for normalized_alias, canonical_name in alias_to_canonical.items():
-        if normalized_alias == normalized_raw or normalized_alias in normalized_raw or normalized_raw in normalized_alias:
-            return canonical_name
+        stripped_alias = normalize_model_name(normalized_alias, strip_prefix=True)
+        if stripped_raw and stripped_raw == stripped_alias:
+            return ModelMatch(
+                canonical_name=canonical_name,
+                raw_model_name=raw_model_name,
+                normalized_model_name=stripped_raw,
+                match_type="prefix_stripped_exact",
+                matched_alias=normalized_alias,
+            )
+
     return None
+
+
+def match_target_model(raw_model_name: str, alias_to_canonical: dict[str, str]) -> str | None:
+    """対象機種に一致する canonical_name を返す。"""
+    match = match_target_model_detail(raw_model_name, alias_to_canonical)
+    return match.canonical_name if match else None
