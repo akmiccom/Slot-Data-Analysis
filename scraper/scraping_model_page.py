@@ -71,8 +71,8 @@ def extract_model_data(
         canonical_model_name = model_url_tuple[5] if len(model_url_tuple) >= 6 else None
         url = urljoin(date_url, model_url)
         try:
-            logger.info(f"機種ページにアクセスします。")
-            logger.info(f"{url}")
+            logger.debug("機種ページにアクセスします。")
+            logger.debug("url: %s", url)
             goto_with_retry(page, url, retries=2)
 
             # スクリーンショット
@@ -98,16 +98,23 @@ def extract_model_data(
                         break
                 if not model and h2s.count():
                     model = extract_model_name(h2s.nth(i).inner_text())
-                logger.info("機種名(h2): %s", model)
+                logger.debug("機種名(h2): %s", model)
             except PWTimeout:
                 logger.warning("機種タイトルが取得できませんでした: %s", url)
 
             if canonical_model_name:
-                logger.info(
-                    "DB保存用機種名に canonical_model_name を使用: h2_model=%s, canonical_model_name=%s",
-                    model,
-                    canonical_model_name,
-                )
+                if model and canonical_model_name not in model and model not in canonical_model_name:
+                    logger.warning(
+                        "h2_model と canonical_model_name が想定外に違います: h2_model=%s, canonical_model_name=%s",
+                        model,
+                        canonical_model_name,
+                    )
+                else:
+                    logger.debug(
+                        "DB保存用機種名に canonical_model_name を使用: h2_model=%s, canonical_model_name=%s",
+                        model,
+                        canonical_model_name,
+                    )
                 model = canonical_model_name
 
             # テーブルの取得
@@ -155,7 +162,7 @@ def extract_model_data(
             df["hall"] = hall
             df["model"] = model
             df["date"] = date
-            logger.info(
+            logger.debug(
                 "機種データ取得成功: hall=%s, date=%s, model=%s, rows=%d",
                 hall,
                 date,

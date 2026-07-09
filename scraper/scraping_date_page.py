@@ -28,7 +28,7 @@ def extract_model_url(
     returns: List[(pref, hall, date, date_url, model_url, canonical_model_name)]
     """
 
-    logger.info("日付ページにアクセス: %s", date_url)
+    logger.debug("日付ページにアクセス: %s", date_url)
     page.goto(date_url, timeout=90_000, wait_until="domcontentloaded")
 
     # スクリーンショット
@@ -40,7 +40,7 @@ def extract_model_url(
     # )
 
     title = _norm_text(page.locator("h1").first.text_content())
-    logger.info("Page title: %s", title)
+    logger.debug("Page title: %s", title)
 
     model_urls: list[tuple[str, str, str, str, str, str]] = []
     alias_to_canonical = build_alias_to_canonical()
@@ -63,7 +63,7 @@ def extract_model_url(
         href = links.nth(j).get_attribute("href") or ""
         canonical_model = match_target_model(model_text, alias_to_canonical)
         if canonical_model:
-            logger.info(
+            logger.debug(
                 "対象機種に一致: raw_model_name=%s, canonical_model_name=%s, url=%s",
                 model_text,
                 canonical_model,
@@ -73,7 +73,7 @@ def extract_model_url(
         else:
             logger.debug("対象外機種: raw_model_name=%s, url=%s", model_text, href)
 
-    logger.info("機種リンク抽出: %d 件", len(model_urls))
+    logger.debug("機種リンク抽出: %d 件", len(model_urls))
     if model_urls:
         logger.debug("model_urls[0] = %s", model_urls[0])
         for i, model_url in enumerate(model_urls):

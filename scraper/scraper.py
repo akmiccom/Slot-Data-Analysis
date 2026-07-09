@@ -101,13 +101,14 @@ def scraper_all_hall(
             for i, h in enumerate(hall_list, start=1):
                 encoded_slug = quote(h.slug)
                 hall_url = urljoin(config.MAIN_URL, encoded_slug)
-                logger.info("(%d/%d) 処理中: name=%s, prefecture=%s, url=%s", i, len(hall_list), h.name, h.prefecture, hall_url)
+                logger.debug("(%d/%d) 処理中: name=%s, prefecture=%s, url=%s", i, len(hall_list), h.name, h.prefecture, hall_url)
 
                 def should_scrape(pref: str, hall: str, date: str) -> bool:
                     nonlocal target_count, skipped_count, scrape_target_count
                     target_count += 1
                     if supabase is None:
                         scrape_target_count += 1
+                        logger.info("新規取得対象: hall=%s, date=%s", hall, date)
                         return True
                     should_skip, existing_count, _ = has_enough_results(
                         supabase,
@@ -118,7 +119,7 @@ def scraper_all_hall(
                     )
                     if should_skip:
                         skipped_count += 1
-                        logger.info(
+                        logger.debug(
                             "取得済みのためスキップ: hall=%s, date=%s, existing_count=%d",
                             hall,
                             date,
@@ -126,6 +127,7 @@ def scraper_all_hall(
                         )
                         return False
                     scrape_target_count += 1
+                    logger.info("新規取得対象: hall=%s, date=%s", hall, date)
                     return True
 
                 try:
@@ -140,6 +142,13 @@ def scraper_all_hall(
                     continue
 
                 for pref, hall, date, df_hall_date, model_count in hall_date_results:
+                    if h.prefecture and pref and h.prefecture != pref:
+                        logger.warning(
+                            "config prefecture と site prefecture が違います: config_prefecture=%s, site_prefecture=%s, hall=%s",
+                            h.prefecture,
+                            pref,
+                            hall,
+                        )
                     row_count = len(df_hall_date)
                     logger.info(
                         "取得結果: hall=%s, date=%s, models=%d, rows=%d",
@@ -161,13 +170,23 @@ def scraper_all_hall(
         finally:
             browser.close()
 
+    logger.info(
+        "取得済み確認完了: target_count=%d, skipped_count=%d, scrape_target_count=%d",
+        target_count,
+        skipped_count,
+        scrape_target_count,
+    )
+
     if scrape_target_count == 0:
         logger.info("全対象が取得済みのため、今回のスクレイピングは実行せず終了します。")
 
     if frames:
         df_all = pd.concat(frames, ignore_index=True)
     else:
-        logger.warning("取得データが空のため、空DataFrameを出力します。")
+        if scrape_target_count == 0:
+            logger.info("取得データが空のため、空DataFrameを出力します。")
+        else:
+            logger.warning("取得対象があるのに取得データが空のため、空DataFrameを出力します。")
         df_all = pd.DataFrame(columns=cols)
 
     for c in cols:
