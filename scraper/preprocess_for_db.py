@@ -60,7 +60,7 @@ def df_data_clean(df):
         "差枚": "medal",
     }
 
-    logger.info("データの前処理を行います。")
+    logger.debug("データの前処理を行います。")
 
     df = df.rename(columns=COULMNS_RENAME_MAP)
 
@@ -104,16 +104,18 @@ def df_data_clean(df):
 
     duplicate_keys = ["pref", "hall", "model", "date", "unit_no"]
     duplicate_count = df.duplicated(subset=duplicate_keys, keep=False).sum()
-    logger.info("clean後の重複件数(%s): %d 件", duplicate_keys, duplicate_count)
     if duplicate_count:
+        logger.warning("clean後の重複件数(%s): %d 件", duplicate_keys, duplicate_count)
         df = df.drop_duplicates(subset=duplicate_keys, keep="last")
-        logger.info("重複除去後の件数: %d 件", len(df))
+        logger.debug("重複除去後の件数: %d 件", len(df))
+    else:
+        logger.debug("clean後の重複件数(%s): %d 件", duplicate_keys, duplicate_count)
 
     df.to_csv(config.CSV_DIR / "cleaned_all_result_data.csv", index=False)
     info_buffer = io.StringIO()
     df.info(buf=info_buffer)
     logger.debug("DataFrame info:\n%s", info_buffer.getvalue())
-    logger.info("データを出力しました。")
+    logger.debug("データを出力しました。")
 
     return df
 

@@ -92,6 +92,7 @@ def scraper_all_hall(
     scrape_target_count = 0
     scraped_rows = 0
     total_upserted = 0
+    warned_prefecture_mismatch_halls: set[str] = set()
     cols = RESULT_COLUMNS
 
     with sync_playwright() as p:
@@ -142,31 +143,41 @@ def scraper_all_hall(
                     continue
 
                 for pref, hall, date, df_hall_date, model_count in hall_date_results:
-                    if h.prefecture and pref and h.prefecture != pref:
+                    if (
+                        h.prefecture
+                        and pref
+                        and h.prefecture != pref
+                        and hall not in warned_prefecture_mismatch_halls
+                    ):
                         logger.warning(
                             "config prefecture と site prefecture が違います: config_prefecture=%s, site_prefecture=%s, hall=%s",
                             h.prefecture,
                             pref,
                             hall,
                         )
+                        warned_prefecture_mismatch_halls.add(hall)
                     row_count = len(df_hall_date)
+                    if row_count == 0:
+                        logger.warning("取得対象があるのに rows=0 です: hall=%s, date=%s", hall, date)
+                        continue
+                    scraped_rows += row_count
+                    frames.append(df_hall_date)
+                    upserted_rows = 0
+                    if upsert_each_date and supabase is not None:
+                        try:
+                            upserted_rows = _upsert_hall_date(df_hall_date, supabase)
+                            total_upserted += upserted_rows
+                        except Exception as e:
+                            logger.exception("DB登録でエラー: hall=%s, date=%s, error=%s", hall, date, e)
+                            continue
                     logger.info(
-                        "取得結果: hall=%s, date=%s, models=%d, rows=%d",
+                        "取得・保存完了: hall=%s, date=%s, models=%d, rows=%d, upserted_rows=%d",
                         hall,
                         date,
                         model_count,
                         row_count,
+                        upserted_rows,
                     )
-                    if df_hall_date.empty:
-                        logger.warning("空データです: hall=%s, date=%s", hall, date)
-                        continue
-                    scraped_rows += row_count
-                    frames.append(df_hall_date)
-                    if upsert_each_date and supabase is not None:
-                        try:
-                            total_upserted += _upsert_hall_date(df_hall_date, supabase)
-                        except Exception as e:
-                            logger.exception("DB登録でエラー: hall=%s, date=%s, error=%s", hall, date, e)
         finally:
             browser.close()
 
