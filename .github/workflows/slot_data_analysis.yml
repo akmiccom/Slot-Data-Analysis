@@ -3,10 +3,12 @@ name: slot_data_analysis
 # 自動実行のタイミングを指定
 on:
   schedule:
-    # 毎朝 8:00 JST（= 前日 23:00 UTC）
-    - cron: "0 23 * * *"
-    # 毎朝 12:30 JST（= 当日 3:30 UTC）
-    - cron: "30 3 * * *"
+    # JST 06:00-08:30 = UTC 21:00-23:30
+    - cron: "0,30 21-23 * * *"
+    # JST 09:00-11:30 = UTC 00:00-02:30
+    - cron: "0,30 0-2 * * *"
+    # JST 12:00,16:00,20:00,22:00 = UTC 03:00,07:00,11:00,13:00
+    - cron: "0 3,7,11,13 * * *"
 
   # 手動実行
   workflow_dispatch:
@@ -22,15 +24,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
       - name: Cache pip packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
@@ -42,8 +44,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install playwright
-          playwright install
-          playwright install-deps
+          python -m playwright install --with-deps chromium
+
+      - name: Set JST runtime variables
+        run: |
+          echo "JST_DATE=$(TZ=Asia/Tokyo date +%F)" >> $GITHUB_ENV
+          echo "JST_HOUR=$(TZ=Asia/Tokyo date +%H)" >> $GITHUB_ENV
 
       - name: Run Playwright script
         # run: python scraper/scraping_hall_page.py
@@ -52,12 +58,22 @@ jobs:
         # run: python scraper/scraping_results.py
         # run: python scraper/scraper.py
         run: python -m scraper.scraper
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          JST_DATE: ${{ env.JST_DATE }}
+          JST_HOUR: ${{ env.JST_HOUR }}
 
-      - name: Save scraped results
-        uses: actions/upload-artifact@v4
+      - name: Save scraped logs and csv
+        if: always()
+        uses: actions/upload-artifact@v6
         with:
-          name: scraped-results
-          path: data/  # フォルダ全体
+          name: scraped-logs-and-csv
+          path: |
+            data/logs
+            data/csv
+            .scraper_state
+          if-no-files-found: warn
 
 
 

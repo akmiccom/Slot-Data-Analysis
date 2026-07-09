@@ -2,14 +2,16 @@ import pandas as pd
 from urllib.parse import quote, urljoin
 import os
 import time
-import os
 import yaml
+from playwright.sync_api import sync_playwright
 
 from config import config
 from utils.logger_setup import setup_logger
-from scraper.scraping_result_data import extract_result_data
+from scraper.scraping_result_data import RESULT_COLUMNS, extract_result_data_by_dates
 from scraper.preprocess_for_db import df_data_clean
 from scraper import data_to_supabase
+from scraper.materialized_views import refresh_materialized_views
+from scraper.supabase_lookup import has_enough_results
 
 # =========================
 # 設定・ロガー
@@ -21,59 +23,208 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 # ページ操作
 # =========================
-def scraper_all_hall(test_mode=False) -> pd.DataFrame:
-    start = time.perf_counter()
-
-
-    # yaml  読み込み
+def _load_hall_list(test_mode: bool = False, test_count: int = 2) -> list[config.HallInfo]:
     if not os.path.exists(config.HALLS_YAML):
         raise FileNotFoundError(f"YAMLが見つかりません: {config.HALLS_YAML}")
     with open(config.HALLS_YAML, "r", encoding="utf-8") as f:
         halls_cfg = yaml.safe_load(f).get("halls", [])
 
-    hall_list: list[config.HallInfo] = [
-        config.HallInfo(slug=h["slug"], period=int(h["period"])) for h in halls_cfg
+    all_halls: list[config.HallInfo] = [
+        config.HallInfo(
+            name=h.get("name", h.get("slug", "")),
+            prefecture=h.get("prefecture", ""),
+            slug=h["slug"],
+            enabled=h.get("enabled", True),
+            period=int(h["period"]),
+        )
+        for h in halls_cfg
     ]
+    disabled_count = sum(not h.enabled for h in all_halls)
+    hall_list = [h for h in all_halls if h.enabled]
 
+    enabled_count = len(hall_list)
     if test_mode:
-        hall_list = hall_list[:2]
+        hall_list = hall_list[:test_count]
         logger.info("*********** テストモードで実行しています。 **********")
 
-    frames: list = []
-    for i, h in enumerate(hall_list, start=1):
+    logger.info(
+        "ホール設定読み込み: enabled_halls=%d, processing_halls=%d, disabled_halls=%d",
+        enabled_count,
+        len(hall_list),
+        disabled_count,
+    )
+    return hall_list
+
+
+def _upsert_hall_date(df_hall_date: pd.DataFrame, supabase) -> int:
+    if df_hall_date.empty:
+        logger.warning("空データのためDB登録をスキップします。")
+        return 0
+
+    df_clean = df_data_clean(df_hall_date)
+    if df_clean.empty:
+        logger.warning("前処理後のデータが空のためDB登録をスキップします。")
+        return 0
+
+    data_to_supabase.add_model(df_clean, supabase)
+    data_to_supabase.add_prefecture_and_hall(df_clean, supabase)
+    return data_to_supabase.add_data_result(df_clean, supabase)
+
+
+def scraper_all_hall(
+    test_mode: bool = False,
+    test_count: int = 2,
+    min_existing_rows: int = 10,
+    upsert_each_date: bool = True,
+) -> pd.DataFrame:
+    start = time.perf_counter()
+    hall_list = _load_hall_list(test_mode=test_mode, test_count=test_count)
+    supabase = data_to_supabase.get_supabase_client() if upsert_each_date else None
+
+    jst_date = os.getenv("JST_DATE")
+    jst_hour = os.getenv("JST_HOUR")
+    if jst_date or jst_hour:
+        logger.info("実行基準時刻: JST_DATE=%s, JST_HOUR=%s", jst_date, jst_hour)
+
+    frames: list[pd.DataFrame] = []
+    target_count = 0
+    skipped_count = 0
+    scrape_target_count = 0
+    scraped_rows = 0
+    total_upserted = 0
+    warned_prefecture_mismatch_halls: set[str] = set()
+    cols = RESULT_COLUMNS
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
         try:
-            encoded_slug = quote(h.slug)
-            hall_url = urljoin(config.MAIN_URL, encoded_slug)
-            logger.info("(%d/%d) 処理中: %s", i, len(hall_list), hall_url)
-            df_hall = extract_result_data(hall_url, h.period)
-            if not df_hall.empty:
-                frames.append(df_hall)
-        except Exception as e:
-            logger.exception("ホール処理でエラー: %s", e)
+            for i, h in enumerate(hall_list, start=1):
+                encoded_slug = quote(h.slug)
+                hall_url = urljoin(config.MAIN_URL, encoded_slug)
+                logger.debug("(%d/%d) 処理中: name=%s, prefecture=%s, url=%s", i, len(hall_list), h.name, h.prefecture, hall_url)
 
-    df_all = pd.concat(frames, ignore_index=True)
+                def should_scrape(pref: str, hall: str, date: str) -> bool:
+                    nonlocal target_count, skipped_count, scrape_target_count
+                    target_count += 1
+                    if supabase is None:
+                        scrape_target_count += 1
+                        logger.info("新規取得対象: hall=%s, date=%s", hall, date)
+                        return True
+                    should_skip, existing_count, _ = has_enough_results(
+                        supabase,
+                        pref,
+                        hall,
+                        date,
+                        min_existing_rows=min_existing_rows,
+                    )
+                    if should_skip:
+                        skipped_count += 1
+                        logger.debug(
+                            "取得済みのためスキップ: hall=%s, date=%s, existing_count=%d",
+                            hall,
+                            date,
+                            existing_count,
+                        )
+                        return False
+                    scrape_target_count += 1
+                    logger.info("新規取得対象: hall=%s, date=%s", hall, date)
+                    return True
 
-    # 列の順番を固定（下流の処理を安定化）
-    cols = ["pref", "hall", "model", "date", "台番", "G数", "BB", "RB", "差枚"]
+                try:
+                    hall_date_results = extract_result_data_by_dates(
+                        page,
+                        hall_url,
+                        h.period,
+                        date_filter=should_scrape,
+                    )
+                except Exception as e:
+                    logger.exception("ホール処理でエラー: %s", e)
+                    continue
+
+                for pref, hall, date, df_hall_date, model_count in hall_date_results:
+                    if (
+                        h.prefecture
+                        and pref
+                        and h.prefecture != pref
+                        and hall not in warned_prefecture_mismatch_halls
+                    ):
+                        logger.warning(
+                            "config prefecture と site prefecture が違います: config_prefecture=%s, site_prefecture=%s, hall=%s",
+                            h.prefecture,
+                            pref,
+                            hall,
+                        )
+                        warned_prefecture_mismatch_halls.add(hall)
+                    row_count = len(df_hall_date)
+                    if row_count == 0:
+                        logger.warning("取得対象があるのに rows=0 です: hall=%s, date=%s", hall, date)
+                        continue
+                    scraped_rows += row_count
+                    frames.append(df_hall_date)
+                    upserted_rows = 0
+                    if upsert_each_date and supabase is not None:
+                        try:
+                            upserted_rows = _upsert_hall_date(df_hall_date, supabase)
+                            total_upserted += upserted_rows
+                        except Exception as e:
+                            logger.exception("DB登録でエラー: hall=%s, date=%s, error=%s", hall, date, e)
+                            continue
+                    logger.info(
+                        "取得・保存完了: hall=%s, date=%s, models=%d, rows=%d, upserted_rows=%d",
+                        hall,
+                        date,
+                        model_count,
+                        row_count,
+                        upserted_rows,
+                    )
+        finally:
+            browser.close()
+
+    logger.info(
+        "取得済み確認完了: target_count=%d, skipped_count=%d, scrape_target_count=%d",
+        target_count,
+        skipped_count,
+        scrape_target_count,
+    )
+
+    if scrape_target_count == 0:
+        logger.info("全対象が取得済みのため、今回のスクレイピングは実行せず終了します。")
+
+    if frames:
+        df_all = pd.concat(frames, ignore_index=True)
+    else:
+        if scrape_target_count == 0:
+            logger.info("取得データが空のため、空DataFrameを出力します。")
+        else:
+            logger.warning("取得対象があるのに取得データが空のため、空DataFrameを出力します。")
+        df_all = pd.DataFrame(columns=cols)
+
     for c in cols:
         if c not in df_all.columns:
             df_all[c] = pd.NA
     df_all = df_all[cols]
     df_all.to_csv(config.CSV_DIR / "all_result_data.csv", index=False)
 
+    if upsert_each_date and supabase is not None and total_upserted > 0:
+        refresh_materialized_views(supabase)
+    elif upsert_each_date:
+        logger.info("新規登録対象がないためマテビュー更新は呼びません。")
+
+    logger.info(
+        "スクレイピング対象確認結果: target_count=%d, skipped_count=%d, "
+        "scrape_target_count=%d, scraped_rows=%d, upserted_rows=%d",
+        target_count,
+        skipped_count,
+        scrape_target_count,
+        scraped_rows,
+        total_upserted,
+    )
+
     end = time.perf_counter()
     logger.info("全体処理時間: %.2f 秒", end - start)
-
     return df_all
 
 
 if __name__ == "__main__":
-
-    df = scraper_all_hall(test_mode=False)
-
-    df = df_data_clean(df)
-
-    supabase = data_to_supabase.get_supabase_client()
-    data_to_supabase.add_model(df, supabase)
-    data_to_supabase.add_prefecture_and_hall(df, supabase)
-    data_to_supabase.add_data_result(df, supabase)
+    scraper_all_hall(test_mode=False, test_count=2, min_existing_rows=10)

@@ -25,14 +25,14 @@ def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
     returns: List[(prefecture, hall, date(YYYY-MM-DD), date_url)]
     """
 
-    logger.info(f"ホールのトップページにアクセスします。")
-    logger.info(f"url: {hall_url}")
+    logger.debug("ホールのトップページにアクセスします。")
+    logger.debug("url: %s", hall_url)
     page.goto(hall_url, timeout=90_000, wait_until="domcontentloaded")
 
     # ホール名・県名
     hall = _norm_text(page.locator("#content h1").first.text_content())
     pref = _norm_text(page.locator("#content div span.todofuken").first.text_content())
-    logger.info("Hall: %s / Pref: %s", hall, pref)
+    logger.debug("Hall: %s / Pref: %s", hall, pref)
 
     # スクリーンショット
     # page.screenshot(
@@ -72,7 +72,7 @@ def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
 
         date_urls.append((pref, hall, date_iso, href))
 
-    logger.info("取得した日付URL: %d 件", len(date_urls))
+    logger.debug("取得した日付URL: %d 件", len(date_urls))
     if date_urls:
         logger.debug(f"date_urlsの一行目 : {date_urls[0]}")
         for i, date_url in enumerate(date_urls):

@@ -34,7 +34,7 @@ def add_model(df: pd.DataFrame, supabase: Client) -> None:
     # UNIQUE(models.name) 前提で upsert
     rows = [{"name": m} for m in models]
     supabase.table("models").upsert(rows, on_conflict="name").execute()
-    logger.info(f"モデル upsert: {len(rows)} 件（新規/既存含む）")
+    logger.debug(f"モデル upsert: {len(rows)} 件（新規/既存含む）")
 
 
 def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
@@ -47,7 +47,7 @@ def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
     # 1) prefectures upsert
     pref_rows = [{"name": p} for p in prefectures]
     supabase.table("prefectures").upsert(pref_rows, on_conflict="name").execute()
-    logger.info(f"都道府県 upsert: {len(pref_rows)} 件（新規/既存含む）")
+    logger.debug(f"都道府県 upsert: {len(pref_rows)} 件（新規/既存含む）")
 
     # 2) prefecture_id を取得してマップ化
     pref_res = supabase.table("prefectures").select("prefecture_id, name").execute()
@@ -69,13 +69,17 @@ def add_prefecture_and_hall(df: pd.DataFrame, supabase: Client) -> None:
             hall_rows,
             on_conflict="name,prefecture_id",
         ).execute()
-        logger.info(f"ホール upsert: {len(hall_rows)} 件（新規/既存含む）")
+        logger.debug(f"ホール upsert: {len(hall_rows)} 件（新規/既存含む）")
     else:
         logger.warning("ホールなし")
 
 
-def add_data_result(df: pd.DataFrame, supabase: Client) -> None:
-    """--- results テーブルへデータ登録 ---"""
+def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
+    """--- results テーブルへデータ登録 ---
+
+    Returns:
+        upsert 対象として送信できた件数（新規/既存更新を含む）
+    """
 
     # 1) 最新の prefectures / halls / models を取得して ID マップを作る
     pref_res = supabase.table("prefectures").select("prefecture_id, name").execute()
@@ -134,64 +138,60 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> None:
 
     if not records:
         logger.warning("results に挿入するデータがありません。")
-        return
+        return 0
+
+    conflict_keys = ["hall_id", "model_id", "unit_no", "date"]
+    before_dedup = len(records)
+    records_df = pd.DataFrame(records)
+    duplicate_count = records_df.duplicated(subset=conflict_keys, keep=False).sum()
+    if duplicate_count:
+        logger.warning("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
+        records_df = records_df.drop_duplicates(subset=conflict_keys, keep="last")
+        logger.debug("results upsert前の重複除去: %d 件 -> %d 件", before_dedup, len(records_df))
+    else:
+        logger.debug("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
+    records = records_df.to_dict("records")
+    logger.debug("results upsert対象件数: %d 件", len(records))
 
     # 3) 一括 upsert（unique(hall_id, model_id, unit_no, date) を想定）
     #    行数が多い場合はバッチに分ける
     batch_size = 1000
     inserted = 0
     for i in range(0, len(records), batch_size):
+        batch_no = i // batch_size + 1
         batch = records[i : i + batch_size]
-        supabase.table("results").upsert(
-            batch,
-            on_conflict="hall_id,model_id,unit_no,date",
-        ).execute()
+        logger.debug("results upsert batch %d: %d 件", batch_no, len(batch))
+        try:
+            supabase.table("results").upsert(
+                batch,
+                on_conflict="hall_id,model_id,unit_no,date",
+            ).execute()
+        except Exception:
+            key_samples = [
+                {key: record.get(key) for key in ["hall_id", "model_id", "unit_no", "date"]}
+                for record in batch[:5]
+            ]
+            logger.exception(
+                "results upsert失敗: batch=%d, 件数=%d, key_samples=%s",
+                batch_no,
+                len(batch),
+                key_samples,
+            )
+            raise
         inserted += len(batch)
 
-    logger.info(f"results upsert: {inserted} 件（新規/既存含む）")
+    logger.debug(f"results upsert: {inserted} 件（新規/既存含む）")
+    return inserted
 
 
 if __name__ == "__main__":
 
     df = pd.read_csv(config.CSV_DIR / "cleaned_all_result_data.csv")
     
-    # df = pd.read_csv("minrepo_01_from_sqlite.csv")
-    # df["date"] = pd.to_datetime(df["date"]).dt.date
-
-    # target_models = [
-    #     "ハッピージャグラーVIII",
-    #     "ジャグラーガールズ",
-    #     "ファンキージャグラー2",
-    #     "ネオアイムジャグラーEX",
-    #     "マイジャグラーV",
-    #     "ゴーゴージャグラー3",
-    #     "ウルトラミラクルジャグラー",
-    #     "ミスタージャグラー",
-    #     "アイムジャグラーEX-TP",
-    # ]
-
-    # target_halls = [
-    #     "コンサートホールエフ成増",
-    #     "マルハン大山店",
-    #     "マルハン青梅新町店",
-    #     "大山オーシャン",
-    #     "楽園ハッピーロード大山",
-    #     "楽園池袋店",
-    #     "楽園池袋店グリーンサイド",
-    #     "スーパースロットサンフラワー+",
-    #     "YASUDA9",
-    #     "エクサファースト",
-    #     "マルハン池袋店",
-    # ]
-
-    # df = df[df["hall"].isin(target_halls)]
-    # df = df[df["model"].isin(target_models)]
-    # df = df[(df["date"] >= "2025-11-01") & (df["date"] <= "2025-11-30")]
-
-    print(df.date.unique())
-    print(df.hall.unique())
-    print(df.model.unique())
-    print(df.shape[0])
+    logger.debug("date unique: %s", df.date.unique())
+    logger.debug("hall unique: %s", df.hall.unique())
+    logger.debug("model unique: %s", df.model.unique())
+    logger.debug("row count: %d", df.shape[0])
 
     supabase = get_supabase_client()
     add_model(df, supabase)

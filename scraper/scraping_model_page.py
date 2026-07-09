@@ -1,4 +1,3 @@
-from playwright.sync_api import sync_playwright
 from playwright.sync_api import Page, sync_playwright, TimeoutError as PWTimeout
 import pandas as pd
 from urllib.parse import quote, urljoin
@@ -7,6 +6,7 @@ import os
 from config import config
 from utils.logger_setup import setup_logger
 from utils.utils import _norm_text, extract_model_name
+from utils.target_models import build_alias_to_canonical, match_target_model_detail
 from scraper.scraping_hall_page import extract_date_url
 from scraper.scraping_date_page import extract_model_url
 
@@ -20,8 +20,45 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 # ページ操作
 # =========================
+def goto_with_retry(page: Page, url: str, retries: int = 2) -> None:
+    """機種ページへ軽くリトライしながら遷移する。"""
+    last_error: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            page.goto(url, timeout=90_000, wait_until="domcontentloaded")
+            return
+        except Exception as e:
+            last_error = e
+            logger.warning(
+                "機種ページへのアクセスに失敗しました。retry=%d/%d, url=%s, error=%s",
+                attempt,
+                retries,
+                url,
+                e,
+            )
+    if last_error is not None:
+        raise last_error
+
+
+def _log_model_skip(
+    hall: str,
+    date: str,
+    model_url: str,
+    url: str,
+    error: str | Exception,
+) -> None:
+    logger.warning(
+        "機種データをスキップします: hall=%s, date=%s, model_url=%s, url=%s, error=%s",
+        hall,
+        date,
+        model_url,
+        url,
+        error,
+    )
+
+
 def extract_model_data(
-    page: Page, model_urls: list[tuple[str, str, str, str, str]]
+    page: Page, model_urls: list[tuple]
 ) -> pd.DataFrame:
     """
     各機種ページに移動し、台データを DataFrame で返す
@@ -29,75 +66,133 @@ def extract_model_data(
     """
 
     frames: list[pd.DataFrame] = []
+    alias_to_canonical = build_alias_to_canonical()
 
-    for pref, hall, date, date_url, model_url in model_urls:
+    for model_url_tuple in model_urls:
+        pref, hall, date, date_url, model_url = model_url_tuple[:5]
+        canonical_model_name = model_url_tuple[5] if len(model_url_tuple) >= 6 else None
+        raw_model_name = model_url_tuple[6] if len(model_url_tuple) >= 7 else None
+        normalized_model_name = model_url_tuple[7] if len(model_url_tuple) >= 8 else None
+        match_type = model_url_tuple[8] if len(model_url_tuple) >= 9 else None
+        matched_alias = model_url_tuple[9] if len(model_url_tuple) >= 10 else None
         url = urljoin(date_url, model_url)
-        logger.info(f"機種ページにアクセスします。")
-        logger.info(f"{url}")
-        page.goto(url, timeout=90_000, wait_until="domcontentloaded")
-        page.reload()  # これは必ず入れる!!!
-
-        # スクリーンショット
-        # page.screenshot(
-        #     path=config.IMG_DIR / f"{hall}_model_page.jpg",
-        #     full_page=True,
-        #     type="jpeg",
-        #     quality=50,
-        # )
-
-        # 機種名 (h2 に "ジャグラー" を含むものを優先)
-        model = ""
-        css = "div.tab_content > h2"
-        # css  = "div > h2"
         try:
+            logger.debug("機種ページにアクセスします。")
+            logger.debug("url: %s", url)
+            goto_with_retry(page, url, retries=2)
+
+            # スクリーンショット
+            # page.screenshot(
+            #     path=config.IMG_DIR / f"{hall}_model_page.jpg",
+            #     full_page=True,
+            #     type="jpeg",
+            #     quality=50,
+            # )
+
+            # 機種名 (DB保存用は canonical_model_name を優先)
+            model = ""
+            css = "div.tab_content > h2"
+            # css  = "div > h2"
             TARGET_MODEL = "ジャグラー"
-            page.wait_for_selector(css, timeout=10_000)
-            h2s = page.locator(css)
-            for i in range(h2s.count()):
-                txt = extract_model_name(h2s.nth(i).inner_text())
-                if TARGET_MODEL in txt:
-                    model = txt
-                    break
-            if not model and h2s.count():
-                model = extract_model_name(h2s.nth(i).inner_text())
-            logger.info(f"機種名: {model}")
-        except PWTimeout:
-            logger.warning("機種タイトルが取得できませんでした: %s", url)
+            try:
+                page.wait_for_selector(css, timeout=10_000)
+                h2s = page.locator(css)
+                for i in range(h2s.count()):
+                    txt = extract_model_name(h2s.nth(i).inner_text())
+                    if TARGET_MODEL in txt:
+                        model = txt
+                        break
+                if not model and h2s.count():
+                    model = extract_model_name(h2s.nth(i).inner_text())
+                logger.debug("機種名(h2): %s", model)
+            except PWTimeout:
+                logger.warning("機種タイトルが取得できませんでした: %s", url)
 
-        # テーブルの取得
-        css = "div > div.table_wrap > table > tbody > tr"
-        try:
-            page.wait_for_selector(css, timeout=15_000)
-        except PWTimeout:
-            logger.debug("テーブルが見つかりません。")
-            # return []
+            if canonical_model_name:
+                h2_match = match_target_model_detail(model, alias_to_canonical) if model else None
+                if model and (h2_match is None or h2_match.canonical_name != canonical_model_name):
+                    logger.warning(
+                        "h2_model と canonical_model_name が想定外に違うため機種データをスキップします: "
+                        "raw_model_name=%s, normalized_model_name=%s, h2_model=%s, "
+                        "canonical_model_name=%s, match_type=%s, matched_alias=%s",
+                        raw_model_name,
+                        normalized_model_name,
+                        model,
+                        canonical_model_name,
+                        match_type,
+                        matched_alias,
+                    )
+                    continue
 
-        rows = page.locator(css)
-        # th行(header)処理
-        ths = rows.nth(0).locator("th")
-        header = [_norm_text(ths.nth(i).inner_text()) for i in range(ths.count())]
-        logger.debug(header)
-        # td(date)行処理
-        table: list[list[str]] = []
-        for j in range(rows.count()):
-            tds = rows.nth(j).locator("td")
-            row = []
-            for k in range(tds.count()):
-                row.append(_norm_text(tds.nth(k).inner_text()))
-            if row:  # 空行スキップ
-                table.append(row)
+                logger.debug(
+                    "DB保存用機種名に canonical_model_name を使用: raw_model_name=%s, "
+                    "normalized_model_name=%s, h2_model=%s, canonical_model_name=%s, "
+                    "match_type=%s, matched_alias=%s",
+                    raw_model_name,
+                    normalized_model_name,
+                    model,
+                    canonical_model_name,
+                    match_type,
+                    matched_alias,
+                )
+                model = canonical_model_name
 
-        logger.info(f"{len(table)} 行の機種データを取得")
-        for t in table:
-            logger.debug(t)
+            # テーブルの取得
+            css = "div > div.table_wrap > table > tbody > tr"
+            try:
+                page.wait_for_selector(css, timeout=15_000)
+            except PWTimeout as e:
+                _log_model_skip(hall, date, model_url, url, e)
+                continue
 
-        df = pd.DataFrame(table, columns=header)
-        df = df[~df["台番"].astype(str).str.contains("平均")]
-        df["pref"] = pref
-        df["hall"] = hall
-        df["model"] = model
-        df["date"] = date
-        frames.append(df)
+            rows = page.locator(css)
+            if rows.count() == 0:
+                _log_model_skip(hall, date, model_url, url, "テーブル行が空")
+                continue
+
+            # th行(header)処理
+            ths = rows.nth(0).locator("th")
+            header = [_norm_text(ths.nth(i).inner_text()) for i in range(ths.count())]
+            if not header:
+                _log_model_skip(hall, date, model_url, url, "テーブルヘッダーが空")
+                continue
+            logger.debug(header)
+            # td(date)行処理
+            table: list[list[str]] = []
+            for j in range(rows.count()):
+                tds = rows.nth(j).locator("td")
+                row = []
+                for k in range(tds.count()):
+                    row.append(_norm_text(tds.nth(k).inner_text()))
+                if row:  # 空行スキップ
+                    table.append(row)
+
+            if not table:
+                _log_model_skip(hall, date, model_url, url, "テーブルデータが空")
+                continue
+            for t in table:
+                logger.debug(t)
+
+            df = pd.DataFrame(table, columns=header)
+            if "台番" not in df.columns:
+                _log_model_skip(hall, date, model_url, url, "台番列が見つからない")
+                continue
+            df = df[~df["台番"].astype(str).str.contains("平均")]
+            df["pref"] = pref
+            df["hall"] = hall
+            df["model"] = model
+            df["date"] = date
+            logger.debug(
+                "機種データ取得成功: hall=%s, date=%s, model=%s, rows=%d",
+                hall,
+                date,
+                model,
+                len(df),
+            )
+            frames.append(df)
+        except Exception as e:
+            _log_model_skip(hall, date, model_url, url, e)
+            continue
 
     return pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
 
@@ -121,7 +216,7 @@ if __name__ == "__main__":
 
         try:
             df_model_urls: list = []
-            columns = ["pref", "hall", "date", "date_url", "model_url"]
+            columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name", "raw_model_name", "normalized_model_name", "match_type", "matched_alias"]
             for pref, hall, date, date_url in date_urls:
                 model_urls = extract_model_url(page, hall, pref, date_url, date)
                 if not model_urls:
