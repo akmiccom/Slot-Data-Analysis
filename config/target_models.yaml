@@ -48,17 +48,26 @@ target_models:
       - "ハッピージャグラー8"
       - "ハッピー8"
 
-  - canonical_name: "ジャグラーガールズ"
-    enabled: true
-    aliases:
-      - ""
+- canonical_name: "ジャグラーガールズ"
+  enabled: true
+  aliases:
+    - "ジャグラーガールズ"
+    - "ジャグラーガールズSS"
+    - "Lジャグラーガールズ"
+    - "LジャグラーガールズSS"
+    - "Sジャグラーガールズ"
+    - "SジャグラーガールズSS"
 
-  - canonical_name: "ウルトラミラクルジャグラー"
-    enabled: true
-    aliases:
-      - ""
+- canonical_name: "ウルトラミラクルジャグラー"
+  enabled: true
+  aliases:
+    - "ウルトラミラクルジャグラー"
+    - "Lウルトラミラクルジャグラー"
+    - "Sウルトラミラクルジャグラー"
 
-  - canonical_name: "ミスタージャグラー"
-    enabled: true
-    aliases:
-      - ""
+- canonical_name: "ミスタージャグラー"
+  enabled: true
+  aliases:
+    - "ミスタージャグラー"
+    - "Lミスタージャグラー"
+    - "Sミスタージャグラー"
