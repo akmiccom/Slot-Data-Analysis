@@ -1,19 +1,4 @@
 target_models:
-  - canonical_name: "ゴーゴージャグラー3"
-    enabled: true
-    aliases:
-      - "ゴーゴージャグラー3"
-      - "ゴーゴージャグラー３"
-      - "ゴージャグ3"
-      - "ゴージャグ３"
-
-  - canonical_name: "マイジャグラーV"
-    enabled: true
-    aliases:
-      - "マイジャグラーV"
-      - "マイジャグラーⅤ"
-      - "マイジャグ5"
-
   - canonical_name: "ネオアイムジャグラーEX"
     enabled: true
     aliases:
@@ -22,13 +7,29 @@ target_models:
       - "SネオアイムジャグラーEX-KK"
       - "SネオアイムジャグラーEXKK"
 
-  - canonical_name: "アイムジャグラーEX-TP"
+  - canonical_name: "ゴーゴージャグラー3"
     enabled: true
     aliases:
-      - "アイムジャグラーEX-TP"
-      - "アイムジャグラーEX"
-      - "SアイムジャグラーEX"
-      - "SアイムジャグラーEX-TP"
+      - "ゴーゴージャグラー3"
+      - "ゴーゴージャグラー３"
+      - "Sゴーゴージャグラー3"
+      - "Sゴーゴージャグラー３"
+
+  - canonical_name: "マイジャグラーV"
+    enabled: true
+    aliases:
+      - "マイジャグラーV"
+      - "SマイジャグラーV"
+
+  - canonical_name: "ジャグラーガールズ"
+    enabled: true
+    aliases:
+      - "ジャグラーガールズ"
+      - "ジャグラーガールズSS"
+      - "Lジャグラーガールズ"
+      - "LジャグラーガールズSS"
+      - "Sジャグラーガールズ"
+      - "SジャグラーガールズSS"
 
   - canonical_name: "ファンキージャグラー2"
     enabled: true
@@ -37,37 +38,29 @@ target_models:
       - "ファンキージャグラー２"
       - "ファンキージャグラー2KT"
       - "ファンキージャグラー２ＫＴ"
-      - "ファンキー2"
+      - "Sファンキージャグラー2"
+      - "Sファンキージャグラー２"
 
-  - canonical_name: "ハッピージャグラーVIII"
+  - canonical_name: "ハッピージャグラー"
     enabled: true
     aliases:
+      - "ハッピージャグラー"
       - "ハッピージャグラーVIII"
       - "ハッピージャグラーＶＩＩＩ"
-      - "ハッピージャグラーVⅢ"
-      - "ハッピージャグラー8"
-      - "ハッピー8"
+      - "Sハッピージャグラー"
+      - "SハッピージャグラーVIII"
+      - "SハッピージャグラーＶＩＩＩ"
 
-- canonical_name: "ジャグラーガールズ"
-  enabled: true
-  aliases:
-    - "ジャグラーガールズ"
-    - "ジャグラーガールズSS"
-    - "Lジャグラーガールズ"
-    - "LジャグラーガールズSS"
-    - "Sジャグラーガールズ"
-    - "SジャグラーガールズSS"
+  - canonical_name: "ウルトラミラクルジャグラー"
+    enabled: true
+    aliases:
+      - "ウルトラミラクルジャグラー"
+      - "Lウルトラミラクルジャグラー"
+      - "Sウルトラミラクルジャグラー"
 
-- canonical_name: "ウルトラミラクルジャグラー"
-  enabled: true
-  aliases:
-    - "ウルトラミラクルジャグラー"
-    - "Lウルトラミラクルジャグラー"
-    - "Sウルトラミラクルジャグラー"
-
-- canonical_name: "ミスタージャグラー"
-  enabled: true
-  aliases:
-    - "ミスタージャグラー"
-    - "Lミスタージャグラー"
-    - "Sミスタージャグラー"
+  - canonical_name: "ミスタージャグラー"
+    enabled: true
+    aliases:
+      - "ミスタージャグラー"
+      - "Lミスタージャグラー"
+      - "Sミスタージャグラー"
