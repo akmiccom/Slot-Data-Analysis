@@ -25,12 +25,13 @@ def extract_result_data_by_dates(
     hall_url: str,
     period: int = 1,
     date_filter=None,
+    target_dates: set[str] | None = None,
 ) -> list[tuple[str, str, str, pd.DataFrame, int]]:
     """ホール×日付単位で結果データを取得する。
 
     returns: List[(pref, hall, date, df_result, model_count)]
     """
-    date_urls = extract_date_url(hall_url, page, period=period)
+    date_urls = extract_date_url(hall_url, page, period=period, target_dates=target_dates)
     results: list[tuple[str, str, str, pd.DataFrame, int]] = []
 
     for pref, hall, date, date_url in date_urls:
