@@ -20,6 +20,27 @@ on:
 
   # 手動実行
   workflow_dispatch:
+    inputs:
+      target_dates:
+        description: "再取得する日付。例: 2026-07-06 または 2026-07-06,2026-07-07"
+        required: false
+        default: ""
+      force_rescrape:
+        description: "取得済みでも再取得する"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+      disable_pre_skip:
+        description: "事前スキップを無効にする"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -71,6 +92,9 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           JST_DATE: ${{ env.JST_DATE }}
           JST_HOUR: ${{ env.JST_HOUR }}
+          TARGET_DATES: ${{ github.event.inputs.target_dates }}
+          FORCE_RESCRAPE: ${{ github.event.inputs.force_rescrape }}
+          DISABLE_PRE_SKIP: ${{ github.event.inputs.disable_pre_skip }}
 
       - name: Save scraped logs and csv
         if: always()
