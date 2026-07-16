@@ -1,4 +1,19 @@
 target_models:
+  - canonical_name: "ゴーゴージャグラー3"
+    enabled: true
+    aliases:
+      - "ゴーゴージャグラー3"
+      - "ゴーゴージャグラー３"
+      - "ゴージャグ3"
+      - "ゴージャグ３"
+
+  - canonical_name: "マイジャグラーV"
+    enabled: true
+    aliases:
+      - "マイジャグラーV"
+      - "マイジャグラーⅤ"
+      - "マイジャグ5"
+
   - canonical_name: "ネオアイムジャグラーEX"
     enabled: true
     aliases:
@@ -7,19 +22,31 @@ target_models:
       - "SネオアイムジャグラーEX-KK"
       - "SネオアイムジャグラーEXKK"
 
-  - canonical_name: "ゴーゴージャグラー3"
+  - canonical_name: "アイムジャグラーEX-TP"
     enabled: true
     aliases:
-      - "ゴーゴージャグラー3"
-      - "ゴーゴージャグラー３"
-      - "Sゴーゴージャグラー3"
-      - "Sゴーゴージャグラー３"
+      - "アイムジャグラーEX-TP"
+      - "アイムジャグラーEX"
+      - "SアイムジャグラーEX"
+      - "SアイムジャグラーEX-TP"
 
-  - canonical_name: "マイジャグラーV"
+  - canonical_name: "ファンキージャグラー2"
     enabled: true
     aliases:
-      - "マイジャグラーV"
-      - "SマイジャグラーV"
+      - "ファンキージャグラー2"
+      - "ファンキージャグラー２"
+      - "ファンキージャグラー2KT"
+      - "ファンキージャグラー２ＫＴ"
+      - "ファンキー2"
+
+  - canonical_name: "ハッピージャグラーVIII"
+    enabled: true
+    aliases:
+      - "ハッピージャグラーVIII"
+      - "ハッピージャグラーＶＩＩＩ"
+      - "ハッピージャグラーVⅢ"
+      - "ハッピージャグラー8"
+      - "ハッピー8"
 
   - canonical_name: "ジャグラーガールズ"
     enabled: true
@@ -30,34 +57,14 @@ target_models:
       - "LジャグラーガールズSS"
       - "Sジャグラーガールズ"
       - "SジャグラーガールズSS"
-
-  - canonical_name: "ファンキージャグラー2"
-    enabled: true
-    aliases:
-      - "ファンキージャグラー2"
-      - "ファンキージャグラー２"
-      - "ファンキージャグラー2KT"
-      - "ファンキージャグラー２ＫＴ"
-      - "Sファンキージャグラー2"
-      - "Sファンキージャグラー２"
-
-  - canonical_name: "ハッピージャグラー"
-    enabled: true
-    aliases:
-      - "ハッピージャグラー"
-      - "ハッピージャグラーVIII"
-      - "ハッピージャグラーＶＩＩＩ"
-      - "Sハッピージャグラー"
-      - "SハッピージャグラーVIII"
-      - "SハッピージャグラーＶＩＩＩ"
-
+  
   - canonical_name: "ウルトラミラクルジャグラー"
     enabled: true
     aliases:
       - "ウルトラミラクルジャグラー"
       - "Lウルトラミラクルジャグラー"
       - "Sウルトラミラクルジャグラー"
-
+  
   - canonical_name: "ミスタージャグラー"
     enabled: true
     aliases:
