@@ -1,6 +1,8 @@
 import pandas as pd
 from urllib.parse import quote, urljoin
 import os
+import datetime as dt
+import re
 import time
 import yaml
 from playwright.sync_api import sync_playwright
@@ -18,6 +20,35 @@ from scraper.supabase_lookup import has_enough_results
 # =========================
 filename, ext = os.path.splitext(os.path.basename(__file__))
 logger = setup_logger(filename, log_file=config.LOG_PATH)
+
+
+def _parse_bool_env(name: str) -> bool:
+    return os.getenv(name, "").strip().lower() == "true"
+
+
+def _load_target_dates_from_env() -> set[str] | None:
+    raw_target_dates = os.getenv("TARGET_DATES", "").strip()
+    if not raw_target_dates:
+        return None
+
+    target_dates: set[str] = set()
+    for raw_date in raw_target_dates.split(","):
+        target_date = raw_date.strip()
+        if not target_date:
+            continue
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", target_date):
+            raise ValueError(f"TARGET_DATES は YYYY-MM-DD のカンマ区切りで指定してください: {target_date}")
+        try:
+            dt.date.fromisoformat(target_date)
+        except ValueError as exc:
+            raise ValueError(f"TARGET_DATES は YYYY-MM-DD のカンマ区切りで指定してください: {target_date}") from exc
+        target_dates.add(target_date)
+
+    if not target_dates:
+        raise ValueError("TARGET_DATES に有効な日付が指定されていません。")
+
+    logger.info("手動指定日付: target_dates=%s", ",".join(sorted(target_dates)))
+    return target_dates
 
 
 # =========================
@@ -80,6 +111,13 @@ def scraper_all_hall(
     start = time.perf_counter()
     hall_list = _load_hall_list(test_mode=test_mode, test_count=test_count)
     supabase = data_to_supabase.get_supabase_client() if upsert_each_date else None
+    target_dates = _load_target_dates_from_env()
+    force_rescrape = _parse_bool_env("FORCE_RESCRAPE")
+    disable_pre_skip = _parse_bool_env("DISABLE_PRE_SKIP")
+    if force_rescrape:
+        logger.info("force_rescrape=true のため取得済みでも再取得します")
+    if disable_pre_skip:
+        logger.info("disable_pre_skip=true のため事前スキップを無効化します")
 
     jst_date = os.getenv("JST_DATE")
     jst_hour = os.getenv("JST_HOUR")
@@ -107,7 +145,7 @@ def scraper_all_hall(
                 def should_scrape(pref: str, hall: str, date: str) -> bool:
                     nonlocal target_count, skipped_count, scrape_target_count
                     target_count += 1
-                    if supabase is None:
+                    if supabase is None or force_rescrape or disable_pre_skip:
                         scrape_target_count += 1
                         logger.info("新規取得対象: hall=%s, date=%s", hall, date)
                         return True
@@ -137,6 +175,7 @@ def scraper_all_hall(
                         hall_url,
                         h.period,
                         date_filter=should_scrape,
+                        target_dates=target_dates,
                     )
                 except Exception as e:
                     logger.exception("ホール処理でエラー: %s", e)

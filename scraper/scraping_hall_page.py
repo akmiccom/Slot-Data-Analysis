@@ -19,9 +19,9 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 # ページ操作
 # =========================
-def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
+def extract_date_url(hall_url, page, period, target_dates: set[str] | None = None) -> list[tuple[str, str, str, str]]:
     """
-    ホールのメインページから、直近 period 件の日付リンクを取得
+    ホールのメインページから、直近 period 件または指定日付の日付リンクを取得
     returns: List[(prefecture, hall, date(YYYY-MM-DD), date_url)]
     """
 
@@ -48,7 +48,7 @@ def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
     links = page.locator(css)
     count = links.count()
     logger.debug(f"link取得数: {count}")
-    take = min(period, count)
+    take = count if target_dates else min(period, count)
     logger.debug(f"take: {take}")
 
     date_urls: list[tuple[str, str, str, str]] = []
@@ -68,6 +68,9 @@ def extract_date_url(hall_url, page, period) -> list[tuple[str, str, str, str]]:
             date_iso = dt.date(int(y), int(mth), int(d)).strftime("%Y-%m-%d")
         except ValueError:
             logger.warning("日付に変換できません: %s", date_text)
+            continue
+
+        if target_dates is not None and date_iso not in target_dates:
             continue
 
         date_urls.append((pref, hall, date_iso, href))
