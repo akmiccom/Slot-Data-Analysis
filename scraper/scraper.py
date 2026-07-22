@@ -5,7 +5,7 @@ import datetime as dt
 import re
 import time
 import yaml
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
 
 from config import config
 from utils.logger_setup import setup_logger
@@ -13,6 +13,14 @@ from scraper.scraping_result_data import RESULT_COLUMNS, extract_result_data_by_
 from scraper.preprocess_for_db import df_data_clean
 from scraper import data_to_supabase
 from scraper.materialized_views import refresh_materialized_views
+from scraper.run_monitor import (
+    CircuitBreakerOpenError,
+    ConsecutiveErrorCircuitBreaker,
+    RunQualityError,
+    build_quality_issues,
+    emit_github_annotation,
+    positive_int_env,
+)
 from scraper.supabase_lookup import has_enough_results
 
 # =========================
@@ -87,19 +95,59 @@ def _load_hall_list(test_mode: bool = False, test_count: int = 2) -> list[config
     return hall_list
 
 
-def _upsert_hall_date(df_hall_date: pd.DataFrame, supabase) -> int:
+def _upsert_hall_date(
+    df_hall_date: pd.DataFrame,
+    supabase,
+    *,
+    hall: str,
+    date: str,
+) -> int:
+    db_start = time.perf_counter()
     if df_hall_date.empty:
         logger.warning("空データのためDB登録をスキップします。")
         return 0
 
+    preprocess_start = time.perf_counter()
     df_clean = df_data_clean(df_hall_date)
+    logger.info(
+        "timing stage=db_preprocess hall=%s date=%s rows=%d duration_sec=%.2f",
+        hall,
+        date,
+        len(df_hall_date),
+        time.perf_counter() - preprocess_start,
+    )
     if df_clean.empty:
         logger.warning("前処理後のデータが空のためDB登録をスキップします。")
         return 0
 
+    dimension_start = time.perf_counter()
     data_to_supabase.add_model(df_clean, supabase)
     data_to_supabase.add_prefecture_and_hall(df_clean, supabase)
-    return data_to_supabase.add_data_result(df_clean, supabase)
+    logger.info(
+        "timing stage=db_dimensions hall=%s date=%s rows=%d duration_sec=%.2f",
+        hall,
+        date,
+        len(df_clean),
+        time.perf_counter() - dimension_start,
+    )
+
+    result_start = time.perf_counter()
+    upserted_rows = data_to_supabase.add_data_result(df_clean, supabase)
+    logger.info(
+        "timing stage=db_results hall=%s date=%s rows=%d duration_sec=%.2f",
+        hall,
+        date,
+        upserted_rows,
+        time.perf_counter() - result_start,
+    )
+    logger.info(
+        "timing stage=db_total hall=%s date=%s rows=%d duration_sec=%.2f",
+        hall,
+        date,
+        upserted_rows,
+        time.perf_counter() - db_start,
+    )
+    return upserted_rows
 
 
 def scraper_all_hall(
@@ -109,11 +157,26 @@ def scraper_all_hall(
     upsert_each_date: bool = True,
 ) -> pd.DataFrame:
     start = time.perf_counter()
+    load_halls_start = time.perf_counter()
     hall_list = _load_hall_list(test_mode=test_mode, test_count=test_count)
+    logger.info(
+        "timing stage=load_halls hall_count=%d duration_sec=%.2f",
+        len(hall_list),
+        time.perf_counter() - load_halls_start,
+    )
+
+    db_client_start = time.perf_counter()
     supabase = data_to_supabase.get_supabase_client() if upsert_each_date else None
+    logger.info(
+        "timing stage=db_client enabled=%s duration_sec=%.2f",
+        supabase is not None,
+        time.perf_counter() - db_client_start,
+    )
     target_dates = _load_target_dates_from_env()
     force_rescrape = _parse_bool_env("FORCE_RESCRAPE")
     disable_pre_skip = _parse_bool_env("DISABLE_PRE_SKIP")
+    timeout_limit = positive_int_env("CONSECUTIVE_TIMEOUT_LIMIT", 5)
+    timeout_breaker = ConsecutiveErrorCircuitBreaker(threshold=timeout_limit)
     if force_rescrape:
         logger.info("force_rescrape=true のため取得済みでも再取得します")
     if disable_pre_skip:
@@ -130,14 +193,23 @@ def scraper_all_hall(
     scrape_target_count = 0
     scraped_rows = 0
     total_upserted = 0
+    hall_error_count = 0
+    db_error_count = 0
     warned_prefecture_mismatch_halls: set[str] = set()
     cols = RESULT_COLUMNS
 
     with sync_playwright() as p:
+        browser_start = time.perf_counter()
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
+        logger.info(
+            "timing stage=browser_startup duration_sec=%.2f",
+            time.perf_counter() - browser_start,
+        )
         try:
             for i, h in enumerate(hall_list, start=1):
+                hall_start = time.perf_counter()
+                hall_status = "started"
                 encoded_slug = quote(h.slug)
                 hall_url = urljoin(config.MAIN_URL, encoded_slug)
                 logger.debug("(%d/%d) 処理中: name=%s, prefecture=%s, url=%s", i, len(hall_list), h.name, h.prefecture, hall_url)
@@ -147,15 +219,29 @@ def scraper_all_hall(
                     target_count += 1
                     if supabase is None or force_rescrape or disable_pre_skip:
                         scrape_target_count += 1
+                        logger.info(
+                            "timing stage=db_lookup hall=%s date=%s status=bypassed duration_sec=0.00",
+                            hall,
+                            date,
+                        )
                         logger.info("新規取得対象: hall=%s, date=%s", hall, date)
                         return True
-                    should_skip, existing_count, _ = has_enough_results(
-                        supabase,
-                        pref,
-                        hall,
-                        date,
-                        min_existing_rows=min_existing_rows,
-                    )
+                    lookup_start = time.perf_counter()
+                    try:
+                        should_skip, existing_count, _ = has_enough_results(
+                            supabase,
+                            pref,
+                            hall,
+                            date,
+                            min_existing_rows=min_existing_rows,
+                        )
+                    finally:
+                        logger.info(
+                            "timing stage=db_lookup hall=%s date=%s duration_sec=%.2f",
+                            hall,
+                            date,
+                            time.perf_counter() - lookup_start,
+                        )
                     if should_skip:
                         skipped_count += 1
                         logger.debug(
@@ -178,8 +264,43 @@ def scraper_all_hall(
                         target_dates=target_dates,
                     )
                 except Exception as e:
+                    hall_error_count += 1
+                    hall_status = "error"
                     logger.exception("ホール処理でエラー: %s", e)
+                    emit_github_annotation(
+                        "error",
+                        "ホール収集エラー",
+                        f"hall={h.name}, error={type(e).__name__}: {e}",
+                    )
+                    if isinstance(e, PWTimeout):
+                        consecutive_count, is_open, signature = timeout_breaker.record(e)
+                        logger.warning(
+                            "同種タイムアウト連続数: count=%d limit=%d signature=%s",
+                            consecutive_count,
+                            timeout_limit,
+                            signature,
+                        )
+                        if is_open:
+                            message = (
+                                "同種タイムアウトが連続したため収集を打ち切ります: "
+                                f"count={consecutive_count}, limit={timeout_limit}, signature={signature}"
+                            )
+                            logger.error(message)
+                            emit_github_annotation("error", "収集サーキットブレーカー作動", message)
+                            raise CircuitBreakerOpenError(message) from e
+                    else:
+                        timeout_breaker.reset()
                     continue
+                else:
+                    timeout_breaker.reset()
+                    hall_status = "completed"
+                finally:
+                    logger.info(
+                        "timing stage=hall hall=%s status=%s duration_sec=%.2f",
+                        h.name,
+                        hall_status,
+                        time.perf_counter() - hall_start,
+                    )
 
                 for pref, hall, date, df_hall_date, model_count in hall_date_results:
                     if (
@@ -203,12 +324,35 @@ def scraper_all_hall(
                     frames.append(df_hall_date)
                     upserted_rows = 0
                     if upsert_each_date and supabase is not None:
+                        db_start = time.perf_counter()
+                        db_status = "started"
                         try:
-                            upserted_rows = _upsert_hall_date(df_hall_date, supabase)
+                            upserted_rows = _upsert_hall_date(
+                                df_hall_date,
+                                supabase,
+                                hall=hall,
+                                date=date,
+                            )
                             total_upserted += upserted_rows
+                            db_status = "completed" if upserted_rows else "skipped_empty"
                         except Exception as e:
+                            db_error_count += 1
+                            db_status = "error"
                             logger.exception("DB登録でエラー: hall=%s, date=%s, error=%s", hall, date, e)
+                            emit_github_annotation(
+                                "error",
+                                "DB登録エラー",
+                                f"hall={hall}, date={date}, error={type(e).__name__}: {e}",
+                            )
                             continue
+                        finally:
+                            logger.info(
+                                "timing stage=db hall=%s date=%s status=%s duration_sec=%.2f",
+                                hall,
+                                date,
+                                db_status,
+                                time.perf_counter() - db_start,
+                            )
                     logger.info(
                         "取得・保存完了: hall=%s, date=%s, models=%d, rows=%d, upserted_rows=%d",
                         hall,
@@ -252,16 +396,32 @@ def scraper_all_hall(
 
     logger.info(
         "スクレイピング対象確認結果: target_count=%d, skipped_count=%d, "
-        "scrape_target_count=%d, scraped_rows=%d, upserted_rows=%d",
+        "scrape_target_count=%d, scraped_rows=%d, upserted_rows=%d, "
+        "hall_error_count=%d, db_error_count=%d",
         target_count,
         skipped_count,
         scrape_target_count,
         scraped_rows,
         total_upserted,
+        hall_error_count,
+        db_error_count,
     )
 
     end = time.perf_counter()
     logger.info("全体処理時間: %.2f 秒", end - start)
+
+    quality_issues = build_quality_issues(
+        hall_count=len(hall_list),
+        target_count=target_count,
+        hall_error_count=hall_error_count,
+        db_error_count=db_error_count,
+    )
+    if quality_issues:
+        message = "; ".join(quality_issues)
+        logger.error("収集品質チェック失敗: %s", message)
+        emit_github_annotation("error", "収集品質チェック失敗", message)
+        raise RunQualityError(message)
+
     return df_all
 
 
