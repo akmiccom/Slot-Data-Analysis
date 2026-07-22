@@ -3,6 +3,7 @@ from playwright.sync_api import sync_playwright
 import pandas as pd
 from urllib.parse import quote, urljoin
 import os
+import time
 
 from config import config
 from utils.logger_setup import setup_logger
@@ -31,35 +32,58 @@ def extract_result_data_by_dates(
 
     returns: List[(pref, hall, date, df_result, model_count)]
     """
+    discovery_start = time.perf_counter()
     date_urls = extract_date_url(hall_url, page, period=period, target_dates=target_dates)
+    logger.info(
+        "timing stage=date_discovery hall_url=%s date_count=%d duration_sec=%.2f",
+        hall_url,
+        len(date_urls),
+        time.perf_counter() - discovery_start,
+    )
     results: list[tuple[str, str, str, pd.DataFrame, int]] = []
 
     for pref, hall, date, date_url in date_urls:
-        if date_filter is not None and not date_filter(pref, hall, date):
-            continue
+        date_start = time.perf_counter()
+        status = "started"
+        try:
+            if date_filter is not None and not date_filter(pref, hall, date):
+                status = "skipped_existing"
+                continue
 
-        model_urls = extract_model_url(page, hall, pref, date_url, date)
-        model_count = len(model_urls)
-        if not model_urls:
-            logger.warning("機種URLが取得できませんでした: %s / %s / %s", pref, hall, date)
-            results.append((pref, hall, date, pd.DataFrame(columns=RESULT_COLUMNS), model_count))
-            continue
+            model_urls = extract_model_url(page, hall, pref, date_url, date)
+            model_count = len(model_urls)
+            if not model_urls:
+                status = "empty_model_urls"
+                logger.warning("機種URLが取得できませんでした: %s / %s / %s", pref, hall, date)
+                results.append((pref, hall, date, pd.DataFrame(columns=RESULT_COLUMNS), model_count))
+                continue
 
-        df_model_urls = pd.DataFrame(model_urls, columns=MODEL_URL_COLUMNS)
-        df_model_urls.to_csv(
-            config.CSV_DIR / f"{pref}_{hall}_{date}_model_urls.csv",
-            index=False,
-        )
+            df_model_urls = pd.DataFrame(model_urls, columns=MODEL_URL_COLUMNS)
+            df_model_urls.to_csv(
+                config.CSV_DIR / f"{pref}_{hall}_{date}_model_urls.csv",
+                index=False,
+            )
 
-        df_result = extract_model_data(page, model_urls)
-        if df_result.empty:
-            logger.warning("結果データが空です: %s / %s / %s", pref, hall, date)
-            df_result = pd.DataFrame(columns=RESULT_COLUMNS)
-        df_result.to_csv(
-            config.CSV_DIR / f"{pref}_{hall}_{date}_result_data.csv",
-            index=False,
-        )
-        results.append((pref, hall, date, df_result, model_count))
+            df_result = extract_model_data(page, model_urls)
+            if df_result.empty:
+                status = "empty_result"
+                logger.warning("結果データが空です: %s / %s / %s", pref, hall, date)
+                df_result = pd.DataFrame(columns=RESULT_COLUMNS)
+            else:
+                status = "scraped"
+            df_result.to_csv(
+                config.CSV_DIR / f"{pref}_{hall}_{date}_result_data.csv",
+                index=False,
+            )
+            results.append((pref, hall, date, df_result, model_count))
+        finally:
+            logger.info(
+                "timing stage=date hall=%s date=%s status=%s duration_sec=%.2f",
+                hall,
+                date,
+                status,
+                time.perf_counter() - date_start,
+            )
 
     return results
 
