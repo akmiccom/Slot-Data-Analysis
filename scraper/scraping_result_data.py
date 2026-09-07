@@ -11,6 +11,7 @@ from utils.utils import _norm_text, extract_model_name
 from scraper.scraping_hall_page import extract_date_url
 from scraper.scraping_date_page import extract_model_url
 from scraper.scraping_model_page import extract_model_data
+from scraper.request_delay import wait_random_delay
 
 # =========================
 # 設定・ロガー
@@ -50,7 +51,21 @@ def extract_result_data_by_dates(
                 status = "skipped_existing"
                 continue
 
-            model_urls = extract_model_url(page, hall, pref, date_url, date)
+            wait_random_delay(
+                logger,
+                stage="before_date_page",
+                min_seconds=1,
+                max_seconds=3,
+                target=f"{hall}/{date}",
+            )
+            model_urls = extract_model_url(
+                page,
+                hall,
+                pref,
+                date_url,
+                date,
+                referer=hall_url,
+            )
             model_count = len(model_urls)
             if not model_urls:
                 status = "empty_model_urls"
@@ -104,7 +119,14 @@ def extract_result_data(hall_url: str, period: int = 1):
         try:
             df_model_urls: list = []
             for pref, hall, date, date_url in date_urls:
-                model_urls = extract_model_url(page, hall, pref, date_url, date)
+                model_urls = extract_model_url(
+                    page,
+                    hall,
+                    pref,
+                    date_url,
+                    date,
+                    referer=hall_url,
+                )
                 if not model_urls:
                     continue
                 df_model_url = pd.DataFrame(model_urls, columns=MODEL_URL_COLUMNS)
