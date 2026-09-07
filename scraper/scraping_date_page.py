@@ -21,7 +21,13 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # ページ操作
 # =========================
 def extract_model_url(
-    page: Page, hall: str, pref: str, date_url: str, date: str
+    page: Page,
+    hall: str,
+    pref: str,
+    date_url: str,
+    date: str,
+    *,
+    referer: str | None = None,
 ) -> list[tuple[str, str, str, str, str, str, str, str, str, str]]:
     """
     日付ページから、target_models.yaml に一致する機種リンクを抽出
@@ -29,7 +35,12 @@ def extract_model_url(
     """
 
     logger.debug("日付ページにアクセス: %s", date_url)
-    page.goto(date_url, timeout=90_000, wait_until="domcontentloaded")
+    page.goto(
+        date_url,
+        referer=referer,
+        timeout=90_000,
+        wait_until="domcontentloaded",
+    )
 
     # スクリーンショット
     # page.screenshot(
@@ -114,7 +125,14 @@ if __name__ == "__main__":
         df_model_urls: list = []
         columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name", "raw_model_name", "normalized_model_name", "match_type", "matched_alias"]
         for pref, hall, date, date_url in date_urls:
-            model_urls = extract_model_url(page, hall, pref, date_url, date)
+            model_urls = extract_model_url(
+                page,
+                hall,
+                pref,
+                date_url,
+                date,
+                referer=hall_url,
+            )
             df_model_url = pd.DataFrame(model_urls, columns=columns)
             df_model_urls.append(df_model_url)
         df_csv = pd.concat(df_model_urls)

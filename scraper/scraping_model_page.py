@@ -9,6 +9,7 @@ from utils.utils import _norm_text, extract_model_name
 from utils.target_models import build_alias_to_canonical, match_target_model_detail
 from scraper.scraping_hall_page import extract_date_url
 from scraper.scraping_date_page import extract_model_url
+from scraper.request_delay import wait_random_delay
 
 # =========================
 # 設定・ロガー
@@ -20,12 +21,23 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 # =========================
 # ページ操作
 # =========================
-def goto_with_retry(page: Page, url: str, retries: int = 2) -> None:
+def goto_with_retry(
+    page: Page,
+    url: str,
+    retries: int = 2,
+    *,
+    referer: str | None = None,
+) -> None:
     """機種ページへ軽くリトライしながら遷移する。"""
     last_error: Exception | None = None
     for attempt in range(1, retries + 1):
         try:
-            page.goto(url, timeout=90_000, wait_until="domcontentloaded")
+            page.goto(
+                url,
+                referer=referer,
+                timeout=90_000,
+                wait_until="domcontentloaded",
+            )
             return
         except Exception as e:
             last_error = e
@@ -79,7 +91,14 @@ def extract_model_data(
         try:
             logger.debug("機種ページにアクセスします。")
             logger.debug("url: %s", url)
-            goto_with_retry(page, url, retries=2)
+            wait_random_delay(
+                logger,
+                stage="before_model_page",
+                min_seconds=1,
+                max_seconds=3,
+                target=f"{hall}/{date}/{canonical_model_name or raw_model_name or model_url}",
+            )
+            goto_with_retry(page, url, retries=2, referer=date_url)
 
             # スクリーンショット
             # page.screenshot(
@@ -218,7 +237,14 @@ if __name__ == "__main__":
             df_model_urls: list = []
             columns = ["pref", "hall", "date", "date_url", "model_url", "canonical_model_name", "raw_model_name", "normalized_model_name", "match_type", "matched_alias"]
             for pref, hall, date, date_url in date_urls:
-                model_urls = extract_model_url(page, hall, pref, date_url, date)
+                model_urls = extract_model_url(
+                    page,
+                    hall,
+                    pref,
+                    date_url,
+                    date,
+                    referer=hall_url,
+                )
                 if not model_urls:
                     continue
                 df_model_url = pd.DataFrame(model_urls, columns=columns)
