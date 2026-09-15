@@ -60,14 +60,29 @@ def extract_model_url(
             )
 
             if attempt == 2:
-                logger.warning(
-                    "機種リンクが見つかりません: hall=%s date=%s url=%s status=%s",
+                # 2回とも失敗した場合は、GitHub Actions 上で実際に返ってきた
+                # HTMLの概要を残し、PWTimeoutを上位へ戻す。
+                # これにより scraper.py 側の既存 Circuit Breaker が機能する。
+                try:
+                    html = page.content()
+                    html_length = len(html)
+                    html_preview = " ".join(html[:1000].split())
+                except Exception as content_error:
+                    html_length = -1
+                    html_preview = f"<page.content() failed: {content_error}>"
+
+                logger.error(
+                    "日付ページ診断: hall=%s date=%s requested_url=%s final_url=%s status=%s title=%s html_length=%s html_preview=%s",
                     hall,
                     date,
                     date_url,
+                    page.url,
                     response_status,
+                    page_title,
+                    html_length,
+                    html_preview,
                 )
-                return model_urls
+                raise
 
     first_table = page.locator(css_table).nth(0)
     css_links = "tbody tr td a"
