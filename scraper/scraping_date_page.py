@@ -1,4 +1,3 @@
-from playwright.sync_api import sync_playwright
 from playwright.sync_api import Page, sync_playwright, TimeoutError as PWTimeout
 import pandas as pd
 from urllib.parse import quote, urljoin
@@ -28,35 +27,52 @@ def extract_model_url(
     returns: List[(pref, hall, date, date_url, model_url, canonical_model_name, raw_model_name, normalized_model_name, match_type, matched_alias)]
     """
 
-    logger.debug("日付ページにアクセス: %s", date_url)
-    page.goto(date_url, timeout=90_000, wait_until="domcontentloaded")
-
-    # スクリーンショット
-    # page.screenshot(
-    #     path=config.IMG_DIR / f"{hall}_date_page.jpg",
-    #     full_page=True,
-    #     type="jpeg",
-    #     quality=50,
-    # )
-
-    title = _norm_text(page.locator("h1").first.text_content())
-    logger.debug("Page title: %s", title)
-
     model_urls: list[tuple[str, str, str, str, str, str, str, str, str, str]] = []
     alias_to_canonical = build_alias_to_canonical()
     css_table = "table.kishu"
+
+    # h1 は後続処理で使用しないため、取得待ちを行わない。
+    # 日付ページの本質的な取得対象である table.kishu を直接待ち、
+    # 一時的な読み込み失敗に備えて最大2回まで再試行する。
+    response_status: int | None = None
+    for attempt in range(1, 3):
+        logger.debug("日付ページにアクセス: %s (attempt=%d/2)", date_url, attempt)
+        response = page.goto(date_url, timeout=90_000, wait_until="domcontentloaded")
+        response_status = response.status if response is not None else None
+
+        try:
+            page.wait_for_selector(css_table, timeout=10_000)
+            break
+        except PWTimeout:
+            try:
+                page_title = page.title()
+            except Exception:
+                page_title = ""
+
+            logger.warning(
+                "機種テーブル待機タイムアウト: hall=%s date=%s attempt=%d/2 status=%s final_url=%s title=%s",
+                hall,
+                date,
+                attempt,
+                response_status,
+                page.url,
+                page_title,
+            )
+
+            if attempt == 2:
+                logger.warning(
+                    "機種リンクが見つかりません: hall=%s date=%s url=%s status=%s",
+                    hall,
+                    date,
+                    date_url,
+                    response_status,
+                )
+                return model_urls
+
     first_table = page.locator(css_table).nth(0)
+    css_links = "tbody tr td a"
+    links = first_table.locator(css_links)
 
-    try:
-        page.wait_for_selector(css_table, timeout=10_000)
-    except PWTimeout:
-        logger.warning("機種リンクが見つかりません: %s", date_url)
-        return model_urls
-
-    css_table = "tbody tr td a"
-    links = first_table.locator(css_table)
-    # links = page.locator(css)
-    
     count = links.count()
     for j in range(count):
         model_text = _norm_text(links.nth(j).inner_text())
@@ -91,7 +107,7 @@ def extract_model_url(
     if model_urls:
         logger.debug("model_urls[0] = %s", model_urls[0])
         for i, model_url in enumerate(model_urls):
-            logger.debug(f"{i+1} = {model_url}")
+            logger.debug("%d = %s", i + 1, model_url)
 
     return model_urls
 
