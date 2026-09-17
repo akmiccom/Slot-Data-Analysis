@@ -4,6 +4,7 @@ from supabase import create_client, Client
 
 from config import config
 from utils.logger_setup import setup_logger
+
 # from app.data_from_supabase import get_supabase_client
 
 # =========================
@@ -16,7 +17,10 @@ logger = setup_logger(filename, log_file=config.LOG_PATH)
 def get_supabase_client() -> Client:
     """supabese のクライアントを取得"""
     url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    # key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
+    key = os.environ.get("SUPABASE_SECRET_KEY") or os.environ.get(
+        "SUPABASE_SERVICE_ROLE_KEY"
+    )
     if not url or not key:
         raise RuntimeError(
             "SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY が設定されていません。"
@@ -145,11 +149,17 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
     records_df = pd.DataFrame(records)
     duplicate_count = records_df.duplicated(subset=conflict_keys, keep=False).sum()
     if duplicate_count:
-        logger.warning("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
+        logger.warning(
+            "results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count
+        )
         records_df = records_df.drop_duplicates(subset=conflict_keys, keep="last")
-        logger.debug("results upsert前の重複除去: %d 件 -> %d 件", before_dedup, len(records_df))
+        logger.debug(
+            "results upsert前の重複除去: %d 件 -> %d 件", before_dedup, len(records_df)
+        )
     else:
-        logger.debug("results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count)
+        logger.debug(
+            "results upsert前の重複件数(%s): %d 件", conflict_keys, duplicate_count
+        )
     records = records_df.to_dict("records")
     logger.debug("results upsert対象件数: %d 件", len(records))
 
@@ -168,7 +178,10 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
             ).execute()
         except Exception:
             key_samples = [
-                {key: record.get(key) for key in ["hall_id", "model_id", "unit_no", "date"]}
+                {
+                    key: record.get(key)
+                    for key in ["hall_id", "model_id", "unit_no", "date"]
+                }
                 for record in batch[:5]
             ]
             logger.exception(
@@ -187,7 +200,7 @@ def add_data_result(df: pd.DataFrame, supabase: Client) -> int:
 if __name__ == "__main__":
 
     df = pd.read_csv(config.CSV_DIR / "cleaned_all_result_data.csv")
-    
+
     logger.debug("date unique: %s", df.date.unique())
     logger.debug("hall unique: %s", df.hall.unique())
     logger.debug("model unique: %s", df.model.unique())
