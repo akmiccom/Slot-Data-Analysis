@@ -4,6 +4,7 @@ pandas
 pandas-stubs
 pyyaml
 supabase
+psycopg[binary]
 colorlog
 types-PyYAML
 streamlit
