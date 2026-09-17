@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       target_dates:
-        description: "再取得する日付。例: 2026-07-06 または 2026-07-06,2026-07-07"
+        description: "再取得する日付。診断時は NETWORK_DIAGNOSTIC"
         required: false
         default: ""
       force_rescrape:
@@ -72,12 +72,14 @@ jobs:
           echo "JST_DATE=$(TZ=Asia/Tokyo date +%F)" >> $GITHUB_ENV
           echo "JST_HOUR=$(TZ=Asia/Tokyo date +%H)" >> $GITHUB_ENV
 
-      - name: Run Playwright script
-        # run: python scraper/scraping_hall_page.py
-        # run: python scraper/scraping_date_page.py
-        # run: python scraper/scraping_model_page.py
-        # run: python scraper/scraping_results.py
-        # run: python scraper/scraper.py
+      - name: Run single-page network diagnostic
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target_dates == 'NETWORK_DIAGNOSTIC' }}
+        run: python scripts/network_diagnostic.py
+        env:
+          DIAGNOSTIC_URL: "https://min-repo.com/3350338/"
+
+      - name: Run Playwright scraper
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.target_dates != 'NETWORK_DIAGNOSTIC' }}
         run: python -m scraper.scraper
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -89,7 +91,7 @@ jobs:
           DISABLE_PRE_SKIP: ${{ github.event.inputs.disable_pre_skip }}
 
       - name: Save scraped logs and csv
-        if: always()
+        if: ${{ always() && (github.event_name != 'workflow_dispatch' || github.event.inputs.target_dates != 'NETWORK_DIAGNOSTIC') }}
         uses: actions/upload-artifact@v6
         with:
           name: scraped-logs-and-csv
@@ -98,7 +100,3 @@ jobs:
             data/csv
             .scraper_state
           if-no-files-found: warn
-
-
-
-          
