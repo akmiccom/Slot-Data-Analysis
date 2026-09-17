@@ -16,16 +16,20 @@ def refresh_materialized_views(_supabase=None) -> bool:
     長時間処理をSupabase REST/RPC経由で待たないため、Postgresへ直接接続して
     public.refresh_dashboard_materialized_views() を呼び出す。
 
+    SUPABASE_DB_URL が未設定の場合は、ローカル実行などを想定して
+    警告を出してMV更新だけをスキップする。
+
     Returns:
         True: この実行でMV更新を行った
-        False: 別の更新が実行中でadvisory lockを取得できなかった
+        False: DB URL未設定、または別の更新が実行中でスキップした
     """
     db_url = os.environ.get("SUPABASE_DB_URL")
     if not db_url:
-        raise RuntimeError(
-            "SUPABASE_DB_URL が設定されていません。"
-            "GitHub Actions Secrets にPostgres接続文字列を設定してください。"
+        logger.warning(
+            "SUPABASE_DB_URL が未設定のためマテビュー更新をスキップします。"
+            "results への登録結果はそのまま保持されます。"
         )
+        return False
 
     start = time.perf_counter()
     logger.info("マテビュー更新開始")
