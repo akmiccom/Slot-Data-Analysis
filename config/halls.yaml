@@ -1,5 +1,6 @@
 # config/halls.yaml
 halls:
+
   - name: "ビックディッパー門前仲町店"
     prefecture: "東京都"
     slug: "ビックディッパー門前仲町店"
@@ -405,5 +406,29 @@ halls:
   - name: "ウイングあすと長町店"
     prefecture: "宮城県"
     slug: "ウイングあすと長町店"
+    enabled: true
+    period: 2
+    
+  - name: "オーパ荻窪店"
+    prefecture: "東京都"
+    slug: "オーパ"
+    enabled: true
+    period: 2
+
+  - name: "メッセ荻窪店本館"
+    prefecture: "東京都"
+    slug: "メッセ荻窪"
+    enabled: true
+    period: 2
+
+  - name: "メッセ荻窪店新館"
+    prefecture: "東京都"
+    slug: "オリエンタルパサージュ荻窪426"
+    enabled: true
+    period: 2
+
+  - name: "メッセ西荻窪店"
+    prefecture: "東京都"
+    slug: "メッセ西荻窪店"
     enabled: true
     period: 2
