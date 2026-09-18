@@ -3,9 +3,16 @@ from urllib.parse import quote, urljoin
 import os
 import datetime as dt
 import re
+import sys
 import time
+from pathlib import Path
 import yaml
 from playwright.sync_api import TimeoutError as PWTimeout, sync_playwright
+
+# VS Code の「Python ファイルを実行」などでこのファイルを直接起動した場合も、
+# プロジェクト直下の config / utils / scraper パッケージを読み込めるようにする。
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from config import config
 from utils.logger_setup import setup_logger
@@ -13,6 +20,7 @@ from scraper.scraping_result_data import RESULT_COLUMNS, extract_result_data_by_
 from scraper.preprocess_for_db import df_data_clean
 from scraper import data_to_supabase
 from scraper.materialized_views import refresh_materialized_views
+from scraper.request_delay import wait_random_delay
 from scraper.run_monitor import (
     CircuitBreakerOpenError,
     ConsecutiveErrorCircuitBreaker,
@@ -208,6 +216,14 @@ def scraper_all_hall(
         )
         try:
             for i, h in enumerate(hall_list, start=1):
+                if i > 1:
+                    wait_random_delay(
+                        logger,
+                        stage="between_halls",
+                        min_seconds=3,
+                        max_seconds=8,
+                        target=h.name,
+                    )
                 hall_start = time.perf_counter()
                 hall_status = "started"
                 encoded_slug = quote(h.slug)
