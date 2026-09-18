@@ -14,7 +14,7 @@ from config import config
 
 
 DEFAULT_DIRECT_URL = "https://min-repo.com/3350338/"
-DEFAULT_HALL = "BIGディッパー門前仲町店"
+DEFAULT_HALL = "ビックディッパー門前仲町店"
 TIMEOUT_MS = 30_000
 DATE_LINK_SELECTOR = "#content div table tbody tr td a"
 
