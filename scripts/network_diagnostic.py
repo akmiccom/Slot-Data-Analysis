@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import sys
+import time
 import urllib.error
 import urllib.request
 from typing import Any
@@ -205,8 +207,14 @@ def _playwright_route_diagnostic(hall_name: str) -> None:
             print(f"selected_date_href={href}")
             print(f"selected_date_url={date_url}")
 
+            delay_seconds = random.uniform(1, 3)
+            print(f"before_date_page_delay_sec={delay_seconds:.2f}")
+            time.sleep(delay_seconds)
+            print(f"date_page_referer={hall_url}")
+
             date_response = page.goto(
                 date_url,
+                referer=hall_url,
                 timeout=TIMEOUT_MS,
                 wait_until="domcontentloaded",
             )
