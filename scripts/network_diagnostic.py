@@ -6,12 +6,17 @@ import sys
 import urllib.error
 import urllib.request
 from typing import Any
+from urllib.parse import quote, urljoin
 
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import Page, Response, sync_playwright
+
+from config import config
 
 
-DEFAULT_URL = "https://min-repo.com/3350338/"
+DEFAULT_DIRECT_URL = "https://min-repo.com/3350338/"
+DEFAULT_HALL = "BIGディッパー門前仲町店"
 TIMEOUT_MS = 30_000
+DATE_LINK_SELECTOR = "#content div table tbody tr td a"
 
 
 def _compact(value: str, limit: int = 500) -> str:
@@ -57,6 +62,8 @@ def _plain_http_diagnostic(target_url: str) -> None:
             print(f"body_preview={_compact(text)}")
             print("response_headers=")
             for key, value in response.headers.items():
+                if key.lower() == "set-cookie":
+                    continue
                 print(f"  {key}: {value}")
     except urllib.error.HTTPError as exc:
         body = exc.read()
@@ -72,63 +79,159 @@ def _plain_http_diagnostic(target_url: str) -> None:
         print(f"request_error={exc!r}")
 
 
-def _playwright_diagnostic(target_url: str) -> None:
-    print("\n=== Playwright diagnostic ===")
+def _safe_response_body(response: Response | None) -> tuple[int | None, str]:
+    if response is None:
+        return None, ""
+    try:
+        body = response.body()
+        return len(body), _compact(body.decode("utf-8", errors="replace"))
+    except Exception as exc:
+        return None, f"<response.body() failed: {exc!r}>"
+
+
+def _print_page_state(label: str, page: Page, response: Response | None) -> None:
+    print(f"\n=== {label} ===")
+    print(f"final_url={page.url}")
+    print(f"status={response.status if response else None}")
+
+    if response:
+        headers = response.headers
+        print(f"content_type={headers.get('content-type')}")
+        print(f"server={headers.get('server')}")
+        print(f"content_length_header={headers.get('content-length')}")
+        body_bytes, body_preview = _safe_response_body(response)
+        print(f"response_body_bytes={body_bytes}")
+        print(f"response_body_preview={body_preview}")
+
+    try:
+        html = page.content()
+        print(f"page_title={page.title()!r}")
+        print(f"page_content_chars={len(html)}")
+        print(f"page_content_preview={_compact(html)}")
+    except Exception as exc:
+        print(f"page_content_error={exc!r}")
+
+    print(f"date_link_count={page.locator(DATE_LINK_SELECTOR).count()}")
+    print(f"table_kishu_count={page.locator('table.kishu').count()}")
+    print(f"h1_count={page.locator('h1').count()}")
+
+    try:
+        cookies = page.context.cookies()
+        print(f"cookie_count={len(cookies)}")
+        cookie_meta = [
+            {
+                "name": cookie.get("name"),
+                "domain": cookie.get("domain"),
+                "path": cookie.get("path"),
+            }
+            for cookie in cookies
+        ]
+        print(f"cookie_metadata={cookie_meta}")
+    except Exception as exc:
+        print(f"cookie_error={exc!r}")
+
+
+def _playwright_direct_diagnostic(target_url: str) -> None:
+    print("\n=== Playwright direct diagnostic ===")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         page.set_default_timeout(TIMEOUT_MS)
 
-        user_agent = page.evaluate("navigator.userAgent")
-        print(f"user_agent={user_agent}")
-
-        response = None
+        print(f"user_agent={page.evaluate('navigator.userAgent')}")
         try:
-            response = page.goto(target_url, timeout=TIMEOUT_MS, wait_until="domcontentloaded")
-            print(f"requested_url={target_url}")
-            print(f"final_url={page.url}")
-            print(f"status={response.status if response else None}")
-
-            if response:
-                headers = response.headers
-                print(f"content_type={headers.get('content-type')}")
-                print(f"server={headers.get('server')}")
-                print(f"content_length_header={headers.get('content-length')}")
-                try:
-                    response_body = response.body()
-                    print(f"response_body_bytes={len(response_body)}")
-                    print(
-                        "response_body_preview="
-                        f"{_compact(response_body.decode('utf-8', errors='replace'))}"
-                    )
-                except Exception as exc:
-                    print(f"response_body_error={exc!r}")
-
-                print("response_headers=")
-                for key, value in sorted(headers.items()):
-                    print(f"  {key}: {value}")
-
-            html = page.content()
-            print(f"page_title={page.title()!r}")
-            print(f"page_content_chars={len(html)}")
-            print(f"page_content_preview={_compact(html)}")
-            print(f"table_kishu_count={page.locator('table.kishu').count()}")
-            print(f"h1_count={page.locator('h1').count()}")
+            response = page.goto(
+                target_url,
+                timeout=TIMEOUT_MS,
+                wait_until="domcontentloaded",
+            )
+            _print_page_state("direct page result", page, response)
         except Exception as exc:
             print(f"playwright_error={exc!r}")
+            _print_page_state("direct page result after error", page, None)
+        finally:
+            browser.close()
+
+
+def _playwright_route_diagnostic(hall_name: str) -> None:
+    hall_url = urljoin(config.MAIN_URL, quote(hall_name))
+    print("\n=== Playwright route diagnostic ===")
+    print(f"diagnostic_hall={hall_name}")
+    print(f"hall_url={hall_url}")
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+        page.set_default_timeout(TIMEOUT_MS)
+
+        print(f"user_agent={page.evaluate('navigator.userAgent')}")
+
+        ajax_events: list[str] = []
+
+        def record_response(response: Response) -> None:
+            if "admin-ajax.php" in response.url:
+                ajax_events.append(f"{response.status} {response.url}")
+
+        page.on("response", record_response)
+
+        try:
+            hall_response = page.goto(
+                hall_url,
+                timeout=TIMEOUT_MS,
+                wait_until="domcontentloaded",
+            )
+            _print_page_state("hall page result", page, hall_response)
+
             try:
-                html = page.content()
-                print(f"final_url={page.url}")
-                print(f"page_content_chars={len(html)}")
-                print(f"page_content_preview={_compact(html)}")
-            except Exception as content_exc:
-                print(f"page_content_error={content_exc!r}")
+                page.wait_for_selector(DATE_LINK_SELECTOR, timeout=15_000)
+            except Exception as exc:
+                print(f"date_link_wait_error={exc!r}")
+
+            links = page.locator(DATE_LINK_SELECTOR)
+            link_count = links.count()
+            print(f"date_link_count_after_wait={link_count}")
+
+            if link_count == 0:
+                print("route_result=no_date_link")
+                print(f"admin_ajax_events={ajax_events}")
+                return
+
+            first_link = links.nth(0)
+            date_text = first_link.inner_text().strip()
+            href = first_link.get_attribute("href") or ""
+            date_url = urljoin(page.url, href)
+
+            print(f"selected_date_text={date_text!r}")
+            print(f"selected_date_href={href}")
+            print(f"selected_date_url={date_url}")
+
+            date_response = page.goto(
+                date_url,
+                timeout=TIMEOUT_MS,
+                wait_until="domcontentloaded",
+            )
+            _print_page_state("date page result via hall page", page, date_response)
+
+            try:
+                page.wait_for_selector("table.kishu", timeout=10_000)
+                print("table_kishu_wait=found")
+            except Exception as exc:
+                print(f"table_kishu_wait=timeout error={exc!r}")
+
+            print(f"table_kishu_count_after_wait={page.locator('table.kishu').count()}")
+            print(f"route_result={'success' if page.locator('table.kishu').count() > 0 else 'no_table'}")
+            print(f"admin_ajax_events={ajax_events}")
+        except Exception as exc:
+            print(f"route_diagnostic_error={exc!r}")
+            _print_page_state("route page state after error", page, None)
+            print(f"admin_ajax_events={ajax_events}")
         finally:
             browser.close()
 
 
 def main() -> int:
-    target_url = os.getenv("DIAGNOSTIC_URL", DEFAULT_URL).strip() or DEFAULT_URL
+    direct_url = os.getenv("DIAGNOSTIC_URL", DEFAULT_DIRECT_URL).strip() or DEFAULT_DIRECT_URL
+    hall_name = os.getenv("DIAGNOSTIC_HALL", DEFAULT_HALL).strip() or DEFAULT_HALL
 
     print("=== runner diagnostic ===")
     for name in (
@@ -146,8 +249,9 @@ def main() -> int:
     ip_data = _fetch_json("https://api.ipify.org?format=json")
     print(f"egress_ip={ip_data.get('ip') if ip_data else None}")
 
-    _plain_http_diagnostic(target_url)
-    _playwright_diagnostic(target_url)
+    _plain_http_diagnostic(direct_url)
+    _playwright_direct_diagnostic(direct_url)
+    _playwright_route_diagnostic(hall_name)
     return 0
 
 
