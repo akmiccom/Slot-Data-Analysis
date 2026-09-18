@@ -38,6 +38,8 @@ env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
   SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+  SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+  SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
 
 jobs:
   run-scraping:
@@ -82,6 +84,8 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           JST_DATE: ${{ env.JST_DATE }}
           JST_HOUR: ${{ env.JST_HOUR }}
           TARGET_DATES: ${{ github.event.inputs.target_dates }}
@@ -98,7 +102,3 @@ jobs:
             data/csv
             .scraper_state
           if-no-files-found: warn
-
-
-
-          

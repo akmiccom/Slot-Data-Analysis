@@ -1,0 +1,28 @@
+name: test_mv_refresh
+
+on:
+  workflow_dispatch:
+
+jobs:
+  refresh-mv:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Refresh materialized views
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          python -c "from scraper.materialized_views import refresh_materialized_views; refreshed = refresh_materialized_views(); print(f'refreshed={refreshed}')"
