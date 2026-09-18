@@ -74,7 +74,7 @@ jobs:
 
       - name: Run single-page network diagnostic
         if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.target_dates == 'NETWORK_DIAGNOSTIC' }}
-        run: python scripts/network_diagnostic.py
+        run: python -m scripts.network_diagnostic
         env:
           DIAGNOSTIC_URL: "https://min-repo.com/3350338/"
 
