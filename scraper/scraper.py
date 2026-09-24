@@ -19,6 +19,7 @@ from utils.logger_setup import setup_logger
 from scraper.scraping_result_data import RESULT_COLUMNS, extract_result_data_by_dates
 from scraper.preprocess_for_db import df_data_clean
 from scraper import data_to_supabase
+from scraper.daily_setting_probabilities import refresh_daily_setting_probabilities
 from scraper.materialized_views import refresh_materialized_views
 from scraper.request_delay import wait_random_delay
 from scraper.run_monitor import (
@@ -201,6 +202,7 @@ def scraper_all_hall(
     scrape_target_count = 0
     scraped_rows = 0
     total_upserted = 0
+    updated_dates: set[str] = set()
     hall_error_count = 0
     db_error_count = 0
     warned_prefecture_mismatch_halls: set[str] = set()
@@ -350,6 +352,8 @@ def scraper_all_hall(
                                 date=date,
                             )
                             total_upserted += upserted_rows
+                            if upserted_rows > 0:
+                                updated_dates.add(date)
                             db_status = "completed" if upserted_rows else "skipped_empty"
                         except Exception as e:
                             db_error_count += 1
@@ -406,6 +410,7 @@ def scraper_all_hall(
     df_all.to_csv(config.CSV_DIR / "all_result_data.csv", index=False)
 
     if upsert_each_date and supabase is not None and total_upserted > 0:
+        refresh_daily_setting_probabilities(updated_dates)
         refresh_materialized_views(supabase)
     elif upsert_each_date:
         logger.info("新規登録対象がないためマテビュー更新は呼びません。")
