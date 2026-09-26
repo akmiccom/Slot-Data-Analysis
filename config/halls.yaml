@@ -432,3 +432,15 @@ halls:
     slug: "メッセ西荻窪店"
     enabled: true
     period: 2
+
+  - name: "麗都守谷"
+    prefecture: "茨城県"
+    slug: "麗都守谷"
+    enabled: true
+    period: 2
+
+  - name: "麗都荒川沖"
+    prefecture: "茨城県"
+    slug: "麗都荒川沖"
+    enabled: true
+    period: 2
