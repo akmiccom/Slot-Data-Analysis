@@ -1,6 +1,18 @@
 # config/halls.yaml
 halls:
 
+  - name: "八戸ひまわり"
+    prefecture: "青森県"
+    slug: "八戸ひまわり"
+    enabled: true
+    period: 2
+
+  - name: "コンサートホール八戸店"
+    prefecture: "青森県"
+    slug: "コンサートホール八戸店"
+    enabled: true
+    period: 2
+
   - name: "ビックディッパー門前仲町店"
     prefecture: "東京都"
     slug: "ビックディッパー門前仲町店"
