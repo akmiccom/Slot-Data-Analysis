@@ -184,7 +184,10 @@ def scraper_all_hall(
     target_dates = _load_target_dates_from_env()
     force_rescrape = _parse_bool_env("FORCE_RESCRAPE")
     disable_pre_skip = _parse_bool_env("DISABLE_PRE_SKIP")
-    timeout_limit = positive_int_env("CONSECUTIVE_TIMEOUT_LIMIT", 5)
+    hall_error_failure_threshold = positive_int_env("HALL_ERROR_FAILURE_THRESHOLD", 10)
+    timeout_limit = positive_int_env(
+        "CONSECUTIVE_TIMEOUT_LIMIT", hall_error_failure_threshold
+    )
     timeout_breaker = ConsecutiveErrorCircuitBreaker(threshold=timeout_limit)
     if force_rescrape:
         logger.info("force_rescrape=true のため取得済みでも再取得します")
@@ -286,8 +289,8 @@ def scraper_all_hall(
                     hall_status = "error"
                     logger.exception("ホール処理でエラー: %s", e)
                     emit_github_annotation(
-                        "error",
-                        "ホール収集エラー",
+                        "warning",
+                        "ホール収集警告",
                         f"hall={h.name}, error={type(e).__name__}: {e}",
                     )
                     if isinstance(e, PWTimeout):
@@ -431,11 +434,25 @@ def scraper_all_hall(
     end = time.perf_counter()
     logger.info("全体処理時間: %.2f 秒", end - start)
 
+    if 0 < hall_error_count < hall_error_failure_threshold:
+        warning_title = (
+            "ホール収集警告"
+            if hall_error_count <= 5
+            else "ホール収集警告（要注意）"
+        )
+        warning_message = (
+            f"ホール処理エラーが{hall_error_count}件あります"
+            f"（failure閾値={hall_error_failure_threshold}件）"
+        )
+        logger.warning("収集品質チェック警告: %s", warning_message)
+        emit_github_annotation("warning", warning_title, warning_message)
+
     quality_issues = build_quality_issues(
         hall_count=len(hall_list),
         target_count=target_count,
         hall_error_count=hall_error_count,
         db_error_count=db_error_count,
+        hall_error_failure_threshold=hall_error_failure_threshold,
     )
     if quality_issues:
         message = "; ".join(quality_issues)
