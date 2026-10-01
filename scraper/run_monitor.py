@@ -60,12 +60,16 @@ def build_quality_issues(
     target_count: int,
     hall_error_count: int,
     db_error_count: int,
+    hall_error_failure_threshold: int = 10,
 ) -> list[str]:
     issues: list[str] = []
     if hall_count and target_count == 0:
         issues.append("有効ホールがあるのに対象件数が0です")
-    if hall_error_count:
-        issues.append(f"ホール処理エラーが{hall_error_count}件あります")
+    if hall_error_count >= hall_error_failure_threshold:
+        issues.append(
+            f"ホール処理エラーが{hall_error_count}件あります"
+            f"（failure閾値={hall_error_failure_threshold}件）"
+        )
     if db_error_count:
         issues.append(f"DB登録エラーが{db_error_count}件あります")
     return issues

@@ -55,7 +55,29 @@ class BuildQualityIssuesTest(unittest.TestCase):
             ),
         )
 
-    def test_zero_targets_and_caught_errors_are_reported(self) -> None:
+    def test_small_hall_error_count_is_not_failure(self) -> None:
+        issues = build_quality_issues(
+            hall_count=67,
+            target_count=134,
+            hall_error_count=9,
+            db_error_count=0,
+        )
+
+        self.assertEqual([], issues)
+
+    def test_hall_error_threshold_is_failure(self) -> None:
+        issues = build_quality_issues(
+            hall_count=67,
+            target_count=134,
+            hall_error_count=10,
+            db_error_count=0,
+        )
+
+        self.assertEqual(1, len(issues))
+        self.assertIn("10件", issues[0])
+        self.assertIn("failure閾値=10件", issues[0])
+
+    def test_zero_targets_and_db_errors_are_reported(self) -> None:
         issues = build_quality_issues(
             hall_count=67,
             target_count=0,
@@ -63,10 +85,9 @@ class BuildQualityIssuesTest(unittest.TestCase):
             db_error_count=3,
         )
 
-        self.assertEqual(3, len(issues))
+        self.assertEqual(2, len(issues))
         self.assertIn("対象件数が0", issues[0])
-        self.assertIn("2件", issues[1])
-        self.assertIn("3件", issues[2])
+        self.assertIn("3件", issues[1])
 
 
 class GithubAnnotationTest(unittest.TestCase):
