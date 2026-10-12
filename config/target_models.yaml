@@ -2,6 +2,7 @@ target_models:
   - canonical_name: "マイジャグラーVI"
     enabled: true
     aliases:
+      - "マイジャグラーVI"
       - "マイジャグラー6"
 
   - canonical_name: "ゴーゴージャグラー3"
