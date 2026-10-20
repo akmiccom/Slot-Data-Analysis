@@ -24,10 +24,12 @@ def build_mapping(key, default):
     with open(yaml_path, "r", encoding="utf-8") as f:
         GRAPE_CONSTANTS = yaml.safe_load(f)
     "ブドウ計算用の機種別確率、獲得枚数、小役確率のマッピングを作成"
-    return {
-        k: v.get("grape_contents", {}).get(key, default)
-        for k, v in GRAPE_CONSTANTS.items()
-    }
+    mapping = {}
+    for model, model_config in GRAPE_CONSTANTS.items():
+        grape_contents = (model_config or {}).get("grape_contents") or {}
+        value = grape_contents.get(key)
+        mapping[model] = default if value is None else value
+    return mapping
 
 
 # =========================
