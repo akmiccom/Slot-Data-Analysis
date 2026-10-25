@@ -104,6 +104,14 @@
     cherryOff: 0.05847
     cherryOn: 0.04228
 
+マイジャグラーVI:
+  grape_contents:
+    bb: 239.25
+    rb: 95.25
+    replay: 0.411
+    cherryOff: 0.05847
+    cherryOn: 0.04228
+
 ゴーゴージャグラー3:
   "6":
     BB_RATE: "1/239.9"
