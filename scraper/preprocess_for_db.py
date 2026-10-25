@@ -128,6 +128,8 @@ def calc_rb_count(df):
 
     specific_halls = ["パーラーディオス下赤塚本店"]
     df_specific_halls = df[(df["hall"].isin(specific_halls))].copy()
+    if df_specific_halls.empty:
+        return
 
     df_specific_halls["bb_medals"] = df_specific_halls["model"].map(
         build_mapping("bb", 239)
@@ -172,6 +174,8 @@ def calc_medal(df):
 
     specific_halls = ["ウイングあすと長町店"]
     df_specific_halls = df[(df["hall"].isin(specific_halls))].copy()
+    if df_specific_halls.empty:
+        return
 
     df_specific_halls["bb_medals"] = df_specific_halls["model"].map(
         build_mapping("bb", 239)
